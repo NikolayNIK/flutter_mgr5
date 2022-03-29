@@ -1,4 +1,4 @@
-import 'package:flutter_mgr5/mgr_format.dart';
+import 'package:flutter_mgr5/src/mgr_format.dart';
 import 'package:xml/xml.dart';
 
 extension XmlAttributeExtension on XmlHasAttributes {

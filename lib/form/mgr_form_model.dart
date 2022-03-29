@@ -17,11 +17,11 @@ import 'package:flutter_mgr5/form/components/mgr_form_ticket.dart';
 import 'package:flutter_mgr5/form/components/mgr_form_tree.dart';
 import 'package:flutter_mgr5/form/mgr_exception_holder.dart';
 import 'package:flutter_mgr5/form/mgr_form_controller.dart';
-import 'package:flutter_mgr5/iterator_extensions.dart';
+import 'package:flutter_mgr5/extensions/iterator_extensions.dart';
 import 'package:flutter_mgr5/mgr_format.dart';
 import 'package:flutter_mgr5/mgr_messages.dart';
 import 'package:flutter_mgr5/mgr_model.dart';
-import 'package:flutter_mgr5/xml_extensions.dart';
+import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:xml/xml.dart';
 
 typedef MgrConditionalStateChecker = MgrFormState Function(

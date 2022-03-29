@@ -1,4 +1,4 @@
-import 'package:flutter_mgr5/xml_extensions.dart';
+import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:xml/xml.dart';
 
 abstract class MgrFormatExceptionReporter {

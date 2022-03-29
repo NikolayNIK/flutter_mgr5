@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_mgr5/datetime_extensions.dart';
+import 'package:flutter_mgr5/extensions/datetime_extensions.dart';
 import 'package:flutter_mgr5/form/mgr_exception_holder.dart';
 import 'package:flutter_mgr5/form/mgr_form_controller.dart';
 import 'package:flutter_mgr5/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/listenable_builder.dart';
 import 'package:flutter_mgr5/mgr_exception.dart';
-import 'package:flutter_mgr5/xml_extensions.dart';
+import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:xml/xml.dart';
 

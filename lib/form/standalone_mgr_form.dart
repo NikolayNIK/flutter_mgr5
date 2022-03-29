@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mgr5/form/mgr_form.dart';
 import 'package:flutter_mgr5/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/form/standalone_mgr_form_controller.dart';
-import 'package:flutter_mgr5/map_extensions.dart';
+import 'package:flutter_mgr5/extensions/map_extensions.dart';
 import 'package:flutter_mgr5/mgr_client.dart';
 import 'package:flutter_mgr5/mgr_exception.dart';
 import 'package:provider/provider.dart';

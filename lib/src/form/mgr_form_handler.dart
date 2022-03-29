@@ -9,7 +9,8 @@ class MgrFormHandler {
 
   MgrFormHandler(this.formController);
 
-  MgrFormControllerParam addParamCallback(String name, MgrFormHandlerCallback callback) {
+  MgrFormControllerParam addParamCallback(
+      String name, MgrFormHandlerCallback callback) {
     final param = formController.params[name];
     void cb() => callback(param);
 

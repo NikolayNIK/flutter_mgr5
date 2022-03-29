@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:flutter_mgr5/form/mgr_exception_holder.dart';
 import 'package:flutter_mgr5/form/mgr_form_controller.dart';
 import 'package:flutter_mgr5/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/mgr_messages.dart';
-import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:xml/xml.dart';
 
 enum TextDataType { msg, msgdata, data }

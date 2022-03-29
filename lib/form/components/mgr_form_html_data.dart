@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:flutter_mgr5/form/mgr_exception_holder.dart';
 import 'package:flutter_mgr5/form/mgr_form_controller.dart';
 import 'package:flutter_mgr5/form/mgr_form_model.dart';
-import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:xml/xml.dart';
 
 class HtmlDataFormFieldControlModel extends FormFieldControlModel {

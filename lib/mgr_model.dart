@@ -1,5 +1,5 @@
-import 'package:flutter_mgr5/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/extensions/xml_extensions.dart';
+import 'package:flutter_mgr5/form/mgr_form_model.dart';
 import 'package:xml/xml.dart';
 
 enum MgrModelType {

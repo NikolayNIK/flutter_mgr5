@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-class ListenableBuilder<T> extends StatefulWidget {
+class ListenableBuilder extends StatefulWidget {
   final Listenable? listenable;
   final WidgetBuilder builder;
   final VoidCallback? callback;
@@ -16,7 +16,7 @@ class ListenableBuilder<T> extends StatefulWidget {
   State<StatefulWidget> createState() => _ListenableBuilderState();
 }
 
-class _ListenableBuilderState<T> extends State<ListenableBuilder> {
+class _ListenableBuilderState extends State<ListenableBuilder> {
   @override
   void initState() {
     super.initState();

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class ValueListenableAnimatedSwitcherBuilder<T> extends StatelessWidget {
   final Duration duration;
   final ValueListenable<T> valueListenable;
-  final ValueWidgetBuilder builder;
+  final ValueWidgetBuilder<T> builder;
   final Widget? child;
   final Duration? reverseDuration;
   final Curve switchInCurve;
@@ -27,7 +27,7 @@ class ValueListenableAnimatedSwitcherBuilder<T> extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => ValueListenableBuilder(
+  Widget build(BuildContext context) => ValueListenableBuilder<T>(
         valueListenable: valueListenable,
         builder: (context, value, child) => AnimatedSwitcher(
           duration: duration,
@@ -37,7 +37,7 @@ class ValueListenableAnimatedSwitcherBuilder<T> extends StatelessWidget {
           reverseDuration: reverseDuration,
           transitionBuilder: transitionBuilder,
           child: KeyedSubtree(
-            key: ValueKey(value),
+            key: ValueKey<T>(value),
             child: builder(context, value, this.child),
           ),
         ),

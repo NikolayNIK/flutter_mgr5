@@ -82,7 +82,7 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
 
   late Future<void> _initialLoadFuture;
 
-  bool isRefreshing = false, isSubmitting = false;
+  bool isRefreshing = false, isSubmitting = false, isDisposed = false;
 
   @override
   void initState() {
@@ -105,16 +105,18 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
 
       _initialLoadFuture = () async {
         final doc = await widget.mgrClient.request(widget.name, widget.params);
-        setState(() {
-          _controller = StandaloneMgrFormController.fromXmlDocument(
-              widget.mgrClient,
-              doc,
-              widget.modelAdjuster == null
-                  ? null
-                  : widget.modelAdjuster!(MgrFormModel.fromXmlDocument(doc)));
+        if (!isDisposed) {
+          setState(() {
+            _controller = StandaloneMgrFormController.fromXmlDocument(
+                widget.mgrClient,
+                doc,
+                widget.modelAdjuster == null
+                    ? null
+                    : widget.modelAdjuster!(MgrFormModel.fromXmlDocument(doc)));
 
-          isRefreshing = false;
-        });
+            isRefreshing = false;
+          });
+        }
       }();
     });
   }
@@ -285,6 +287,7 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
   void dispose() {
     super.dispose();
 
+    isDisposed = true;
     _controller?.dispose();
   }
 }

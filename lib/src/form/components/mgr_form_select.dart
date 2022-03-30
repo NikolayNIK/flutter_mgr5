@@ -96,7 +96,7 @@ class MgrFormSelect extends StatelessWidget {
                   for (final entry in slist)
                     InkWell(
                       customBorder: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+                        borderRadius: BorderRadius.circular(4.0),
                       ),
                       onTap: isReadOnly
                           ? null

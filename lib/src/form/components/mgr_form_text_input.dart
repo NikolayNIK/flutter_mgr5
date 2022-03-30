@@ -84,6 +84,7 @@ class MgrFormTextInput extends StatelessWidget {
             controller: textEditingController,
             readOnly: forceReadOnly || model.isReadonly,
             inputFormatters: model.inputFormatters,
+            textInputAction: TextInputAction.next,
             decoration: InputDecoration(
               errorMaxLines: 16,
               errorText: controller.isChanged ? null : exception?.toString(),

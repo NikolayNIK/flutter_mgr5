@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:flutter_mgr5/listenable_builder.dart';
 import 'package:flutter_mgr5/src/form/mgr_exception_holder.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
@@ -12,7 +13,7 @@ class TextAreaFormFieldControlModel extends FormFieldControlModel {
   TextAreaFormFieldControlModel.fromXmlElement(XmlElement element,
       {required Map<String, String> messages,
       ConditionalStateCheckerConsumer? conditionalHideConsumer})
-      : rows = int.parse(element.getAttribute('rows') ?? '1'),
+      : rows = int.parse(element.attribute('rows') ?? '1'),
         super.innerFromXmlElement(element,
             messages: messages,
             conditionalHideConsumer: conditionalHideConsumer);

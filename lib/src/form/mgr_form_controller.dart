@@ -247,8 +247,8 @@ class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
             .value = [
           for (final item in slist.childElements)
             if (item.name.local == 'val')
-              SlistEntry(item.getAttribute('key'), item.innerText,
-                  item.getAttribute('depend')),
+              SlistEntry(item.attribute('key'), item.innerText,
+                  item.attribute('depend')),
         ];
       }
     }

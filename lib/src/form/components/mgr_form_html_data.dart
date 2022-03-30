@@ -17,7 +17,7 @@ class HtmlDataFormFieldControlModel extends FormFieldControlModel {
           'height',
           converter: (value) => value == null ? null : double.tryParse(value),
         ),
-        chheight = element.getAttribute('chheight'),
+        chheight = element.attribute('chheight'),
         super.innerFromXmlElement(element,
             messages: messages,
             conditionalHideConsumer: conditionalHideConsumer);

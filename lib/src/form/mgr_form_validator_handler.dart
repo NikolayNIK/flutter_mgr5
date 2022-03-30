@@ -1,3 +1,4 @@
+import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_handler.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
@@ -60,7 +61,7 @@ class _MgrFormValidatorHandler extends MgrFormHandler
 
           // если значение изменилось с момента вызова валидатора, его результат игнорируется
           if (param.value == value) {
-            final element = doc.rootElement.getElement('value');
+            final element = doc.rootElement.child('value');
             if (element != null) {
               _blockedValidators.add(name);
               param.value = element.innerText;

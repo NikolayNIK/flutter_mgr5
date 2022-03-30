@@ -20,11 +20,11 @@ class TextInputFormFieldControlModel extends FormFieldControlModel {
       {required Map<String, String> messages,
       ConditionalStateCheckerConsumer? conditionalHideConsumer})
       : type = element.requireAttribute('type'),
-        isDate = element.getAttributeBool('date'),
+        isDate = element.boolAttribute('date'),
         super.innerFromXmlElement(element,
             messages: messages,
             conditionalHideConsumer: conditionalHideConsumer) {
-    final mask = element.getAttribute('mask');
+    final mask = element.attribute('mask');
     placeholder = messages['placeholder_$name'] ??
         mask?.replaceAll(RegExp(r'[0-9]'), '_');
     inputFormatters = List.unmodifiable([

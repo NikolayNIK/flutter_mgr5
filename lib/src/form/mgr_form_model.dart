@@ -136,16 +136,16 @@ class MgrFormModel extends MgrModel {
       if (page == null ||
           page.name !=
               (parentElement?.name.local == 'page'
-                  ? parentElement?.getAttribute('name')
+                  ? parentElement?.attribute('name')
                   : null)) {
         flushPage();
         page = MgrFormPageModel(
-          parentElement?.getAttribute('name'),
+          parentElement?.attribute('name'),
           isDecorated: parentElement?.name.local == 'page',
           messages: messages,
           // ignore: prefer_const_literals_to_create_immutables
           fields: [],
-          isCollapsed: parentElement?.getAttributeBool('collapsed') ?? false,
+          isCollapsed: parentElement?.boolAttribute('collapsed') ?? false,
         );
       }
 
@@ -219,7 +219,7 @@ class MgrFormButtonModel {
   factory MgrFormButtonModel.fromXmlElement(XmlElement element,
       {required MgrMessages messages}) {
     final Color? color;
-    switch (element.getAttribute('color')) {
+    switch (element.attribute('color')) {
       case 'blue':
         color = Colors.blueAccent.shade400;
         break;
@@ -246,12 +246,12 @@ class MgrFormButtonModel {
         type: element.requireConvertAttribute('type',
             converter: _mgrFormButtonTypeFromString),
         label: messages['msg_$name'] ?? '',
-        func: element.getAttribute('func'),
+        func: element.attribute('func'),
         color: color,
-        keepform: element.getAttributeBool('keepform'),
-        blocking: element.getAttributeBool('blocking'),
-        disabled: element.getAttributeBool('disabled'),
-        confirmMessage: element.getAttributeBool('confirm')
+        keepform: element.boolAttribute('keepform'),
+        blocking: element.boolAttribute('blocking'),
+        disabled: element.boolAttribute('disabled'),
+        confirmMessage: element.boolAttribute('confirm')
             ? messages['confirm_$name']
             : null);
   }
@@ -317,9 +317,9 @@ class MgrFormFieldModel {
       title: messages[name],
       hint: messages['hint_$name'],
       shadowHint: messages['shadow_hint_$name'],
-      isFullWidth: element.getAttributeBool('fullwidth') ||
-          element.getAttributeBool('formwidth'),
-      isNameLabelDisabled: element.getAttributeBool('noname'),
+      isFullWidth: element.boolAttribute('fullwidth') ||
+          element.boolAttribute('formwidth'),
+      isNameLabelDisabled: element.boolAttribute('noname'),
       controls: List.unmodifiable(element.childElements
           .map((child) => FormFieldControlModel.fromXmlElement(
                 child,
@@ -351,7 +351,7 @@ class MgrFormSetValuesOptions {
   });
 
   static MgrFormSetValuesOptions? fromXmlElement(XmlElement element) {
-    final setvalues = element.getAttribute('setvalues');
+    final setvalues = element.attribute('setvalues');
     if (setvalues == null) {
       return null;
     }
@@ -384,14 +384,14 @@ class MgrValidatorOptions {
   const MgrValidatorOptions({required this.func, this.args});
 
   static MgrValidatorOptions? fromXmlElement(XmlElement element) {
-    final check = element.getAttribute('check');
+    final check = element.attribute('check');
     if (check == null) {
       return null;
     }
 
     return MgrValidatorOptions(
       func: check,
-      args: element.getAttribute('checkargs'),
+      args: element.attribute('checkargs'),
     );
   }
 }
@@ -410,10 +410,10 @@ abstract class FormFieldControlModel {
       {required Map<String, String> messages,
       ConditionalStateCheckerConsumer? conditionalHideConsumer})
       : name = element.requireAttribute('name'),
-        isReadonly = element.getAttributeBool('readonly'),
-        isRequired = element.getAttributeBool('required'),
-        isFocus = element.getAttributeBool('focus'),
-        convert = element.getAttribute('convert'),
+        isReadonly = element.boolAttribute('readonly'),
+        isRequired = element.boolAttribute('required'),
+        isFocus = element.boolAttribute('focus'),
+        convert = element.attribute('convert'),
         setValuesOptions = MgrFormSetValuesOptions.fromXmlElement(element),
         validatorOptions = MgrValidatorOptions.fromXmlElement(element) {
     // TODO read readonly and prefix attr for setvalues functionality
@@ -421,9 +421,9 @@ abstract class FormFieldControlModel {
 
     List<MgrConditionalStateChecker> ifs = [];
     for (final condition in element.findElements('if')) {
-      final empty = condition.getAttribute('empty');
-      final shadow = condition.getAttribute('shadow');
-      final hide = condition.getAttribute('hide');
+      final empty = condition.attribute('empty');
+      final shadow = condition.attribute('shadow');
+      final hide = condition.attribute('hide');
       final targetField = shadow ?? hide;
       final targetStatus = shadow != null && shadow.isNotEmpty
           ? MgrFormState.readOnly
@@ -433,7 +433,7 @@ abstract class FormFieldControlModel {
 
       MgrConditionalStateChecker? checker;
       if (empty == null) {
-        final value = condition.getAttribute('value');
+        final value = condition.attribute('value');
         if (value == null) {
           // TODO exception
           throw '${condition.positionDescription} may not have no "empty" or "value" attributes';
@@ -442,7 +442,7 @@ abstract class FormFieldControlModel {
         checker = (controller) =>
             controller[name] == value ? targetStatus : MgrFormState.visible;
       } else {
-        if (condition.getAttribute('value') != null) {
+        if (condition.attribute('value') != null) {
           // TODO exception
           throw '${condition.positionDescription} may not have both "empty" and "value" attributes';
         }
@@ -473,8 +473,8 @@ abstract class FormFieldControlModel {
     }
 
     for (final condition in element.findElements('else')) {
-      final shadow = condition.getAttribute('shadow');
-      final hide = condition.getAttribute('hide');
+      final shadow = condition.attribute('shadow');
+      final hide = condition.attribute('hide');
       final targetField = shadow ?? hide;
       final targetStatus = shadow != null && shadow.isNotEmpty
           ? MgrFormState.readOnly
@@ -503,7 +503,7 @@ abstract class FormFieldControlModel {
       ConditionalStateCheckerConsumer? conditionalHideConsumer}) {
     switch (element.name.local) {
       case 'input':
-        return element.getAttribute('type') == 'checkbox'
+        return element.attribute('type') == 'checkbox'
             ? CheckFormFieldControlModel.fromXmlElement(element,
                 messages: messages,
                 conditionalHideConsumer: conditionalHideConsumer)

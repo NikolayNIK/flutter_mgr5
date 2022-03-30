@@ -28,7 +28,7 @@ class SelectFormFieldControlModel extends FormFieldControlModel {
       {required Map<String, String> messages,
       ConditionalStateCheckerConsumer? conditionalHideConsumer})
       : type = element.convertAttribute('type', converter: _typeFromString),
-        depend = element.getAttribute('depend'),
+        depend = element.attribute('depend'),
         super.innerFromXmlElement(element,
             messages: messages,
             conditionalHideConsumer: conditionalHideConsumer);

@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:flutter_mgr5/src/mgr_exception.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
@@ -65,7 +66,7 @@ class MgrClient extends ChangeNotifier implements Listenable {
   }
 
   void _checkError(XmlDocument doc) {
-    final error = doc.rootElement.getElement('error');
+    final error = doc.rootElement.child('error');
     if (error != null) {
       final exception = MgrException.fromElement(error);
       if (exception.type == 'auth') _invalidate();

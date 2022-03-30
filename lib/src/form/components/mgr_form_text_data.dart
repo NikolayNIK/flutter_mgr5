@@ -49,7 +49,7 @@ abstract class TextDataFormFieldControlModel extends FormFieldControlModel {
   TextDataFormFieldControlModel._init(XmlElement element,
       {required Map<String, String> messages,
       ConditionalStateCheckerConsumer? conditionalHideConsumer})
-      : isWarning = element.getAttributeBool('warning'),
+      : isWarning = element.boolAttribute('warning'),
         super.innerFromXmlElement(element,
             messages: messages,
             conditionalHideConsumer: conditionalHideConsumer);

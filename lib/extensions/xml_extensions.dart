@@ -1,12 +1,25 @@
 import 'package:flutter_mgr5/src/mgr_format.dart';
 import 'package:xml/xml.dart';
 
+bool _parseBool(String? value) => value == 'yes';
+
+extension XmlChildExtension on XmlHasChildren {
+  XmlElement? child(String name, {String? namespace}) =>
+      getElement(name, namespace: namespace);
+}
+
 extension XmlAttributeExtension on XmlHasAttributes {
-  bool getAttributeBool(String name, {String? namespace}) =>
-      getAttribute(name, namespace: namespace) == 'yes';
+  String? attribute(String name, {String? namespace}) =>
+      getAttribute(name, namespace: namespace);
+
+  XmlNode? attributeNode(String name, {String? namespace}) =>
+      getAttributeNode(name, namespace: namespace);
+
+  bool boolAttribute(String name, {String? namespace}) =>
+      convertAttribute(name, namespace: namespace, converter: _parseBool);
 
   String requireAttribute(String name, {String? namespace}) {
-    final attr = getAttribute(name, namespace: namespace);
+    final attr = attribute(name, namespace: namespace);
     if (attr == null) {
       throw MgrMissingAttributeException('Missing required attribute "$name"' +
           (this is XmlElement
@@ -20,7 +33,7 @@ extension XmlAttributeExtension on XmlHasAttributes {
   T convertAttribute<T>(String name,
       {String? namespace, required T Function(String? value) converter}) {
     try {
-      return converter(getAttribute(name, namespace: namespace));
+      return converter(attribute(name, namespace: namespace));
     } on MgrFormatException catch (exception) {
       throw MgrFormatException('Invalid value of attribute "$name"' +
           (this is XmlElement

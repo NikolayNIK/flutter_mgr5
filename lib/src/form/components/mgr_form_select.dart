@@ -108,6 +108,10 @@ class MgrFormSelect extends StatelessWidget {
                             Radio<String?>(
                               value: entry.key,
                               groupValue: value,
+                              focusNode: FocusNode(
+                                canRequestFocus: false,
+                                skipTraversal: true,
+                              ),
                               onChanged: isReadOnly
                                   ? null
                                   : (value) => controller.value = value,

@@ -106,7 +106,7 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
       _controller = null;
 
       _initialLoadFuture = () async {
-        final doc = await widget.mgrClient.request(widget.name, widget.params);
+        final doc = await widget.mgrClient.requestXmlDocument(widget.name, widget.params);
         if (!isDisposed) {
           setState(() {
             _controller = StandaloneMgrFormController.fromXmlDocument(
@@ -249,7 +249,7 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
       final XmlDocument response;
       try {
         response =
-            await widget.mgrClient.request(controller.model.func, params);
+            await widget.mgrClient.requestXmlDocument(controller.model.func, params);
       } on MgrException catch (e) {
         controller.exception.value = e;
         return;

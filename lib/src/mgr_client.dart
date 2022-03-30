@@ -37,7 +37,7 @@ class MgrClient extends ChangeNotifier implements Listenable {
               _lang != null &&
               _lang!.isNotEmpty));
 
-  Future<XmlDocument> request(String? func,
+  Future<XmlDocument> requestXmlDocument(String? func,
       [Map<String, String>? params]) async {
     params = params == null ? HashMap() : HashMap.of(params);
 
@@ -78,7 +78,7 @@ class MgrClient extends ChangeNotifier implements Listenable {
   Future<bool> validate() async {
     if (!isValid) return false;
 
-    await request('whoami');
+    await requestXmlDocument('whoami');
 
     return true;
   }

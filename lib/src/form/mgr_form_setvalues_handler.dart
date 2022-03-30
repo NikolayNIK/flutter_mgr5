@@ -120,7 +120,7 @@ class MgrFormSetValuesHandlerImpl extends MgrFormHandler
       }
 
       try {
-        final doc = await _mgrClient.request(
+        final doc = await _mgrClient.requestXmlDocument(
           formModel.func,
           formController.stringParams.copyWith(map: {'sv_field': name}),
         );

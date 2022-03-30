@@ -48,7 +48,7 @@ class _MgrFormValidatorHandler extends MgrFormHandler
         }
 
         final value = param.value;
-        _mgrClient.request('check.${validatorOptions.func}', {
+        _mgrClient.requestXmlDocument('check.${validatorOptions.func}', {
           'name': name,
           'funcname': formModel.func,
           if (value != null) 'value': value,

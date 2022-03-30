@@ -36,7 +36,7 @@ class _MgrFormPageCollapseHandler implements MgrFormPageCollapseHandler {
   }
 
   void _notify(String name, MgrFormPageController controller) {
-    void listener() => mgrClient.request(
+    void listener() => mgrClient.requestXmlDocument(
           'collapse',
           {
             'page': name,

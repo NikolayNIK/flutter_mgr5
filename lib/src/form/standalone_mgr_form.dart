@@ -100,7 +100,9 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
 
   void _refresh() {
     setState(() {
-      _controller?.dispose();
+      // вызывает проблемы, т.к. виджеты вызывают removeListener у содержащихся
+      // в контроллере [Listenable] после смены контроллера
+      // _controller?.dispose(); // что может пойти не так?
       _controller = null;
 
       _initialLoadFuture = () async {
@@ -250,7 +252,6 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
             await widget.mgrClient.request(controller.model.func, params);
       } on MgrException catch (e) {
         controller.exception.value = e;
-        setState(() => _controller = controller);
         return;
       }
 
@@ -259,6 +260,9 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
           if (additionalParams['snext'] == 'ok' ||
               additionalParams['sback'] == 'ok') {
             setState(() {
+              // вызывает проблемы, т.к. виджеты вызывают removeListener у содержащихся
+              // в контроллере [Listenable] после смены контроллера
+              // _controller?.dispose(); // что может пойти не так?
               _controller = StandaloneMgrFormController.fromXmlDocument(
                 context.read<MgrClient>(),
                 response,

@@ -30,18 +30,48 @@ class MgrList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          children: [
-            IconButton(
-                onPressed: () => controller.items.clear(),
-                icon: Icon(Icons.refresh)),
-            for (final toolgrp in model.toolbar)
-              for (final toolbtn in toolgrp)
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(toolbtn.icon),
+        InkWell(
+          onTap: () => controller.items.clear(),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      model.title,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
                 ),
-          ],
+                IconButton(
+                    onPressed: () => controller.items.clear(),
+                    icon: Icon(Icons.refresh)),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+          child: Row(
+            children: [
+              for (final toolgrp in model.toolbar)
+                for (final toolbtn in toolgrp)
+                  InkResponse(
+                    onTap: () {},
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Column(
+                        children: [
+                          Icon(toolbtn.icon),
+                          if (toolbtn.label != null) Text(toolbtn.label!),
+                        ],
+                      ),
+                    ),
+                  ),
+            ],
+          ),
         ),
         Expanded(
           child: LayoutBuilder(
@@ -79,6 +109,11 @@ class MgrList extends StatelessWidget {
                             ),
                         ],
                       ),
+                    ),
+                    Divider(
+                      height: 2,
+                      thickness: 2,
+                      indent: 16.0,
                     ),
                     Expanded(
                       child: ListenableBuilder(

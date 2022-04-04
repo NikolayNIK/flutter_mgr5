@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mgr5/extensions/xml_extensions.dart';
+import 'package:flutter_mgr5/mgr5.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
 import 'package:xml/xml.dart';
@@ -34,13 +35,15 @@ abstract class MgrModel {
 
   factory MgrModel.fromXmlElement(XmlElement element) {
     switch (
-        element.requireConvertAttribute('type', converter: _typeFromString)) {
+        element.child('metadata')?.requireConvertAttribute('type', converter: _typeFromString)) {
       case MgrModelType.form:
         return MgrFormModel.fromXmlElement(element);
       case MgrModelType.list:
         return MgrListModel.fromXmlElement(element);
       case MgrModelType.report:
         throw UnimplementedError('report is not implemented yet');
+      default:
+        throw MgrFormatException('unknown metadata type');
     }
   }
 

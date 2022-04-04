@@ -76,6 +76,7 @@ class _MgrListPages extends IterableBase<MgrListElem?>
       int elemCountPerPage) {
     if (totalElemCount != _elemCount || data.length != _elemCountPerPage) {
       _pages.clear();
+      _pageLoadingFutures.clear();
 
       _elemCount = totalElemCount;
       _elemCountPerPage = elemCountPerPage;

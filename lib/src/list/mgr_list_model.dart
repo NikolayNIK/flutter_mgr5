@@ -95,6 +95,37 @@ IconData? _parseIcon(String name) {
       return Icons.refresh;
     case 't-filter':
       return Icons.filter_alt;
+    case 't-credit':
+      return Icons.list_alt;
+    case 't-editlist':
+      return Icons.topic;
+    case 't-set':
+      return Icons.settings;
+    case 't-contract':
+      return Icons.assignment;
+    case 't-verified':
+      return Icons.done;
+    case 't-verified2':
+      return Icons.done_all;
+    case 't-redirect':
+      return Icons.assignment_return;
+    case 't-wait':
+    case 't-arrived':
+      return Icons.assignment_returned;
+    case 't-restart':
+      return Icons.replay;
+    case 't-undo':
+      return Icons.undo;
+    case 't-lock':
+      return Icons.lock;
+    case 't-unlock':
+      return Icons.no_encryption;
+    case 't-iplist':
+      return Icons.dns;
+    case 't-aid':
+      return Icons.medical_services;
+    case 't-rotate':
+      return Icons.threesixty;
     default:
       return null;
   }

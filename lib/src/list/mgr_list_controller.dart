@@ -47,8 +47,9 @@ class _MgrListPages extends IterableBase<MgrListElem?>
   final MgrListController _controller;
   final Map<int, List<MgrListElem>> _pages = {};
   final Map<int, Future<XmlDocument>> _pageLoadingFutures = {};
+  final int _pageSize = 500;
 
-  int _elemCount = 0, _elemCountPerPage = 0;
+  int _elemCount = 0;
 
   _MgrListPages(this._controller);
 
@@ -69,17 +70,14 @@ class _MgrListPages extends IterableBase<MgrListElem?>
           doc.findElements('elem').map((e) => parseElem(e)),
         ),
         (int.tryParse(doc.getElement('p_elems')?.innerText ?? 'kostil') ?? 0),
-        (int.tryParse(doc.getElement('p_cnt')?.innerText ?? 'kostil') ?? 0),
       );
 
-  void ingest(int index, List<MgrListElem> data, int totalElemCount,
-      int elemCountPerPage) {
-    if (totalElemCount != _elemCount || data.length != _elemCountPerPage) {
+  void ingest(int index, List<MgrListElem> data, int totalElemCount) {
+    if (totalElemCount != _elemCount) {
       _pages.clear();
       _pageLoadingFutures.clear();
 
       _elemCount = totalElemCount;
-      _elemCountPerPage = elemCountPerPage;
     }
 
     _pages[index] = data;
@@ -92,8 +90,8 @@ class _MgrListPages extends IterableBase<MgrListElem?>
       throw RangeError('Index $index must be in the range [0..$length).');
     }
 
-    final pageIndex = (index / _elemCountPerPage).floor();
-    final elemIndex = index % _elemCountPerPage;
+    final pageIndex = (index / _pageSize).floor();
+    final elemIndex = index % _pageSize;
     final page = _pages[pageIndex];
     if (page == null) {
       _requestPage(pageIndex);
@@ -113,7 +111,7 @@ class _MgrListPages extends IterableBase<MgrListElem?>
         (_controller.params ?? {}).copyWith(
           map: {
             'p_num': (pageIndex + 1).toString(),
-            'p_cnt': '256',
+            'p_cnt': _pageSize.toString(),
           },
         ),
       ),

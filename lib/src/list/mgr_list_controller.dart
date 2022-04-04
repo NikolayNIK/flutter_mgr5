@@ -69,14 +69,16 @@ class _MgrListPages extends IterableBase<MgrListElem?>
           doc.findElements('elem').map((e) => parseElem(e)),
         ),
         (int.tryParse(doc.getElement('p_elems')?.innerText ?? 'kostil') ?? 0),
+        (int.tryParse(doc.getElement('p_cnt')?.innerText ?? 'kostil') ?? 0),
       );
 
-  void ingest(int index, List<MgrListElem> data, int totalElemCount) {
+  void ingest(int index, List<MgrListElem> data, int totalElemCount,
+      int elemCountPerPage) {
     if (totalElemCount != _elemCount || data.length != _elemCountPerPage) {
       _pages.clear();
 
       _elemCount = totalElemCount;
-      _elemCountPerPage = data.length;
+      _elemCountPerPage = elemCountPerPage;
     }
 
     _pages[index] = data;

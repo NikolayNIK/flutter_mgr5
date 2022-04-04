@@ -106,7 +106,7 @@ class MgrListToolbtn {
   final String? label, hint;
   final IconData? icon;
 
-  MgrListToolbtn({
+  const MgrListToolbtn({
     required this.name,
     required this.label,
     required this.hint,
@@ -114,11 +114,13 @@ class MgrListToolbtn {
   });
 
   factory MgrListToolbtn.fromXmlElement(
-          XmlElement element, MgrMessages messages) =>
-      MgrListToolbtn(
-        name: element.requireAttribute('name'),
-        label: messages['short_${element.name}'],
-        hint: messages['hint_${element.name}'],
-        icon: element.requireConvertAttribute('img', converter: _parseIcon),
-      );
+      XmlElement element, MgrMessages messages) {
+    final name = element.requireAttribute('name');
+    return MgrListToolbtn(
+      name: element.requireAttribute('name'),
+      label: messages['short_$name'],
+      hint: messages['hint_$name'],
+      icon: element.requireConvertAttribute('img', converter: _parseIcon),
+    );
+  }
 }

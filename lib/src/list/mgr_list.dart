@@ -52,25 +52,31 @@ class MgrList extends StatelessWidget {
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-          child: Row(
-            children: [
-              for (final toolgrp in model.toolbar)
-                for (final toolbtn in toolgrp)
-                  InkResponse(
-                    onTap: () {},
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Column(
-                        children: [
-                          Icon(toolbtn.icon),
-                          if (toolbtn.label != null) Text(toolbtn.label!),
-                        ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              children: [
+                for (final toolgrp in model.toolbar) ...[
+                  const SizedBox(width: 8.0),
+                  for (final toolbtn in toolgrp)
+                    InkResponse(
+                      onTap: () {},
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Column(
+                          children: [
+                            Icon(toolbtn.icon),
+                            if (toolbtn.label != null) Text(toolbtn.label!),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-            ],
+                  const SizedBox(width: 24.0),
+                ],
+              ],
+            ),
           ),
         ),
         Expanded(

@@ -9,7 +9,7 @@ import 'package:xml/xml.dart';
 class MgrListController {
   MgrClient mgrClient;
 
-  late final MgrListItems items = _MgrListPages(this);
+  late final MgrListItems items = _MgrListItems(this);
   final String func;
   final Map<String, String>? params;
   final MgrListSelection selection = _MgrListSelection();
@@ -42,7 +42,7 @@ abstract class MgrListItems implements Listenable, Iterable<MgrListElem?> {
 
 abstract class MgrListSelection implements Set<String>, Listenable {}
 
-class _MgrListPages extends IterableBase<MgrListElem?>
+class _MgrListItems extends IterableBase<MgrListElem?>
     with ChangeNotifier, MgrListItems {
   final MgrListController _controller;
   final Map<int, List<MgrListElem>> _pages = {};
@@ -51,7 +51,7 @@ class _MgrListPages extends IterableBase<MgrListElem?>
 
   int _elemCount = 0;
 
-  _MgrListPages(this._controller);
+  _MgrListItems(this._controller);
 
   @override
   int get length => _elemCount;

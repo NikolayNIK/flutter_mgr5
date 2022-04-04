@@ -153,9 +153,10 @@ class MgrList extends StatelessWidget {
                                               for (final col in cols)
                                                 Padding(
                                                   padding:
-                                                      const EdgeInsets.all(8.0),
+                                                      const EdgeInsets.only(
+                                                          left: 8.0),
                                                   child: Container(
-                                                    width: col.width - 16.0,
+                                                    width: col.width - 8.0,
                                                     height: Theme.of(context)
                                                             .textTheme
                                                             .bodyMedium
@@ -201,7 +202,8 @@ class MgrList extends StatelessWidget {
                                                       child: Padding(
                                                         padding:
                                                             const EdgeInsets
-                                                                .all(8.0),
+                                                                    .only(
+                                                                left: 8.0),
                                                         child: Text(
                                                           elem[col.col.name] ??
                                                               '',

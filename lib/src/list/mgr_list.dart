@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_mgr5/listenable_builder.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_controller.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
+import 'package:flutter_mgr5/src/optional_tooltip.dart';
 import 'package:flutter_mgr5/value_animated_switcher.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -61,15 +62,18 @@ class MgrList extends StatelessWidget {
                 for (final toolgrp in model.toolbar) ...[
                   const SizedBox(width: 8.0),
                   for (final toolbtn in toolgrp)
-                    InkResponse(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Column(
-                          children: [
-                            Icon(toolbtn.icon),
-                            if (toolbtn.label != null) Text(toolbtn.label!),
-                          ],
+                    OptionalTooltip(
+                      message: toolbtn.hint,
+                      child: InkResponse(
+                        onTap: () {},
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Column(
+                            children: [
+                              Icon(toolbtn.icon),
+                              if (toolbtn.label != null) Text(toolbtn.label!),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -100,16 +104,23 @@ class MgrList extends StatelessWidget {
                       child: Row(
                         children: [
                           for (final col in cols)
-                            SizedBox(
-                              width: col.width,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  col.col.label ?? '',
-                                  maxLines: 1,
-                                  softWrap: false,
-                                  overflow: TextOverflow.fade,
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                            OptionalTooltip(
+                              message: col.col.hint,
+                              child: InkWell(
+                                onTap: () {},
+                                child: SizedBox(
+                                  width: col.width,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      col.col.label ?? '',
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      overflow: TextOverflow.fade,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),

@@ -55,32 +55,43 @@ class MgrList extends StatelessWidget {
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Row(
-              children: [
-                for (final toolgrp in model.toolbar) ...[
-                  const SizedBox(width: 8.0),
-                  for (final toolbtn in toolgrp)
-                    OptionalTooltip(
-                      message: toolbtn.hint,
-                      child: InkResponse(
-                        onTap: () {},
+          child: Row(
+            children: [
+              for (final toolgrp in model.toolbar) ...[
+                const SizedBox(width: 8.0),
+                for (final toolbtn in toolgrp)
+                  OptionalTooltip(
+                    message: toolbtn.hint,
+                    child: InkResponse(
+                      onTap: () {},
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                            minWidth: 56.0 +
+                                4.0 *
+                                    Theme.of(context).visualDensity.horizontal,
+                            minHeight: 56.0 +
+                                4.0 * Theme.of(context).visualDensity.vertical),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.only(
+                            left: 8.0,
+                            right: 8.0,
+                            bottom: 8.0,
+                          ),
                           child: Column(
                             children: [
                               Icon(toolbtn.icon),
-                              if (toolbtn.label != null) Text(toolbtn.label!),
+                              if (toolbtn.label != null)
+                                Text(toolbtn.label!,
+                                    textAlign: TextAlign.center),
                             ],
                           ),
                         ),
                       ),
                     ),
-                  const SizedBox(width: 24.0),
-                ],
+                  ),
+                const SizedBox(width: 24.0),
               ],
-            ),
+            ],
           ),
         ),
         Expanded(

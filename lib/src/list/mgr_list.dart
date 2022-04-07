@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mgr5/listenable_builder.dart';
@@ -34,7 +36,10 @@ class MgrList extends StatelessWidget {
         InkWell(
           onTap: () => controller.items.clear(),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: max(8.0, 8.0 + 4.0 * Theme.of(context).visualDensity.vertical),
+            ),
             child: Row(
               children: [
                 Expanded(
@@ -91,6 +96,7 @@ class MgrList extends StatelessWidget {
                                   bottom: 8.0,
                                 ),
                                 child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
                                       toolbtn.icon,

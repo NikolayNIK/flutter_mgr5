@@ -16,6 +16,8 @@ class MgrListController {
   final Map<String, String>? params;
   final MgrListSelection selection = _MgrListSelection();
 
+  late String _keyField;
+
   MgrListController({
     required this.mgrClient,
     required this.func,
@@ -23,6 +25,7 @@ class MgrListController {
   });
 
   void update(MgrListModel model) {
+    _keyField = model.keyField ?? 'id';
     items.update(model);
   }
 
@@ -33,6 +36,8 @@ abstract class MgrListItems implements Listenable, Iterable<MgrListElem?> {
   int get length;
 
   MgrListElem? operator [](int index);
+
+  int? findPositionByKey(MgrListElemKey key);
 
   void update(MgrListModel model);
 
@@ -51,6 +56,7 @@ class _MgrListItems extends IterableBase<MgrListElem?>
   final MgrListController _controller;
   final Map<int, List<MgrListElem>> _pages = {};
   final Map<int, Future<XmlDocument>> _pageLoadingFutures = {};
+  final Map<MgrListElemKey, int> _keyToPositionMap = {};
   final int _pageSize = 500;
 
   int _elemCount = 0;
@@ -90,6 +96,7 @@ class _MgrListItems extends IterableBase<MgrListElem?>
     if (model.elemCount != _elemCount) {
       _pages.clear();
       _pageLoadingFutures.clear();
+      _keyToPositionMap.clear();
 
       _elemCount = model.elemCount ?? 0;
       notificationRequired = true;
@@ -97,7 +104,16 @@ class _MgrListItems extends IterableBase<MgrListElem?>
 
     final index = model.pageIndex;
     if (index != null) {
-      _pages[index] = model.pageData;
+      _pages[index - 1] = model.pageData;
+
+      var i = (index - 1) * _pageSize;
+      for (final elem in model.pageData) {
+        final key = elem[_controller._keyField];
+        if (key != null) {
+          _keyToPositionMap[key] = i++;
+        }
+      }
+
       notificationRequired = true;
     }
 
@@ -105,6 +121,9 @@ class _MgrListItems extends IterableBase<MgrListElem?>
       notifyListeners();
     }
   }
+
+  @override
+  int? findPositionByKey(MgrListElemKey key) => _keyToPositionMap[key];
 
   void _requestPage(int pageIndex) async {
     Future<XmlDocument>? future;

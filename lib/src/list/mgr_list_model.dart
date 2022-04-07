@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mgr5/extensions/iterator_extensions.dart';
 import 'package:flutter_mgr5/extensions/xml_extensions.dart';
+import 'package:flutter_mgr5/mgr5.dart';
 import 'package:flutter_mgr5/src/mgr_messages.dart';
 import 'package:flutter_mgr5/src/mgr_model.dart';
 import 'package:xml/xml.dart';
@@ -131,17 +132,75 @@ IconData? _parseIcon(String name) {
   }
 }
 
+enum MgrListToolbtnActivateSelectionType {
+  none,
+  single,
+  multiple,
+  any,
+}
+
+extension MgrListToolbtnActivateSelectionTypeExtension
+    on MgrListToolbtnActivateSelectionType {
+  static MgrListToolbtnActivateSelectionType fromXmlElement(
+      XmlElement element) {
+    final type = element.requireAttribute('type');
+    switch (type) {
+      case 'new':
+      case 'back':
+      case 'groupformnosel':
+      case 'list':
+      case 'refresh':
+      case 'windownosel':
+      case 'url':
+        return MgrListToolbtnActivateSelectionType.any;
+      case 'editnosel':
+        return MgrListToolbtnActivateSelectionType.any;
+      case 'action':
+      case 'editlist':
+      case 'window':
+      case 'preview':
+        return MgrListToolbtnActivateSelectionType.single;
+      case 'edit':
+        return element.boolAttribute('nogroupedit')
+            ? MgrListToolbtnActivateSelectionType.single
+            : MgrListToolbtnActivateSelectionType.multiple;
+      case 'group':
+      case 'groupdownload':
+      case 'groupform':
+      case 'groupwindow':
+        return MgrListToolbtnActivateSelectionType.multiple;
+      default:
+        throw MgrFormatException('unknown type: "$type"');
+    }
+  }
+
+  bool check(int selectionCount) {
+    switch (this) {
+      case MgrListToolbtnActivateSelectionType.none:
+        return selectionCount == 0;
+      case MgrListToolbtnActivateSelectionType.single:
+        return selectionCount == 1;
+      case MgrListToolbtnActivateSelectionType.multiple:
+        return selectionCount > 0;
+      case MgrListToolbtnActivateSelectionType.any:
+        return true;
+    }
+  }
+}
+
 @immutable
 class MgrListToolbtn {
   final String name;
   final String? label, hint;
   final IconData? icon;
+  final MgrListToolbtnActivateSelectionType selectionType;
 
   const MgrListToolbtn({
     required this.name,
     required this.label,
     required this.hint,
     required this.icon,
+    required this.selectionType,
   });
 
   factory MgrListToolbtn.fromXmlElement(
@@ -152,6 +211,8 @@ class MgrListToolbtn {
       label: messages['short_$name'],
       hint: messages['hint_$name'],
       icon: element.requireConvertAttribute('img', converter: _parseIcon),
+      selectionType:
+          MgrListToolbtnActivateSelectionTypeExtension.fromXmlElement(element),
     );
   }
 }

@@ -52,7 +52,7 @@ class _StandaloneMgrListState extends State<StandaloneMgrList> {
             mgrClient: widget.mgrClient,
             func: widget.func,
             params: widget.params)
-          ..items.update(_model!);
+          ..update(_model!);
       });
     }();
   }

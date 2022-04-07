@@ -72,6 +72,12 @@ class MgrList extends StatelessWidget {
                       child: Builder(builder: (context) {
                         final enabled = toolbtn.selectionType
                             .check(controller.selection.length);
+                        final foregroundColor = enabled
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(.25);
                         return InkResponse(
                           onTap: enabled ? () {} : null,
                           child: AnimatedSwitcher(
@@ -100,28 +106,14 @@ class MgrList extends StatelessWidget {
                                   children: [
                                     Icon(
                                       toolbtn.icon,
-                                      color: enabled
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .onSurface
-                                          : Theme.of(context)
-                                              .colorScheme
-                                              .onSurface
-                                              .withOpacity(.5),
+                                      color: foregroundColor,
                                     ),
                                     if (toolbtn.label != null)
                                       Text(
                                         toolbtn.label!,
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            color: enabled
-                                                ? Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface
-                                                : Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface
-                                                    .withOpacity(.5)),
+                                        style:
+                                            TextStyle(color: foregroundColor),
                                       ),
                                   ],
                                 ),

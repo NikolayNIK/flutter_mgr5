@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mgr5/listenable_builder.dart';
 import 'package:flutter_mgr5/src/form/components/mgr_form_error_card.dart';
@@ -193,11 +195,9 @@ class _MgrFormState extends State<MgrForm> {
 
   Widget _buildTitle(BuildContext context) => Material(
         child: Padding(
-          padding: const EdgeInsets.only(
-            left: 16.0,
-            top: 16.0,
-            right: 16.0,
-            bottom: 16.0,
+          padding: EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: max(8.0, 8.0 + 4.0 * Theme.of(context).visualDensity.vertical),
           ),
           child: Row(
             children: [

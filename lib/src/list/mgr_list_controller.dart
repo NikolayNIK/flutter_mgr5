@@ -9,7 +9,7 @@ import 'package:xml/xml.dart';
 typedef MgrListElemKey = String;
 
 class MgrListController {
-  MgrClient mgrClient;
+  MgrClient mgrClient; // TODO вынести из контроллера
 
   late final MgrListItems items = _MgrListItems(this);
   final String func;

@@ -22,6 +22,10 @@ class MgrListController {
     this.params,
   });
 
+  void update(MgrListModel model) {
+    items.update(model);
+  }
+
   void dispose() => items.dispose();
 }
 
@@ -30,9 +34,7 @@ abstract class MgrListItems implements Listenable, Iterable<MgrListElem?> {
 
   MgrListElem? operator [](int index);
 
-  void ingestXmlDocument(XmlDocument doc) => ingestXmlElement(doc.rootElement);
-
-  void ingestXmlElement(XmlElement doc);
+  void update(MgrListModel model);
 
   void clear();
 
@@ -66,27 +68,6 @@ class _MgrListItems extends IterableBase<MgrListElem?>
   }
 
   @override
-  void ingestXmlElement(XmlElement doc) => ingest(
-        (int.tryParse(doc.getElement('p_num')?.innerText ?? 'kostil') ?? 1) - 1,
-        List.unmodifiable(
-          doc.findElements('elem').map((e) => parseElem(e)),
-        ),
-        (int.tryParse(doc.getElement('p_elems')?.innerText ?? 'kostil') ?? 0),
-      );
-
-  void ingest(int index, List<MgrListElem> data, int totalElemCount) {
-    if (totalElemCount != _elemCount) {
-      _pages.clear();
-      _pageLoadingFutures.clear();
-
-      _elemCount = totalElemCount;
-    }
-
-    _pages[index] = data;
-    notifyListeners();
-  }
-
-  @override
   MgrListElem? operator [](int index) {
     if (index < 0 || index >= length) {
       throw RangeError('Index $index must be in the range [0..$length).');
@@ -101,6 +82,28 @@ class _MgrListItems extends IterableBase<MgrListElem?>
     }
 
     return page[elemIndex];
+  }
+
+  @override
+  void update(MgrListModel model) {
+    var notificationRequired = false;
+    if (model.elemCount != _elemCount) {
+      _pages.clear();
+      _pageLoadingFutures.clear();
+
+      _elemCount = model.elemCount ?? 0;
+      notificationRequired = true;
+    }
+
+    final index = model.pageIndex;
+    if (index != null) {
+      _pages[index] = model.pageData;
+      notificationRequired = true;
+    }
+
+    if (notificationRequired) {
+      notifyListeners();
+    }
   }
 
   void _requestPage(int pageIndex) async {
@@ -120,7 +123,7 @@ class _MgrListItems extends IterableBase<MgrListElem?>
     );
 
     if (future != null && _pageLoadingFutures[pageIndex] == future) {
-      ingestXmlDocument(doc);
+      update(MgrListModel.fromXmlDocument(doc));
       _pageLoadingFutures.remove(pageIndex);
     }
   }

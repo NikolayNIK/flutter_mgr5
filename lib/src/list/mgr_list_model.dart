@@ -10,16 +10,16 @@ import 'package:xml/xml.dart';
 
 typedef MgrListElem = Map<String, String>;
 
-MgrListElem parseElem(XmlElement elem) => Map.fromIterable(elem.childElements,
-    key: (element) => (element as XmlElement).name.local,
-    value: (element) => (element as XmlElement).innerText);
-
 @immutable
 class MgrListModel extends MgrModel {
   final String title;
   final String? keyField, keyNameField;
   final List<MgrListCol> coldata;
   final List<List<MgrListToolbtn>> toolbar;
+  final List<String> pageNames;
+  final List<MgrListElem> pageData;
+  final int? pageIndex;
+  final int? elemCount;
 
   const MgrListModel({
     required String func,
@@ -28,6 +28,10 @@ class MgrListModel extends MgrModel {
     required this.keyNameField,
     required this.coldata,
     required this.toolbar,
+    required this.pageNames,
+    required this.pageData,
+    required this.pageIndex,
+    required this.elemCount,
   }) : super(func);
 
   factory MgrListModel.fromXmlDocument(XmlDocument doc,
@@ -38,6 +42,8 @@ class MgrListModel extends MgrModel {
       [MgrMessages? mgrMessages]) {
     final messages = mgrMessages ?? parseMessages(doc);
     final metadata = doc.findElements('metadata');
+    final pNum = doc.child('p_num');
+    final pElems = doc.child('p_elems');
     return MgrListModel(
       func: doc.requireAttribute('func'),
       title: messages['title'] ?? '',
@@ -57,6 +63,14 @@ class MgrListModel extends MgrModel {
                 .findElements('toolbtn')
                 .map((e) => MgrListToolbtn.fromXmlElement(e, messages)))),
       ),
+      pageNames:
+          List.unmodifiable(doc.findElements('page').map((e) => e.innerText)),
+      pageData: List.unmodifiable(doc.findElements('elem').map((e) =>
+          Map.fromIterable(e.childElements,
+              key: (element) => (element as XmlElement).name.local,
+              value: (element) => (element as XmlElement).innerText))),
+      pageIndex: pNum == null ? null : int.tryParse(pNum.innerText),
+      elemCount: pElems == null ? null : int.tryParse(pElems.innerText),
     );
   }
 }

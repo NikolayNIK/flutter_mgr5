@@ -55,43 +55,80 @@ class MgrList extends StatelessWidget {
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (final toolgrp in model.toolbar) ...[
-                const SizedBox(width: 8.0),
-                for (final toolbtn in toolgrp)
-                  OptionalTooltip(
-                    message: toolbtn.hint,
-                    child: InkResponse(
-                      onTap: () {},
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                            minWidth: 56.0 +
-                                4.0 *
-                                    Theme.of(context).visualDensity.horizontal,
-                            minHeight: 56.0 +
-                                4.0 * Theme.of(context).visualDensity.vertical),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            left: 8.0,
-                            right: 8.0,
-                            bottom: 8.0,
+          child: ListenableBuilder(
+            listenable: controller.selection,
+            builder: (context) => Row(
+              children: [
+                for (final toolgrp in model.toolbar) ...[
+                  const SizedBox(width: 8.0),
+                  for (final toolbtn in toolgrp)
+                    OptionalTooltip(
+                      message: toolbtn.hint,
+                      child: Builder(builder: (context) {
+                        final enabled = toolbtn.selectionType
+                            .check(controller.selection.length);
+                        return InkResponse(
+                          onTap: enabled ? () {} : null,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: ConstrainedBox(
+                              key: ValueKey(enabled),
+                              constraints: BoxConstraints(
+                                  minWidth: 56.0 +
+                                      4.0 *
+                                          Theme.of(context)
+                                              .visualDensity
+                                              .horizontal,
+                                  minHeight: 56.0 +
+                                      4.0 *
+                                          Theme.of(context)
+                                              .visualDensity
+                                              .vertical),
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 8.0,
+                                  right: 8.0,
+                                  bottom: 8.0,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      toolbtn.icon,
+                                      color: enabled
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withOpacity(.5),
+                                    ),
+                                    if (toolbtn.label != null)
+                                      Text(
+                                        toolbtn.label!,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: enabled
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                : Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withOpacity(.5)),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
-                          child: Column(
-                            children: [
-                              Icon(toolbtn.icon),
-                              if (toolbtn.label != null)
-                                Text(toolbtn.label!,
-                                    textAlign: TextAlign.center),
-                            ],
-                          ),
-                        ),
-                      ),
+                        );
+                      }),
                     ),
-                  ),
-                const SizedBox(width: 24.0),
+                  const SizedBox(width: 24.0),
+                ],
               ],
-            ],
+            ),
           ),
         ),
         Expanded(
@@ -206,8 +243,10 @@ class MgrList extends StatelessWidget {
                                           onTap: key == null
                                               ? null
                                               : () {
-                                                  controller.selection.clear();
-                                                  controller.selection.add(key);
+                                                  if (!controller.selection
+                                                      .add(key))
+                                                    controller.selection
+                                                        .remove(key);
                                                 },
                                           child: SizedBox(
                                             width: double.infinity,

@@ -6,6 +6,8 @@ import 'package:flutter_mgr5/mgr5.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
 import 'package:xml/xml.dart';
 
+typedef MgrListElemKey = String;
+
 class MgrListController {
   MgrClient mgrClient;
 
@@ -40,7 +42,7 @@ abstract class MgrListItems implements Listenable, Iterable<MgrListElem?> {
   void requestFirstPage();
 }
 
-abstract class MgrListSelection implements Set<String>, Listenable {}
+abstract class MgrListSelection implements Set<MgrListElemKey>, Listenable {}
 
 class _MgrListItems extends IterableBase<MgrListElem?>
     with ChangeNotifier, MgrListItems {
@@ -133,12 +135,12 @@ class _MgrListItems extends IterableBase<MgrListElem?>
       Iterable.generate(length).map((e) => this[e]).iterator;
 }
 
-class _MgrListSelection extends SetBase<String>
+class _MgrListSelection extends SetBase<MgrListElemKey>
     with MgrListSelection, ChangeNotifier {
-  final Set<String> _set = {};
+  final Set<MgrListElemKey> _set = {};
 
   @override
-  bool add(String value) {
+  bool add(MgrListElemKey value) {
     if (_set.add(value)) {
       notifyListeners();
       return true;
@@ -151,13 +153,13 @@ class _MgrListSelection extends SetBase<String>
   bool contains(Object? element) => _set.contains(element);
 
   @override
-  Iterator<String> get iterator => _set.iterator;
+  Iterator<MgrListElemKey> get iterator => _set.iterator;
 
   @override
   int get length => _set.length;
 
   @override
-  String? lookup(Object? element) => _set.lookup(element);
+  MgrListElemKey? lookup(Object? element) => _set.lookup(element);
 
   @override
   bool remove(Object? value) {
@@ -170,5 +172,5 @@ class _MgrListSelection extends SetBase<String>
   }
 
   @override
-  Set<String> toSet() => _set.toSet();
+  Set<MgrListElemKey> toSet() => _set.toSet();
 }

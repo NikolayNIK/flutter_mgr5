@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_mgr5/extensions/iterator_extensions.dart';
 import 'package:flutter_mgr5/listenable_builder.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_controller.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
@@ -38,7 +39,10 @@ class MgrList extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: 16.0,
-              vertical: max(8.0, 8.0 + 4.0 * Theme.of(context).visualDensity.vertical),
+              vertical: max(
+                8.0,
+                8.0 + 4.0 * Theme.of(context).visualDensity.vertical,
+              ),
             ),
             child: Row(
               children: [
@@ -140,45 +144,70 @@ class MgrList extends StatelessWidget {
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final availableWidth = constraints.maxWidth - 16.0;
+              final rowHeight =
+                  56.0 + 8.0 * Theme.of(context).visualDensity.vertical;
+
+              final availableWidth = constraints.maxWidth - 16.0 - rowHeight;
               final cols = [
                 for (final col in model.coldata)
                   _Col(col: col, width: availableWidth / model.coldata.length),
               ];
 
-              final rowHeight =
-                  56.0 + 8.0 * Theme.of(context).visualDensity.vertical;
-
               return ListenableBuilder(
                 listenable: controller.selection,
                 builder: (context) => Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Row(
-                        children: [
-                          for (final col in cols)
-                            OptionalTooltip(
-                              message: col.col.hint,
-                              child: InkWell(
-                                onTap: () {},
-                                child: SizedBox(
-                                  width: col.width,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      col.col.label ?? '',
-                                      maxLines: 1,
-                                      softWrap: false,
-                                      overflow: TextOverflow.fade,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
+                    Material(
+                      color: Colors.transparent,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: rowHeight,
+                              height: rowHeight,
+                              child: Checkbox(
+                                  value: controller.selection.isNotEmpty
+                                      ? (controller.selection.length ==
+                                              controller.items.length
+                                          ? true
+                                          : null)
+                                      : false,
+                                  tristate: true,
+                                  onChanged: (value) => value ?? false
+                                      ? controller.selection.addAll(controller
+                                          .items
+                                          .map((e) => e?[model.keyField])
+                                          .whereNotNull())
+                                      : controller.selection.clear()),
+                            ),
+                            for (final col in cols)
+                              OptionalTooltip(
+                                message: col.col.hint,
+                                child: InkResponse(
+                                  onTap: () {},
+                                  child: SizedBox(
+                                    width: col.width,
+                                    height: rowHeight,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          col.col.label ?? '',
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          overflow: TextOverflow.fade,
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     Divider(
@@ -243,16 +272,22 @@ class MgrList extends StatelessWidget {
                                         color: isSelected
                                             ? Theme.of(context)
                                                 .colorScheme
-                                                .primary
+                                                .primaryContainer
                                             : null,
                                         child: InkWell(
                                           onTap: key == null
                                               ? null
                                               : () {
-                                                  if (!controller.selection
-                                                      .add(key))
-                                                    controller.selection
-                                                        .remove(key);
+                                                  if (controller.selection
+                                                              .length ==
+                                                          1 &&
+                                                      controller.selection
+                                                          .contains(key)) {
+                                                    return;
+                                                  }
+
+                                                  controller.selection.clear();
+                                                  controller.selection.add(key);
                                                 },
                                           child: SizedBox(
                                             width: double.infinity,
@@ -263,6 +298,27 @@ class MgrList extends StatelessWidget {
                                                       horizontal: 8.0),
                                               child: Row(
                                                 children: [
+                                                  SizedBox(
+                                                    width: rowHeight,
+                                                    height: rowHeight,
+                                                    child: Checkbox(
+                                                        value: isSelected,
+                                                        onChanged: key == null
+                                                            ? null
+                                                            : (value) {
+                                                                if (value ??
+                                                                    false) {
+                                                                  controller
+                                                                      .selection
+                                                                      .add(key);
+                                                                } else {
+                                                                  controller
+                                                                      .selection
+                                                                      .remove(
+                                                                          key);
+                                                                }
+                                                              }),
+                                                  ),
                                                   for (final col in cols)
                                                     SizedBox(
                                                       width: col.width,
@@ -283,7 +339,7 @@ class MgrList extends StatelessWidget {
                                                                   ? Theme.of(
                                                                           context)
                                                                       .colorScheme
-                                                                      .onPrimary
+                                                                      .onPrimaryContainer
                                                                   : null),
                                                         ),
                                                       ),

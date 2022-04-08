@@ -351,20 +351,50 @@ class MgrList extends StatelessWidget {
                                                             const EdgeInsets
                                                                     .only(
                                                                 left: 8.0),
-                                                        child: Text(
-                                                          elem[col.col.name] ??
-                                                              '',
-                                                          maxLines: 1,
-                                                          softWrap: false,
-                                                          overflow:
-                                                              TextOverflow.fade,
-                                                          style: TextStyle(
-                                                              color: isSelected
-                                                                  ? Theme.of(
-                                                                          context)
-                                                                      .colorScheme
-                                                                      .onPrimaryContainer
-                                                                  : null),
+                                                        child: Builder(
+                                                          builder: (context) {
+                                                            final text = Text(
+                                                              elem[col.col
+                                                                      .name] ??
+                                                                  '',
+                                                              maxLines: 1,
+                                                              softWrap: false,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .fade,
+                                                              style: TextStyle(
+                                                                  color: isSelected
+                                                                      ? Theme.of(
+                                                                              context)
+                                                                          .colorScheme
+                                                                          .onPrimaryContainer
+                                                                      : null),
+                                                            );
+
+                                                            return col.col.props
+                                                                    .isEmpty
+                                                                ? text
+                                                                : Row(
+                                                                    children: [
+                                                                      for (final prop
+                                                                          in col
+                                                                              .col
+                                                                              .props)
+                                                                        if (prop
+                                                                            .checkVisible(elem))
+                                                                          OptionalTooltip(
+                                                                            message:
+                                                                                prop.extractLabel(elem),
+                                                                            child:
+                                                                                Icon(
+                                                                              prop.icon,
+                                                                              size: max(24.0, 24.0 + 6 * Theme.of(context).visualDensity.vertical),
+                                                                            ),
+                                                                          ),
+                                                                      text
+                                                                    ],
+                                                                  );
+                                                          },
                                                         ),
                                                       ),
                                                     ),

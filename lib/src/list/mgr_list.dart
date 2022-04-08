@@ -380,6 +380,29 @@ class MgrList extends StatelessWidget {
                         ),
                       ),
                     ),
+                    Divider(
+                      height: 2,
+                      thickness: 2,
+                      indent: 16.0,
+                    ),
+                    ListenableBuilder(
+                      listenable: controller.items,
+                      builder: (context) => Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 16.0,
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            controller.selection.isEmpty
+                                ? 'Всего ${controller.items.length}'
+                                : 'Выделено ${controller.selection.length} из ${controller.items.length}',
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               );

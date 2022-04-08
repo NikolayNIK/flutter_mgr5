@@ -245,8 +245,11 @@ class MgrList extends StatelessWidget {
                                           horizontal: 8.0),
                                       child: Center(
                                         child: Shimmer.fromColors(
-                                          baseColor: Colors.transparent,
-                                          highlightColor: Color(0x40808080),
+                                          baseColor:
+                                              Theme.of(context).splashColor,
+                                          highlightColor: Theme.of(context)
+                                              .splashColor
+                                              .withOpacity(0),
                                           child: Row(
                                             children: [
                                               SizedBox(

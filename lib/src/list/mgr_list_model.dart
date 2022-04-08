@@ -79,11 +79,13 @@ class MgrListModel extends MgrModel {
 class MgrListCol {
   final String name;
   final String? label, hint;
+  final List<MgrListColProp> props;
 
   MgrListCol({
     required this.name,
     required this.label,
     required this.hint,
+    required this.props,
   });
 
   factory MgrListCol.fromXmlElement(XmlElement element, MgrMessages messages) {
@@ -92,8 +94,98 @@ class MgrListCol {
       name: name,
       label: messages[name],
       hint: messages['hint_$name'],
+      props: List.unmodifiable(element.childElements
+          .map((e) => MgrListColProp.fromXmlElement(e, messages))),
     );
   }
+}
+
+@immutable
+abstract class MgrListColProp {
+  final String name;
+  final IconData icon;
+
+  MgrListColProp({required this.name, required this.icon});
+
+  factory MgrListColProp.fromXmlElement(
+      XmlElement element, MgrMessages messages) {
+    switch (element.name.local) {
+      case 'prop':
+        return StaticMgrListColProp.fromXmlElement(element);
+      case 'xprop':
+        return DynamicMgrListColProp.fromXmlElement(element, messages);
+      default:
+        throw MgrFormatException(
+            'invalid prop tag name: ${element.name.local}');
+    }
+  }
+
+  bool checkVisible(MgrListElem elem);
+
+  String? extractLabel(MgrListElem elem);
+}
+
+class StaticMgrListColProp extends MgrListColProp {
+  StaticMgrListColProp({
+    required String name,
+    required IconData icon,
+  }) : super(name: name, icon: icon);
+
+  factory StaticMgrListColProp.fromXmlElement(XmlElement element) =>
+      StaticMgrListColProp(
+        name: element.requireAttribute('name'),
+        icon: element.requireConvertAttribute('img',
+            converter: _parseIconRequire),
+      );
+
+  @override
+  bool checkVisible(MgrListElem elem) => elem.containsKey(name);
+
+  @override
+  String? extractLabel(MgrListElem elem) => elem[name];
+}
+
+class DynamicMgrListColProp extends MgrListColProp {
+  final String? value;
+  final MgrMessages messages;
+
+  DynamicMgrListColProp({
+    required String name,
+    required IconData icon,
+    required this.value,
+    required this.messages,
+  }) : super(name: name, icon: icon);
+
+  factory DynamicMgrListColProp.fromXmlElement(
+          XmlElement element, MgrMessages messages) =>
+      DynamicMgrListColProp(
+        name: element.requireAttribute('name'),
+        icon: element.requireConvertAttribute('img',
+            converter: _parseIconRequire),
+        value: element.attribute('value'),
+        messages: messages,
+      );
+
+  @override
+  bool checkVisible(MgrListElem elem) =>
+      elem[name] == value; // TODO value == null
+
+  @override
+  String? extractLabel(MgrListElem elem) =>
+      (messages['hint_p_${name}_$value'] ??
+              messages['hint_p_$name'] ??
+              elem[name])
+          ?.replaceAll('_value_', elem[name] ?? '');
+}
+
+IconData _parseIconRequire(String name) {
+  final result = _parseIcon(name);
+  if (result == null) {
+    return Icons.question_mark; // TODO
+    throw MgrFormatException('icon not found: "$name"');
+  }
+
+  return result;
 }
 
 IconData? _parseIcon(String name) {
@@ -114,6 +206,7 @@ IconData? _parseIcon(String name) {
       return Icons.list_alt;
     case 't-editlist':
       return Icons.topic;
+    case 'p-attr':
     case 't-set':
       return Icons.settings;
     case 't-contract':
@@ -125,12 +218,19 @@ IconData? _parseIcon(String name) {
     case 't-redirect':
       return Icons.assignment_return;
     case 't-wait':
+    case 'p-wait':
+      return Icons.hourglass_top;
     case 't-arrived':
-      return Icons.assignment_returned;
+    case 'p-arrived':
+      return Icons.hourglass_bottom;
+    case 't-setpaid':
+    case 'p-setpaid':
+      return Icons.paid;
     case 't-restart':
       return Icons.replay;
     case 't-undo':
       return Icons.undo;
+    case 'p-lock-yellow':
     case 't-lock':
       return Icons.lock;
     case 't-unlock':
@@ -141,6 +241,30 @@ IconData? _parseIcon(String name) {
       return Icons.medical_services;
     case 't-rotate':
       return Icons.threesixty;
+    case 'p-inetonoff':
+      return Icons.lan; // TODO
+    case 'p-file-100':
+      return Icons.insert_drive_file;
+    case 'p-time':
+      return Icons.schedule;
+    case 'p-contract':
+      return Icons.article;
+    case 'p-verified':
+      return Icons.done;
+    case 'p-file-99':
+      return Icons.hourglass_empty;
+    case 'p-accrued':
+      return Icons.request_quote;
+    case 'p-verified2':
+      return Icons.done_all;
+    case 'p-stop':
+      return Icons.stop;
+    case 'p-error':
+      return Icons.warning;
+    case 'p-nobak':
+      return Icons.cloud_off;
+    case 'p-note':
+      return Icons.note;
     default:
       return null;
   }

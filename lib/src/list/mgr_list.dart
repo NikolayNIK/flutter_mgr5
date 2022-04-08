@@ -111,7 +111,7 @@ class MgrList extends StatelessWidget {
                                           : Theme.of(context)
                                               .colorScheme
                                               .onSurface
-                                              .withOpacity(.5),
+                                              .withOpacity(.25),
                                     ),
                                     if (toolbtn.label != null)
                                       Text(

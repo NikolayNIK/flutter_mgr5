@@ -278,7 +278,7 @@ class MgrList extends StatelessWidget {
                                             ? Theme.of(context)
                                                 .colorScheme
                                                 .primaryContainer
-                                            : null,
+                                            : Colors.transparent,
                                         child: InkWell(
                                           onTap: key == null
                                               ? null

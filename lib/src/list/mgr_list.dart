@@ -249,6 +249,16 @@ class MgrList extends StatelessWidget {
                                           highlightColor: Color(0x40808080),
                                           child: Row(
                                             children: [
+                                              SizedBox(
+                                                width: rowHeight,
+                                                height: rowHeight,
+                                                child: Center(
+                                                  child: Checkbox(
+                                                    value: false,
+                                                    onChanged: null,
+                                                  ),
+                                                ),
+                                              ),
                                               for (final col in cols)
                                                 Padding(
                                                   padding:

@@ -257,11 +257,13 @@ class MgrList extends StatelessWidget {
                     : elem[model.keyField];
             final isSelected =
                 key == null ? false : controller.selection.contains(key);
+            late final placeholder =
+                _buildItemPlaceholder(context, rowHeight, cols);
             return ValueAnimatedSwitcher(
               value: elem == null,
               duration: const Duration(milliseconds: 400),
               child: elem == null
-                  ? _buildItemPlaceholder(context, rowHeight, cols)
+                  ? placeholder
                   : _buildItem(isSelected, context, key, rowHeight, cols, elem),
             );
           },

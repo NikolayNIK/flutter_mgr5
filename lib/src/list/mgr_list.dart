@@ -271,7 +271,13 @@ class MgrList extends StatelessWidget {
                                                             .bodyMedium
                                                             ?.fontSize ??
                                                         16.0,
-                                                    color: Colors.red,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  8)),
+                                                      color: Colors.red,
+                                                    ),
                                                   ),
                                                 ),
                                             ],

@@ -117,15 +117,19 @@ class MgrList extends StatelessWidget {
                                       Text(
                                         toolbtn.label!,
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            color: enabled
-                                                ? Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface
-                                                : Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface
-                                                    .withOpacity(.5)),
+                                        style: (Theme.of(context)
+                                                    .textTheme
+                                                    .labelMedium ??
+                                                TextStyle())
+                                            .copyWith(
+                                                color: enabled
+                                                    ? Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                    : Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withOpacity(.5)),
                                       ),
                                   ],
                                 ),
@@ -198,8 +202,9 @@ class MgrList extends StatelessWidget {
                                           maxLines: 1,
                                           softWrap: false,
                                           overflow: TextOverflow.fade,
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleSmall,
                                         ),
                                       ),
                                     ),

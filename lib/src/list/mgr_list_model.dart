@@ -79,12 +79,14 @@ class MgrListModel extends MgrModel {
 class MgrListCol {
   final String name;
   final String? label, hint;
+  final double width;
   final List<MgrListColProp> props;
 
   MgrListCol({
     required this.name,
     required this.label,
     required this.hint,
+    required this.width,
     required this.props,
   });
 
@@ -94,6 +96,7 @@ class MgrListCol {
       name: name,
       label: messages[name],
       hint: messages['hint_$name'],
+      width: 64,
       props: List.unmodifiable(element.childElements
           .map((e) => MgrListColProp.fromXmlElement(e, messages))),
     );

@@ -122,37 +122,49 @@ class BreakListView extends StatefulWidget {
 }
 
 class _BreakListViewState extends State<BreakListView> {
+  final ScrollController _controller = ScrollController();
+
   @override
-  Widget build(BuildContext context) => Scrollable(
-        axisDirection: AxisDirection.right,
-        viewportBuilder: (BuildContext context, ViewportOffset position) =>
-            ListView.builder(
-          scrollDirection: widget.scrollDirection,
-          reverse: widget.reverse,
-          controller: widget.controller,
-          primary: widget.primary,
-          physics: widget.physics,
-          shrinkWrap: widget.shrinkWrap,
-          padding: widget.padding,
-          itemExtent: widget.itemExtent,
-          prototypeItem: widget.prototypeItem,
-          itemCount: widget.itemCount,
-          addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
-          addRepaintBoundaries: widget.addRepaintBoundaries,
-          addSemanticIndexes: widget.addSemanticIndexes,
-          cacheExtent: widget.cacheExtent,
-          semanticChildCount: widget.semanticChildCount,
-          dragStartBehavior: widget.dragStartBehavior,
-          keyboardDismissBehavior: widget.keyboardDismissBehavior,
-          restorationId: widget.restorationId,
-          clipBehavior: widget.clipBehavior,
-          itemBuilder: (context, index) => BreakListItem(
-            data: widget.itemBuilder(context, index),
-            offset: position,
-            leftSize: widget.leftSize,
-            middleSize: widget.middleSize,
-            rightSize: widget.rightSize,
-            extent: widget.itemExtent,
+  Widget build(BuildContext context) => Transform.translate(
+        offset: Offset(widget.leftSize, 0),
+        child: Scrollbar(
+          controller: _controller,
+          child: Scrollable(
+            controller: _controller,
+            axisDirection: AxisDirection.right,
+            viewportBuilder: (BuildContext context, ViewportOffset position) =>
+                Transform.translate(
+              offset: Offset(-widget.leftSize, 0),
+              child: ListView.builder(
+                scrollDirection: widget.scrollDirection,
+                reverse: widget.reverse,
+                controller: widget.controller,
+                primary: widget.primary,
+                physics: widget.physics,
+                shrinkWrap: widget.shrinkWrap,
+                padding: widget.padding,
+                itemExtent: widget.itemExtent,
+                prototypeItem: widget.prototypeItem,
+                itemCount: widget.itemCount,
+                addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+                addRepaintBoundaries: widget.addRepaintBoundaries,
+                addSemanticIndexes: widget.addSemanticIndexes,
+                cacheExtent: widget.cacheExtent,
+                semanticChildCount: widget.semanticChildCount,
+                dragStartBehavior: widget.dragStartBehavior,
+                keyboardDismissBehavior: widget.keyboardDismissBehavior,
+                restorationId: widget.restorationId,
+                clipBehavior: widget.clipBehavior,
+                itemBuilder: (context, index) => BreakListItem(
+                  data: widget.itemBuilder(context, index),
+                  offset: position,
+                  leftSize: widget.leftSize,
+                  middleSize: widget.middleSize,
+                  rightSize: widget.rightSize,
+                  extent: widget.itemExtent,
+                ),
+              ),
+            ),
           ),
         ),
       );

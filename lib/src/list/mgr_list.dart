@@ -287,47 +287,47 @@ class _MgrListState extends State<MgrList> {
                         ...left.map(builder),
                       ])),
                   Expanded(
-                    child: left.isEmpty && right.isEmpty
-                        ? content
-                        : Stack(children: [
-                            content,
-                            if (_horizontalScrollController
-                                .position.hasContentDimensions)
-                              SizedBox(
-                                height: rowHeight,
-                                child: VerticalDivider(
-                                  width: 2.0,
-                                  thickness: 2.0,
-                                  color: dividerColor.withOpacity(
-                                      dividerColor.opacity *
-                                          min(
-                                              _BREAK_DIVIDER_REVEAL_OFFSET,
-                                              _horizontalScrollController
-                                                  .position.extentBefore) /
-                                          _BREAK_DIVIDER_REVEAL_OFFSET),
-                                ),
-                              ),
-                            if (_horizontalScrollController
-                                    .position.hasContentDimensions &&
-                                rightCount > 0)
-                              SizedBox(
-                                height: rowHeight,
-                                child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: VerticalDivider(
-                                    width: 2.0,
-                                    thickness: 2.0,
-                                    color: dividerColor.withOpacity(dividerColor
-                                            .opacity *
+                    child: Stack(
+                      children: [
+                        content,
+                        if (_horizontalScrollController
+                            .position.hasContentDimensions)
+                          SizedBox(
+                            height: rowHeight,
+                            child: VerticalDivider(
+                              width: 2.0,
+                              thickness: 2.0,
+                              color: dividerColor.withOpacity(
+                                  dividerColor.opacity *
+                                      min(
+                                          _BREAK_DIVIDER_REVEAL_OFFSET,
+                                          _horizontalScrollController
+                                              .position.extentBefore) /
+                                      _BREAK_DIVIDER_REVEAL_OFFSET),
+                            ),
+                          ),
+                        if (_horizontalScrollController
+                                .position.hasContentDimensions &&
+                            rightCount > 0)
+                          SizedBox(
+                            height: rowHeight,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: VerticalDivider(
+                                width: 2.0,
+                                thickness: 2.0,
+                                color: dividerColor.withOpacity(
+                                    dividerColor.opacity *
                                         ((min(
                                                 _BREAK_DIVIDER_REVEAL_OFFSET,
                                                 _horizontalScrollController
                                                     .position.extentAfter) /
                                             _BREAK_DIVIDER_REVEAL_OFFSET))),
-                                  ),
-                                ),
                               ),
-                          ]),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                   if (rightCount > 0)
                     SizedBox(

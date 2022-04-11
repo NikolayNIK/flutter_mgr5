@@ -163,6 +163,7 @@ class _MgrFormState extends State<MgrForm> {
               indent: 16.0,
             ),
             Material(
+              color: Colors.transparent,
               child: Padding(
                 padding:
                     const EdgeInsets.only(left: 16.0, top: 16.0, right: 16.0),
@@ -194,6 +195,7 @@ class _MgrFormState extends State<MgrForm> {
       );
 
   Widget _buildTitle(BuildContext context) => Material(
+        color: Colors.transparent,
         child: Padding(
           padding: EdgeInsets.symmetric(
             horizontal: 16.0,

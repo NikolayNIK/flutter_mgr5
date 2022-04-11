@@ -265,6 +265,9 @@ IconData? _parseIcon(String name) {
       return Icons.cloud_off;
     case 'p-note':
       return Icons.note;
+    case 'p-user':
+    case 't-users':
+      return Icons.person;
     default:
       return null;
   }

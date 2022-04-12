@@ -437,24 +437,27 @@ class _MgrListState extends State<MgrList> {
                             .map((e) => e?[widget.model.keyField])
                             .whereNotNull())
                         : widget.controller.selection.clear())),
-            (col) => OptionalTooltip(
-              message: col.col.hint,
-              child: InkResponse(
-                radius: col.width / 2,
-                onTap: () {},
-                child: SizedBox(
-                  width: col.width,
-                  height: itemHeight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        col.col.label ?? '',
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.fade,
-                        style: Theme.of(context).textTheme.titleSmall,
+            (col) => Material(
+              color: Colors.transparent,
+              child: OptionalTooltip(
+                message: col.col.hint,
+                child: InkResponse(
+                  radius: col.width / 2,
+                  onTap: () {},
+                  child: SizedBox(
+                    width: col.width,
+                    height: itemHeight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          col.col.label ?? '',
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.fade,
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
                       ),
                     ),
                   ),

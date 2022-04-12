@@ -83,11 +83,13 @@ class MgrListCol {
   final String? label, hint;
   final double width;
   final List<MgrListColProp> props;
+  final MgrListColSorted? sorted;
 
   const MgrListCol({
     required this.name,
     required this.label,
     required this.hint,
+    required this.sorted,
     required this.width,
     required this.props,
   });
@@ -113,6 +115,8 @@ class MgrListCol {
             label,
             props,
           ),
+      sorted: element.convertAttribute('sorted',
+          converter: MgrListColSorted.fromXmlAttribute),
       props: props,
     );
   }
@@ -143,6 +147,35 @@ class MgrListCol {
     }
 
     return 16.0 + 16.0 * (maxLength / 2.0).ceilToDouble();
+  }
+}
+
+@immutable
+class MgrListColSorted {
+  final int index;
+  final bool ascending;
+
+  const MgrListColSorted(this.index, this.ascending);
+
+  static MgrListColSorted? fromXmlAttribute(String? value) {
+    if (value == null) {
+      return null;
+    }
+
+    final bool ascending;
+    final first = value[0];
+    switch (first) {
+      case '+':
+        ascending = true;
+        break;
+      case '-':
+        ascending = false;
+        break;
+      default:
+        throw MgrFormatException('invalid sorted sign: $first');
+    }
+
+    return MgrListColSorted(int.parse(value.substring(1)), ascending);
   }
 }
 

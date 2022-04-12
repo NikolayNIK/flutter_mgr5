@@ -339,6 +339,7 @@ class _MgrListState extends State<MgrList> {
             }
 
             body = Scrollbar(
+              isAlwaysShown: true,
               controller: _horizontalScrollController,
               child: Scrollable(
                 controller: _horizontalScrollController,

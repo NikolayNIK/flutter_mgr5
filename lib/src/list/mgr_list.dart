@@ -295,8 +295,8 @@ class _MgrListState extends State<MgrList> {
                           SizedBox(
                             height: rowHeight,
                             child: VerticalDivider(
-                              width: 2.0,
-                              thickness: 2.0,
+                              width: 0,
+                              thickness: 0,
                               color: dividerColor.withOpacity(
                                   dividerColor.opacity *
                                       min(
@@ -314,8 +314,8 @@ class _MgrListState extends State<MgrList> {
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: VerticalDivider(
-                                width: 2.0,
-                                thickness: 2.0,
+                                width: 0,
+                                thickness: 0,
                                 color: dividerColor.withOpacity(
                                     dividerColor.opacity *
                                         ((min(

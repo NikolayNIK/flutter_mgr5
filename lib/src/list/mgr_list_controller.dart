@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mgr5/extensions/map_extensions.dart';
 import 'package:flutter_mgr5/mgr5.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
@@ -11,6 +12,7 @@ typedef MgrListElemKey = String;
 class MgrListController {
   MgrClient mgrClient; // TODO вынести из контроллера
 
+  late final MgrListItemKeys itemKeys = _MgrListItemKeys();
   late final MgrListItems items = _MgrListItems(this);
   final String func;
   final Map<String, String>? params;
@@ -50,6 +52,10 @@ abstract class MgrListItems implements Listenable, Iterable<MgrListElem?> {
 }
 
 abstract class MgrListSelection implements Set<MgrListElemKey>, Listenable {}
+
+abstract class MgrListItemKeys {
+  Key operator [](MgrListElemKey key);
+}
 
 class _MgrListItems extends IterableBase<MgrListElem?>
     with ChangeNotifier, MgrListItems {
@@ -195,4 +201,12 @@ class _MgrListSelection extends SetBase<MgrListElemKey>
 
   @override
   Set<MgrListElemKey> toSet() => _set.toSet();
+}
+
+class _MgrListItemKeys implements MgrListItemKeys {
+  final _map = <MgrListElemKey, Key>{};
+
+  @override
+  Key operator [](MgrListElemKey key) =>
+      _map.putIfAbsent(key, () => GlobalKey());
 }

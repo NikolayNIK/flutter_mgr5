@@ -262,10 +262,15 @@ class _MgrListState extends State<MgrList> {
                   offset: offset,
                   slivers: [
                     SliverToBoxAdapter(
-                      child: SizedBox(
-                        width: middleInnerWidth,
-                        height: rowHeight,
-                        child: middleContent,
+                      child: Padding(
+                        padding: rightCount == 0
+                            ? const EdgeInsets.only(right: 8.0)
+                            : EdgeInsets.zero,
+                        child: SizedBox(
+                          width: middleInnerWidth,
+                          height: rowHeight,
+                          child: middleContent,
+                        ),
                       ),
                     )
                   ],
@@ -277,67 +282,72 @@ class _MgrListState extends State<MgrList> {
               final bgColor = Theme.of(context).colorScheme.surface;
               final dividerColor = Theme.of(context).dividerColor;
 
-              return Row(
-                children: [
-                  SizedBox(
-                      width: leftWidth,
-                      child: Row(children: [
-                        SizedBox(
-                          width: rowHeight,
-                          height: rowHeight,
-                          child: checkbox,
-                        ),
-                        ...left.map(builder),
-                      ])),
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        content,
-                        if (_horizontalScrollController
-                            .position.hasContentDimensions)
+              return Padding(
+                padding: rightCount == 0
+                    ? const EdgeInsets.only(left: 8.0)
+                    : const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    SizedBox(
+                        width: leftWidth,
+                        child: Row(children: [
                           SizedBox(
+                            width: rowHeight,
                             height: rowHeight,
-                            child: VerticalDivider(
-                              width: 0,
-                              thickness: 0,
-                              color: dividerColor.withOpacity(
-                                  dividerColor.opacity *
-                                      min(
-                                          _BREAK_DIVIDER_REVEAL_OFFSET,
-                                          _horizontalScrollController
-                                              .position.extentBefore) /
-                                      _BREAK_DIVIDER_REVEAL_OFFSET),
-                            ),
+                            child: checkbox,
                           ),
-                        if (_horizontalScrollController
-                                .position.hasContentDimensions &&
-                            rightCount > 0)
-                          SizedBox(
-                            height: rowHeight,
-                            child: Align(
-                              alignment: Alignment.centerRight,
+                          ...left.map(builder),
+                        ])),
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          content,
+                          if (_horizontalScrollController
+                              .position.hasContentDimensions)
+                            SizedBox(
+                              height: rowHeight,
                               child: VerticalDivider(
                                 width: 0,
                                 thickness: 0,
                                 color: dividerColor.withOpacity(
                                     dividerColor.opacity *
-                                        ((min(
-                                                _BREAK_DIVIDER_REVEAL_OFFSET,
-                                                _horizontalScrollController
-                                                    .position.extentAfter) /
-                                            _BREAK_DIVIDER_REVEAL_OFFSET))),
+                                        min(
+                                            _BREAK_DIVIDER_REVEAL_OFFSET,
+                                            _horizontalScrollController
+                                                .position.extentBefore) /
+                                        _BREAK_DIVIDER_REVEAL_OFFSET),
                               ),
                             ),
-                          ),
-                      ],
+                          if (_horizontalScrollController
+                                  .position.hasContentDimensions &&
+                              rightCount > 0)
+                            SizedBox(
+                              height: rowHeight,
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: VerticalDivider(
+                                  width: 0,
+                                  thickness: 0,
+                                  color: dividerColor.withOpacity(
+                                      dividerColor.opacity *
+                                          ((min(
+                                                  _BREAK_DIVIDER_REVEAL_OFFSET,
+                                                  _horizontalScrollController
+                                                      .position.extentAfter) /
+                                              _BREAK_DIVIDER_REVEAL_OFFSET))),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                  if (rightCount > 0)
-                    SizedBox(
-                        width: rightWidth,
-                        child: Row(
-                            children: List.unmodifiable(right.map(builder)))),
-                ],
+                    if (rightCount > 0)
+                      SizedBox(
+                          width: rightWidth,
+                          child: Row(
+                              children: List.unmodifiable(right.map(builder)))),
+                  ],
+                ),
               );
             }
 
@@ -379,15 +389,18 @@ class _MgrListState extends State<MgrList> {
             final cols = List<_Col>.unmodifiable(coldata
                 .map((col) => _Col(col: col, width: col.width * factor)));
 
-            _ItemBuilder itemBuilder = (checkbox, toWidget) => Row(
-                  children: [
-                    SizedBox(
-                      width: rowHeight,
-                      height: rowHeight,
-                      child: checkbox,
-                    ),
-                    ...cols.map(toWidget),
-                  ],
+            _ItemBuilder itemBuilder = (checkbox, toWidget) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: rowHeight,
+                        height: rowHeight,
+                        child: checkbox,
+                      ),
+                      ...cols.map(toWidget),
+                    ],
+                  ),
                 );
 
             body = Column(
@@ -422,46 +435,43 @@ class _MgrListState extends State<MgrList> {
   Widget _buildTableHead(double itemHeight, _ItemBuilder itemBuilder) =>
       Material(
         color: Colors.transparent,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: itemBuilder(
-            ListenableBuilder(
-                listenable: widget.controller.selection,
-                builder: (context) => Checkbox(
-                    value: widget.controller.selection.isNotEmpty
-                        ? (widget.controller.selection.length ==
-                                widget.controller.items.length
-                            ? true
-                            : null)
-                        : false,
-                    tristate: true,
-                    onChanged: (value) => value ?? false
-                        ? widget.controller.selection.addAll(widget
-                            .controller.items
-                            .map((e) => e?[widget.model.keyField])
-                            .whereNotNull())
-                        : widget.controller.selection.clear())),
-            (col) => Material(
-              color: Colors.transparent,
-              child: OptionalTooltip(
-                message: col.col.hint,
-                child: InkResponse(
-                  radius: col.width / 2,
-                  onTap: () {},
-                  child: SizedBox(
-                    width: col.width,
-                    height: itemHeight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          col.col.label ?? '',
-                          maxLines: 1,
-                          softWrap: false,
-                          overflow: TextOverflow.fade,
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
+        child: itemBuilder(
+          ListenableBuilder(
+              listenable: widget.controller.selection,
+              builder: (context) => Checkbox(
+                  value: widget.controller.selection.isNotEmpty
+                      ? (widget.controller.selection.length ==
+                              widget.controller.items.length
+                          ? true
+                          : null)
+                      : false,
+                  tristate: true,
+                  onChanged: (value) => value ?? false
+                      ? widget.controller.selection.addAll(widget
+                          .controller.items
+                          .map((e) => e?[widget.model.keyField])
+                          .whereNotNull())
+                      : widget.controller.selection.clear())),
+          (col) => Material(
+            color: Colors.transparent,
+            child: OptionalTooltip(
+              message: col.col.hint,
+              child: InkResponse(
+                radius: col.width / 2,
+                onTap: () {},
+                child: SizedBox(
+                  width: col.width,
+                  height: itemHeight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        col.col.label ?? '',
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.fade,
+                        style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),
                   ),
@@ -504,27 +514,24 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  Widget _buildItemPlaceholder(_ItemBuilder itemBuilder) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Center(
-          child: Shimmer.fromColors(
-            baseColor: Theme.of(context).splashColor,
-            highlightColor: Theme.of(context).splashColor.withOpacity(0),
-            child: itemBuilder(
-              Checkbox(
-                value: false,
-                onChanged: null,
-              ),
-              (col) => Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Container(
-                  width: col.width - 8.0,
-                  height:
-                      Theme.of(context).textTheme.bodyMedium?.fontSize ?? 16.0,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                    color: Colors.red,
-                  ),
+  Widget _buildItemPlaceholder(_ItemBuilder itemBuilder) => Center(
+        child: Shimmer.fromColors(
+          baseColor: Theme.of(context).splashColor,
+          highlightColor: Theme.of(context).splashColor.withOpacity(0),
+          child: itemBuilder(
+            Checkbox(
+              value: false,
+              onChanged: null,
+            ),
+            (col) => Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Container(
+                width: col.width - 8.0,
+                height:
+                    Theme.of(context).textTheme.bodyMedium?.fontSize ?? 16.0,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                  color: Colors.red,
                 ),
               ),
             ),
@@ -561,59 +568,56 @@ class _MgrListState extends State<MgrList> {
           child: SizedBox(
             width: double.infinity,
             height: double.infinity,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: itemBuilder(
-                Checkbox(
-                    value: isSelected,
-                    onChanged: key == null
-                        ? null
-                        : (value) {
-                            if (value ?? false) {
-                              widget.controller.selection.add(key);
-                            } else {
-                              widget.controller.selection.remove(key);
-                            }
-                          }),
-                (col) => SizedBox(
-                  width: col.width,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Builder(
-                      builder: (context) {
-                        final text = Text(
-                          elem[col.col.name] ?? '',
-                          maxLines: 1,
-                          softWrap: false,
-                          overflow: TextOverflow.fade,
-                          style: TextStyle(color: foregroundColor),
-                        );
+            child: itemBuilder(
+              Checkbox(
+                  value: isSelected,
+                  onChanged: key == null
+                      ? null
+                      : (value) {
+                          if (value ?? false) {
+                            widget.controller.selection.add(key);
+                          } else {
+                            widget.controller.selection.remove(key);
+                          }
+                        }),
+              (col) => SizedBox(
+                width: col.width,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Builder(
+                    builder: (context) {
+                      final text = Text(
+                        elem[col.col.name] ?? '',
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.fade,
+                        style: TextStyle(color: foregroundColor),
+                      );
 
-                        return col.col.props.isEmpty
-                            ? text
-                            : Row(
-                                children: [
-                                  for (final prop in col.col.props)
-                                    if (prop.checkVisible(elem))
-                                      OptionalTooltip(
-                                        message: prop.extractLabel(elem),
-                                        child: Icon(
-                                          prop.icon,
-                                          size: max(
-                                              24.0,
-                                              24.0 +
-                                                  6 *
-                                                      Theme.of(context)
-                                                          .visualDensity
-                                                          .vertical),
-                                          color: foregroundColor,
-                                        ),
+                      return col.col.props.isEmpty
+                          ? text
+                          : Row(
+                              children: [
+                                for (final prop in col.col.props)
+                                  if (prop.checkVisible(elem))
+                                    OptionalTooltip(
+                                      message: prop.extractLabel(elem),
+                                      child: Icon(
+                                        prop.icon,
+                                        size: max(
+                                            24.0,
+                                            24.0 +
+                                                6 *
+                                                    Theme.of(context)
+                                                        .visualDensity
+                                                        .vertical),
+                                        color: foregroundColor,
                                       ),
-                                  text
-                                ],
-                              );
-                      },
-                    ),
+                                    ),
+                                text
+                              ],
+                            );
+                    },
                   ),
                 ),
               ),

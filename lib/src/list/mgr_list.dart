@@ -585,6 +585,7 @@ class _MgrListState extends State<MgrList> {
     final foregroundColor =
         isSelected ? Theme.of(context).colorScheme.onPrimaryContainer : null;
     return ValueAnimatedSwitcher(
+      key: key == null ? null : widget.controller.itemKeys[key],
       value: isSelected,
       duration: const Duration(milliseconds: 200),
       child: Material(

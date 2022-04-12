@@ -314,6 +314,17 @@ IconData? _parseIcon(String name) {
     case 'p-user':
     case 't-users':
       return Icons.person;
+    case 't-back':
+      return Icons.arrow_back;
+    case 't-barcode':
+      return Icons.qr_code;
+    case 't-new-barcode':
+      return Icons.qr_code_scanner;
+    case 'p-print':
+    case 't-print':
+    case 't-printd':
+    case 't-printenvelope':
+      return Icons.print;
     default:
       return null;
   }

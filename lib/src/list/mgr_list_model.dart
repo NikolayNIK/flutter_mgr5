@@ -142,7 +142,7 @@ class MgrListCol {
       maxLength = label.length;
     }
 
-    return 16.0 + 8.0 * maxLength;
+    return 16.0 + 16.0 * (maxLength / 2.0).ceilToDouble();
   }
 }
 

@@ -129,7 +129,7 @@ class MgrListCol {
       var length = elem[name]?.length ?? 0;
       for (final prop in props) {
         if (prop.checkVisible(elem)) {
-          length += 4;
+          length += 3;
         }
       }
 

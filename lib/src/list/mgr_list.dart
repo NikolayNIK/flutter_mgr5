@@ -440,6 +440,7 @@ class _MgrListState extends State<MgrList> {
             (col) => OptionalTooltip(
               message: col.col.hint,
               child: InkResponse(
+                radius: col.width / 2,
                 onTap: () {},
                 child: SizedBox(
                   width: col.width,

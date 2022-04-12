@@ -520,6 +520,8 @@ class _MgrListState extends State<MgrList> {
         widget.model.keyField == null ? null : elem[widget.model.keyField];
     final isSelected =
         key == null ? false : widget.controller.selection.contains(key);
+    final foregroundColor =
+        isSelected ? Theme.of(context).colorScheme.onPrimaryContainer : null;
     return ValueAnimatedSwitcher(
       value: isSelected,
       duration: const Duration(milliseconds: 200),
@@ -567,12 +569,7 @@ class _MgrListState extends State<MgrList> {
                           maxLines: 1,
                           softWrap: false,
                           overflow: TextOverflow.fade,
-                          style: TextStyle(
-                              color: isSelected
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .onPrimaryContainer
-                                  : null),
+                          style: TextStyle(color: foregroundColor),
                         );
 
                         return col.col.props.isEmpty
@@ -592,6 +589,7 @@ class _MgrListState extends State<MgrList> {
                                                       Theme.of(context)
                                                           .visualDensity
                                                           .vertical),
+                                          color: foregroundColor,
                                         ),
                                       ),
                                   text

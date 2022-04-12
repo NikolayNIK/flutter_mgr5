@@ -82,86 +82,89 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  Widget _buildToolbar() => SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: ListenableBuilder(
-          listenable: widget.controller.selection,
-          builder: (context) => Row(
-            children: [
-              for (final toolgrp in widget.model.toolbar) ...[
-                const SizedBox(width: 8.0),
-                for (final toolbtn in toolgrp)
-                  OptionalTooltip(
-                    message: toolbtn.hint,
-                    child: Builder(builder: (context) {
-                      final enabled = toolbtn.selectionType
-                          .check(widget.controller.selection.length);
-                      return InkResponse(
-                        onTap: enabled ? () {} : null,
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: ConstrainedBox(
-                            key: ValueKey(enabled),
-                            constraints: BoxConstraints(
-                                minWidth: 56.0 +
-                                    4.0 *
-                                        Theme.of(context)
-                                            .visualDensity
-                                            .horizontal,
-                                minHeight: 56.0 +
-                                    4.0 *
-                                        Theme.of(context)
-                                            .visualDensity
-                                            .vertical),
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                left: 8.0,
-                                right: 8.0,
-                                bottom: 8.0,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    toolbtn.icon,
-                                    color: enabled
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .onSurface
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .onSurface
-                                            .withOpacity(.25),
-                                  ),
-                                  if (toolbtn.label != null)
-                                    Text(
-                                      toolbtn.label!,
-                                      textAlign: TextAlign.center,
-                                      style: (Theme.of(context)
-                                                  .textTheme
-                                                  .labelMedium ??
-                                              TextStyle())
-                                          .copyWith(
-                                              color: enabled
-                                                  ? Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface
-                                                  : Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface
-                                                      .withOpacity(.5)),
+  Widget _buildToolbar() => Align(
+        alignment: Alignment.centerLeft,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ListenableBuilder(
+            listenable: widget.controller.selection,
+            builder: (context) => Row(
+              children: [
+                for (final toolgrp in widget.model.toolbar) ...[
+                  const SizedBox(width: 8.0),
+                  for (final toolbtn in toolgrp)
+                    OptionalTooltip(
+                      message: toolbtn.hint,
+                      child: Builder(builder: (context) {
+                        final enabled = toolbtn.selectionType
+                            .check(widget.controller.selection.length);
+                        return InkResponse(
+                          onTap: enabled ? () {} : null,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: ConstrainedBox(
+                              key: ValueKey(enabled),
+                              constraints: BoxConstraints(
+                                  minWidth: 56.0 +
+                                      4.0 *
+                                          Theme.of(context)
+                                              .visualDensity
+                                              .horizontal,
+                                  minHeight: 56.0 +
+                                      4.0 *
+                                          Theme.of(context)
+                                              .visualDensity
+                                              .vertical),
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 8.0,
+                                  right: 8.0,
+                                  bottom: 8.0,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      toolbtn.icon,
+                                      color: enabled
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withOpacity(.25),
                                     ),
-                                ],
+                                    if (toolbtn.label != null)
+                                      Text(
+                                        toolbtn.label!,
+                                        textAlign: TextAlign.center,
+                                        style: (Theme.of(context)
+                                                    .textTheme
+                                                    .labelMedium ??
+                                                TextStyle())
+                                            .copyWith(
+                                                color: enabled
+                                                    ? Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                    : Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withOpacity(.5)),
+                                      ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
-                  ),
-                const SizedBox(width: 24.0),
+                        );
+                      }),
+                    ),
+                  const SizedBox(width: 24.0),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       );
@@ -491,8 +494,9 @@ class _MgrListState extends State<MgrList> {
                 return ValueAnimatedSwitcher(
                   value: elem == null,
                   duration: const Duration(milliseconds: 400),
-                  child:
-                      elem == null ? placeholder : _buildItem(itemBuilder, elem),
+                  child: elem == null
+                      ? placeholder
+                      : _buildItem(itemBuilder, elem),
                 );
               },
             ),

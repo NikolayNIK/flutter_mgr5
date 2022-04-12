@@ -473,20 +473,28 @@ class _MgrListState extends State<MgrList> {
         listenable: widget.controller.selection,
         builder: (context) => ListenableBuilder(
           listenable: widget.controller.items,
-          builder: (context) => ListView.builder(
+          builder: (context) => Scrollbar(
             controller: _verticalScrollController,
-            itemCount: widget.controller.items.length,
-            itemExtent: itemHeight,
-            itemBuilder: (context, index) {
-              final elem = widget.controller.items[index];
-              late final placeholder = _buildItemPlaceholder(itemBuilder);
-              return ValueAnimatedSwitcher(
-                value: elem == null,
-                duration: const Duration(milliseconds: 400),
-                child:
-                    elem == null ? placeholder : _buildItem(itemBuilder, elem),
-              );
-            },
+            isAlwaysShown: true,
+            interactive: true,
+            trackVisibility: true,
+            thickness: 8.0,
+            radius: const Radius.circular(8.0),
+            child: ListView.builder(
+              controller: _verticalScrollController,
+              itemCount: widget.controller.items.length,
+              itemExtent: itemHeight,
+              itemBuilder: (context, index) {
+                final elem = widget.controller.items[index];
+                late final placeholder = _buildItemPlaceholder(itemBuilder);
+                return ValueAnimatedSwitcher(
+                  value: elem == null,
+                  duration: const Duration(milliseconds: 400),
+                  child:
+                      elem == null ? placeholder : _buildItem(itemBuilder, elem),
+                );
+              },
+            ),
           ),
         ),
       );

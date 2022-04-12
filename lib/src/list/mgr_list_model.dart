@@ -44,6 +44,11 @@ class MgrListModel extends MgrModel {
     final metadata = doc.findElements('metadata');
     final pNum = doc.child('p_num');
     final pElems = doc.child('p_elems');
+    final pageData = List<MgrListElem>.unmodifiable(doc
+        .findElements('elem')
+        .map((e) => Map.fromIterable(e.childElements,
+            key: (element) => (element as XmlElement).name.local,
+            value: (element) => (element as XmlElement).innerText)));
     return MgrListModel(
       func: doc.requireAttribute('func'),
       title: messages['title'] ?? '',
@@ -53,7 +58,7 @@ class MgrListModel extends MgrModel {
         metadata
             .expand((metadata) => metadata.findElements('coldata'))
             .expand((coldata) => coldata.findElements('col'))
-            .map((col) => MgrListCol.fromXmlElement(col, messages)),
+            .map((col) => MgrListCol.fromXmlElement(pageData, col, messages)),
       ),
       toolbar: List<List<MgrListToolbtn>>.unmodifiable(
         metadata
@@ -65,10 +70,7 @@ class MgrListModel extends MgrModel {
       ),
       pageNames:
           List.unmodifiable(doc.findElements('page').map((e) => e.innerText)),
-      pageData: List.unmodifiable(doc.findElements('elem').map((e) =>
-          Map.fromIterable(e.childElements,
-              key: (element) => (element as XmlElement).name.local,
-              value: (element) => (element as XmlElement).innerText))),
+      pageData: pageData,
       pageIndex: pNum == null ? null : int.tryParse(pNum.innerText),
       elemCount: pElems == null ? null : int.tryParse(pElems.innerText),
     );
@@ -82,7 +84,7 @@ class MgrListCol {
   final double width;
   final List<MgrListColProp> props;
 
-  MgrListCol({
+  const MgrListCol({
     required this.name,
     required this.label,
     required this.hint,
@@ -90,16 +92,57 @@ class MgrListCol {
     required this.props,
   });
 
-  factory MgrListCol.fromXmlElement(XmlElement element, MgrMessages messages) {
+  factory MgrListCol.fromXmlElement(
+    List<MgrListElem> elems,
+    XmlElement element,
+    MgrMessages messages,
+  ) {
     final name = element.requireAttribute('name');
+    final label = messages[name];
+    final width = element.attribute('cf_width');
+    final props = List<MgrListColProp>.unmodifiable(element.childElements
+        .map((e) => MgrListColProp.fromXmlElement(e, messages)));
     return MgrListCol(
       name: name,
-      label: messages[name],
+      label: label,
       hint: messages['hint_$name'],
-      width: 64,
-      props: List.unmodifiable(element.childElements
-          .map((e) => MgrListColProp.fromXmlElement(e, messages))),
+      width: (width == null ? null : double.tryParse(width)) ??
+          _calculateWidth(
+            elems,
+            name,
+            label,
+            props,
+          ),
+      props: props,
     );
+  }
+
+  static double _calculateWidth(
+    List<MgrListElem> elems,
+    String name,
+    String? label,
+    List<MgrListColProp> props,
+  ) {
+    int maxLength = 4;
+
+    for (final elem in elems) {
+      var length = elem[name]?.length ?? 0;
+      for (final prop in props) {
+        if (prop.checkVisible(elem)) {
+          length += 4;
+        }
+      }
+
+      if (length > maxLength) {
+        maxLength = length;
+      }
+    }
+
+    if (label != null && label.length > maxLength) {
+      maxLength = label.length;
+    }
+
+    return 16.0 + 8.0 * maxLength;
   }
 }
 

@@ -452,33 +452,71 @@ class _MgrListState extends State<MgrList> {
                           .map((e) => e?[widget.model.keyField])
                           .whereNotNull())
                       : widget.controller.selection.clear())),
-          (col) => Material(
-            color: Colors.transparent,
-            child: OptionalTooltip(
-              message: col.col.hint,
-              child: InkResponse(
-                radius: col.width / 2,
-                onTap: () {},
-                child: SizedBox(
-                  width: col.width,
-                  height: itemHeight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        col.col.label ?? '',
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.fade,
-                        style: Theme.of(context).textTheme.titleSmall,
+          (col) {
+            final text = Text(
+              col.col.label ?? '',
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.fade,
+              style: Theme.of(context).textTheme.titleSmall,
+            );
+
+            return Material(
+              color: Colors.transparent,
+              child: OptionalTooltip(
+                message: col.col.hint,
+                child: InkResponse(
+                  radius: col.width / 2,
+                  onTap: () {},
+                  child: SizedBox(
+                    width: col.width,
+                    height: itemHeight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: col.col.sorted == null
+                            ? text
+                            : Row(
+                                children: [
+                                  Flexible(child: text),
+                                  col.col.sorted!.index == 1
+                                      ? Icon(col.col.sorted!.ascending
+                                          ? Icons.arrow_drop_up
+                                          : Icons.arrow_drop_down)
+                                      : Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 8.0),
+                                              child: Icon(
+                                                  col.col.sorted!.ascending
+                                                      ? Icons.arrow_drop_up
+                                                      : Icons.arrow_drop_down),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 8.0),
+                                              child: Text(
+                                                col.col.sorted!.index
+                                                    .toString(),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelSmall,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                ],
+                              ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       );
 

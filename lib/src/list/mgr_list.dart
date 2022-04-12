@@ -171,7 +171,7 @@ class _MgrListState extends State<MgrList> {
   static const _MIN_WIDTH_RATIO = .5;
 
   /// TODO
-  static const _BREAK_DIVIDER_REVEAL_OFFSET = 64.0;
+  static const _BREAK_DIVIDER_REVEAL_OFFSET = 8.0;
 
   Widget _buildTable() => LayoutBuilder(
         builder: (context, constraints) {

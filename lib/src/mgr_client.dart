@@ -1,12 +1,18 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:flutter_mgr5/src/mgr_exception.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
+
+const _offloadThresholdBytes = 4096;
+
+XmlDocument _parseXmlDocument(Uint8List buffer) =>
+    XmlDocument.parse(const Utf8Decoder().convert(buffer));
 
 class MgrClient extends ChangeNotifier implements Listenable {
   final Uri _url;
@@ -54,8 +60,9 @@ class MgrClient extends ChangeNotifier implements Listenable {
     final uri = _url.replace(queryParameters: params);
     final response =
         await http.get(uri, headers: {'Referrer': _url.toString()});
-    XmlDocument doc =
-        XmlDocument.parse(const Utf8Decoder().convert(response.bodyBytes));
+    XmlDocument doc = response.bodyBytes.length < _offloadThresholdBytes
+        ? _parseXmlDocument(response.bodyBytes)
+        : await compute(_parseXmlDocument, response.bodyBytes);
     _checkError(doc);
     if (doc.rootElement.childElements
         .any((element) => element.name.local == 'loginform')) {

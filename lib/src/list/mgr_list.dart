@@ -42,6 +42,8 @@ class _MgrListState extends State<MgrList> {
   final ScrollController _verticalScrollController = ScrollController();
   final ScrollController _horizontalScrollController = ScrollController();
 
+  double _baseRowHeightScale = 1.0;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -176,260 +178,273 @@ class _MgrListState extends State<MgrList> {
   /// TODO
   static const _BREAK_DIVIDER_REVEAL_OFFSET = 8.0;
 
-  Widget _buildTable() => LayoutBuilder(
-        builder: (context, constraints) {
-          final coldata = widget.model.coldata;
+  Widget _buildTable() => GestureDetector(
+        onScaleStart: (details) =>
+            _baseRowHeightScale = widget.controller.rowHeightScale.value,
+        onScaleUpdate: (details) => widget.controller.rowHeightScale.value =
+            max(.5, min(1.0, _baseRowHeightScale * details.verticalScale)),
+        child: ValueListenableBuilder<double>(
+          valueListenable: widget.controller.rowHeightScale,
+          builder: (context, rowScale, _) => LayoutBuilder(
+            builder: (context, constraints) {
+              final coldata = widget.model.coldata;
 
-          final rowHeight =
-              56.0 + 8.0 * Theme.of(context).visualDensity.vertical;
+              final rowHeight = rowScale * 56.0 +
+                  8.0 * Theme.of(context).visualDensity.vertical;
 
-          final availableWidth = constraints.maxWidth - 16.0;
+              final availableWidth = constraints.maxWidth - 16.0;
 
-          final totalColWidth = coldata
-                  .map((e) => e.width)
-                  .reduce((value, element) => value + element) +
-              rowHeight;
-          final needsBreaks = totalColWidth > availableWidth;
+              final totalColWidth = coldata
+                      .map((e) => e.width)
+                      .reduce((value, element) => value + element) +
+                  rowHeight;
+              final needsBreaks = totalColWidth > availableWidth;
 
-          final Widget body;
-          if (needsBreaks) {
-            final minWidth = max(_MIN_WIDTH, _MIN_WIDTH_RATIO * availableWidth);
+              final Widget body;
+              if (needsBreaks) {
+                final minWidth =
+                    max(_MIN_WIDTH, _MIN_WIDTH_RATIO * availableWidth);
 
-            var alternating = false;
-            var leftCount = 2;
-            var rightCount = 1;
-            late double leftWidth;
-            late double rightWidth;
-            while (true) {
-              if (leftCount + rightCount + 1 < coldata.length) {
-                if (leftCount == 0 && rightCount == 0) {
-                  leftWidth = rowHeight;
-                  rightWidth = 0;
-                  break;
-                } else {
-                  leftWidth = leftCount == 0
-                      ? rowHeight
-                      : leftCount == 1
-                          ? coldata[0].width + rowHeight
-                          : coldata
-                                  .take(leftCount)
+                var alternating = false;
+                var leftCount = 2;
+                var rightCount = 1;
+                late double leftWidth;
+                late double rightWidth;
+                while (true) {
+                  if (leftCount + rightCount + 1 < coldata.length) {
+                    if (leftCount == 0 && rightCount == 0) {
+                      leftWidth = rowHeight;
+                      rightWidth = 0;
+                      break;
+                    } else {
+                      leftWidth = leftCount == 0
+                          ? rowHeight
+                          : leftCount == 1
+                              ? coldata[0].width + rowHeight
+                              : coldata
+                                      .take(leftCount)
+                                      .map((e) => e.width)
+                                      .reduce(
+                                          (value, element) => value + element) +
+                                  rowHeight;
+
+                      rightWidth = rightCount == 0
+                          ? 0
+                          : rightCount == 1
+                              ? coldata[coldata.length - 1].width
+                              : coldata
+                                  .skip(coldata.length - rightCount)
                                   .map((e) => e.width)
-                                  .reduce((value, element) => value + element) +
-                              rowHeight;
+                                  .reduce((value, element) => value + element);
+                    }
 
-                  rightWidth = rightCount == 0
-                      ? 0
-                      : rightCount == 1
-                          ? coldata[coldata.length - 1].width
-                          : coldata
-                              .skip(coldata.length - rightCount)
-                              .map((e) => e.width)
-                              .reduce((value, element) => value + element);
+                    if (availableWidth - leftWidth - rightWidth >= minWidth) {
+                      break;
+                    }
+                  }
+
+                  (alternating = !alternating) ? leftCount-- : rightCount--;
                 }
 
-                if (availableWidth - leftWidth - rightWidth >= minWidth) {
-                  break;
-                }
-              }
+                final middle = List<_Col>.unmodifiable(coldata
+                    .skip(leftCount)
+                    .take(coldata.length - rightCount - leftCount)
+                    .map((col) => _Col(col: col, width: col.width)));
+                final left = List<_Col>.unmodifiable(coldata
+                    .take(leftCount)
+                    .map((col) => _Col(col: col, width: col.width)));
+                final right = List<_Col>.unmodifiable(coldata
+                    .skip(coldata.length - rightCount)
+                    .map((col) => _Col(col: col, width: col.width)));
 
-              (alternating = !alternating) ? leftCount-- : rightCount--;
-            }
+                final middleInnerWidth = middle
+                    .map((e) => e.width)
+                    .reduce((value, element) => value + element);
 
-            final middle = List<_Col>.unmodifiable(coldata
-                .skip(leftCount)
-                .take(coldata.length - rightCount - leftCount)
-                .map((col) => _Col(col: col, width: col.width)));
-            final left = List<_Col>.unmodifiable(coldata
-                .take(leftCount)
-                .map((col) => _Col(col: col, width: col.width)));
-            final right = List<_Col>.unmodifiable(coldata
-                .skip(coldata.length - rightCount)
-                .map((col) => _Col(col: col, width: col.width)));
+                Widget itemItemBuilder(ViewportOffset offset, Widget checkbox,
+                    Widget builder(_Col col)) {
+                  final middleContent =
+                      Row(children: List.unmodifiable(middle.map(builder)));
 
-            final middleInnerWidth = middle
-                .map((e) => e.width)
-                .reduce((value, element) => value + element);
-
-            Widget itemItemBuilder(ViewportOffset offset, Widget checkbox,
-                Widget builder(_Col col)) {
-              final middleContent =
-                  Row(children: List.unmodifiable(middle.map(builder)));
-
-              final content = SizedBox(
-                height: rowHeight,
-                child: Viewport(
-                  axisDirection: AxisDirection.right,
-                  offset: offset,
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: rightCount == 0
-                            ? const EdgeInsets.only(right: 8.0)
-                            : EdgeInsets.zero,
-                        child: SizedBox(
-                          width: middleInnerWidth,
-                          height: rowHeight,
-                          child: middleContent,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              );
-
-              //print('${_horizontalScrollController.position.extentBefore} ${_horizontalScrollController.position.extentAfter}');
-
-              final bgColor = Theme.of(context).colorScheme.surface;
-              final dividerColor = Theme.of(context).dividerColor;
-
-              return Padding(
-                padding: rightCount == 0
-                    ? const EdgeInsets.only(left: 8.0)
-                    : const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    SizedBox(
-                        width: leftWidth,
-                        child: Row(children: [
-                          SizedBox(
-                            width: rowHeight,
-                            height: rowHeight,
-                            child: checkbox,
-                          ),
-                          ...left.map(builder),
-                        ])),
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          content,
-                          if (_horizontalScrollController
-                              .position.hasContentDimensions)
-                            SizedBox(
+                  final content = SizedBox(
+                    height: rowHeight,
+                    child: Viewport(
+                      axisDirection: AxisDirection.right,
+                      offset: offset,
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: rightCount == 0
+                                ? const EdgeInsets.only(right: 8.0)
+                                : EdgeInsets.zero,
+                            child: SizedBox(
+                              width: middleInnerWidth,
                               height: rowHeight,
-                              child: VerticalDivider(
-                                width: 0,
-                                thickness: 0,
-                                color: dividerColor.withOpacity(
-                                    dividerColor.opacity *
-                                        min(
-                                            _BREAK_DIVIDER_REVEAL_OFFSET,
-                                            _horizontalScrollController
-                                                .position.extentBefore) /
-                                        _BREAK_DIVIDER_REVEAL_OFFSET),
-                              ),
+                              child: middleContent,
                             ),
-                          if (_horizontalScrollController
-                                  .position.hasContentDimensions &&
-                              rightCount > 0)
-                            SizedBox(
-                              height: rowHeight,
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: VerticalDivider(
-                                  width: 0,
-                                  thickness: 0,
-                                  color: dividerColor.withOpacity(
-                                      dividerColor.opacity *
+                          ),
+                        )
+                      ],
+                    ),
+                  );
+
+                  //print('${_horizontalScrollController.position.extentBefore} ${_horizontalScrollController.position.extentAfter}');
+
+                  final bgColor = Theme.of(context).colorScheme.surface;
+                  final dividerColor = Theme.of(context).dividerColor;
+
+                  return Padding(
+                    padding: rightCount == 0
+                        ? const EdgeInsets.only(left: 8.0)
+                        : const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                            width: leftWidth,
+                            child: Row(children: [
+                              SizedBox(
+                                width: rowHeight,
+                                height: rowHeight,
+                                child: checkbox,
+                              ),
+                              ...left.map(builder),
+                            ])),
+                        Expanded(
+                          child: Stack(
+                            children: [
+                              content,
+                              if (_horizontalScrollController
+                                  .position.hasContentDimensions)
+                                SizedBox(
+                                  height: rowHeight,
+                                  child: VerticalDivider(
+                                    width: 0,
+                                    thickness: 0,
+                                    color: dividerColor.withOpacity(
+                                        dividerColor.opacity *
+                                            min(
+                                                _BREAK_DIVIDER_REVEAL_OFFSET,
+                                                _horizontalScrollController
+                                                    .position.extentBefore) /
+                                            _BREAK_DIVIDER_REVEAL_OFFSET),
+                                  ),
+                                ),
+                              if (_horizontalScrollController
+                                      .position.hasContentDimensions &&
+                                  rightCount > 0)
+                                SizedBox(
+                                  height: rowHeight,
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: VerticalDivider(
+                                      width: 0,
+                                      thickness: 0,
+                                      color: dividerColor.withOpacity(dividerColor
+                                              .opacity *
                                           ((min(
                                                   _BREAK_DIVIDER_REVEAL_OFFSET,
                                                   _horizontalScrollController
                                                       .position.extentAfter) /
                                               _BREAK_DIVIDER_REVEAL_OFFSET))),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    if (rightCount > 0)
-                      SizedBox(
-                          width: rightWidth,
-                          child: Row(
-                              children: List.unmodifiable(right.map(builder)))),
-                  ],
-                ),
-              );
-            }
-
-            body = Scrollbar(
-              isAlwaysShown: true,
-              controller: _horizontalScrollController,
-              child: Scrollable(
-                controller: _horizontalScrollController,
-                axisDirection: AxisDirection.right,
-                viewportBuilder: (context, position) {
-                  _ItemBuilder itemBuilder = (checkbox, toWidget) =>
-                      itemItemBuilder(position, checkbox, toWidget);
-
-                  return ListenableBuilder(
-                    listenable: _horizontalScrollController,
-                    builder: (context) => Column(
-                      children: [
-                        _buildTableHead(rowHeight, itemBuilder),
-                        Divider(
-                          height: 2,
-                          thickness: 2,
-                          indent: 16.0,
-                        ),
-                        Expanded(
-                          child: NotificationListener<OverscrollNotification>(
-                            // Suppress OverscrollNotification events that escape from the inner scrollable
-                            onNotification: (notification) => true,
-                            child: _buildTableBody(rowHeight, itemBuilder),
+                            ],
                           ),
                         ),
+                        if (rightCount > 0)
+                          SizedBox(
+                              width: rightWidth,
+                              child: Row(
+                                  children:
+                                      List.unmodifiable(right.map(builder)))),
                       ],
                     ),
                   );
-                },
-              ),
-            );
-          } else {
-            final factor = availableWidth / totalColWidth;
-            final cols = List<_Col>.unmodifiable(coldata
-                .map((col) => _Col(col: col, width: col.width * factor)));
+                }
 
-            _ItemBuilder itemBuilder = (checkbox, toWidget) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: rowHeight,
-                        height: rowHeight,
-                        child: checkbox,
-                      ),
-                      ...cols.map(toWidget),
-                    ],
+                body = Scrollbar(
+                  isAlwaysShown: true,
+                  controller: _horizontalScrollController,
+                  child: Scrollable(
+                    controller: _horizontalScrollController,
+                    axisDirection: AxisDirection.right,
+                    viewportBuilder: (context, position) {
+                      _ItemBuilder itemBuilder = (checkbox, toWidget) =>
+                          itemItemBuilder(position, checkbox, toWidget);
+
+                      return ListenableBuilder(
+                        listenable: _horizontalScrollController,
+                        builder: (context) => Column(
+                          children: [
+                            _buildTableHead(rowHeight, itemBuilder),
+                            Divider(
+                              height: 2,
+                              thickness: 2,
+                              indent: 16.0,
+                            ),
+                            Expanded(
+                              child:
+                                  NotificationListener<OverscrollNotification>(
+                                // Suppress OverscrollNotification events that escape from the inner scrollable
+                                onNotification: (notification) => true,
+                                child: _buildTableBody(rowHeight, itemBuilder),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 );
+              } else {
+                final factor = availableWidth / totalColWidth;
+                final cols = List<_Col>.unmodifiable(coldata
+                    .map((col) => _Col(col: col, width: col.width * factor)));
 
-            body = Column(
-              children: [
-                _buildTableHead(rowHeight, itemBuilder),
-                Divider(
-                  height: 2,
-                  thickness: 2,
-                  indent: 16.0,
-                ),
-                Expanded(
-                  child: _buildTableBody(rowHeight, itemBuilder),
-                ),
-              ],
-            );
-          }
+                _ItemBuilder itemBuilder = (checkbox, toWidget) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: rowHeight,
+                            height: rowHeight,
+                            child: checkbox,
+                          ),
+                          ...cols.map(toWidget),
+                        ],
+                      ),
+                    );
 
-          return Column(
-            children: [
-              Expanded(child: body),
-              Divider(
-                height: 2,
-                thickness: 2,
-                indent: 16.0,
-              ),
-              _buildTableFooter(),
-            ],
-          );
-        },
+                body = Column(
+                  children: [
+                    _buildTableHead(rowHeight, itemBuilder),
+                    Divider(
+                      height: 2,
+                      thickness: 2,
+                      indent: 16.0,
+                    ),
+                    Expanded(
+                      child: _buildTableBody(rowHeight, itemBuilder),
+                    ),
+                  ],
+                );
+              }
+
+              return Column(
+                children: [
+                  Expanded(child: body),
+                  Divider(
+                    height: 2,
+                    thickness: 2,
+                    indent: 16.0,
+                  ),
+                  _buildTableFooter(),
+                ],
+              );
+            },
+          ),
+        ),
       );
 
   Widget _buildTableHead(double itemHeight, _ItemBuilder itemBuilder) =>

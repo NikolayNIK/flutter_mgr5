@@ -17,6 +17,7 @@ class MgrListController {
   final String func;
   final Map<String, String>? params;
   final MgrListSelection selection = _MgrListSelection();
+  final rowHeightScale = ValueNotifier<double>(1.0);
 
   late String _keyField;
 

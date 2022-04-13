@@ -190,6 +190,10 @@ class _MgrListState extends State<MgrList> {
           _baseLocalPointY = details.localFocalPoint.dy;
         },
         onScaleUpdate: (details) {
+          if (details.verticalScale == 1.0) {
+            return;
+          }
+
           final value = _baseRowHeightScale * details.verticalScale;
           final clampedValue =
               widget.controller.rowHeightScale.value = max(.5, min(1.0, value));

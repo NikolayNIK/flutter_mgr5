@@ -43,6 +43,7 @@ class _MgrListState extends State<MgrList> {
   final ScrollController _horizontalScrollController = ScrollController();
 
   double _baseRowHeightScale = 1.0;
+  double? _baseVerticalScrollPositionPixels;
 
   @override
   Widget build(BuildContext context) {
@@ -179,10 +180,24 @@ class _MgrListState extends State<MgrList> {
   static const _BREAK_DIVIDER_REVEAL_OFFSET = 8.0;
 
   Widget _buildTable() => GestureDetector(
-        onScaleStart: (details) =>
-            _baseRowHeightScale = widget.controller.rowHeightScale.value,
-        onScaleUpdate: (details) => widget.controller.rowHeightScale.value =
-            max(.5, min(1.0, _baseRowHeightScale * details.verticalScale)),
+        onScaleStart: (details) {
+          _baseRowHeightScale = widget.controller.rowHeightScale.value;
+          _baseVerticalScrollPositionPixels =
+              _verticalScrollController.position.hasPixels
+                  ? _verticalScrollController.position.pixels
+                  : null;
+        },
+        onScaleUpdate: (details) {
+          final value = _baseRowHeightScale * details.verticalScale;
+          final clampedValue =
+              widget.controller.rowHeightScale.value = max(.5, min(1.0, value));
+          final baseOffset = _baseVerticalScrollPositionPixels;
+          if (baseOffset != null) {
+            _verticalScrollController.position.jumpTo(
+              (baseOffset) * details.verticalScale * (clampedValue / value),
+            );
+          }
+        },
         child: ValueListenableBuilder<double>(
           valueListenable: widget.controller.rowHeightScale,
           builder: (context, rowScale, _) => LayoutBuilder(

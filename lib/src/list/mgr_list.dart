@@ -44,6 +44,7 @@ class _MgrListState extends State<MgrList> {
 
   double _baseRowHeightScale = 1.0;
   double? _baseVerticalScrollPositionPixels;
+  double _baseLocalPointY = 0.0;
 
   @override
   Widget build(BuildContext context) {
@@ -186,6 +187,7 @@ class _MgrListState extends State<MgrList> {
               _verticalScrollController.position.hasPixels
                   ? _verticalScrollController.position.pixels
                   : null;
+          _baseLocalPointY = details.localFocalPoint.dy;
         },
         onScaleUpdate: (details) {
           final value = _baseRowHeightScale * details.verticalScale;
@@ -194,7 +196,9 @@ class _MgrListState extends State<MgrList> {
           final baseOffset = _baseVerticalScrollPositionPixels;
           if (baseOffset != null) {
             _verticalScrollController.position.jumpTo(
-              (baseOffset) * details.verticalScale * (clampedValue / value),
+              ((baseOffset + _baseLocalPointY) * details.verticalScale -
+                      details.localFocalPoint.dy) *
+                  (clampedValue / value),
             );
           }
         },

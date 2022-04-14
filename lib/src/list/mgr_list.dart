@@ -21,7 +21,7 @@ class _Col {
   });
 }
 
-typedef _ItemBuilder = Widget Function(
+typedef _RowBuilder = Widget Function(
     Widget checkbox, Widget Function(_Col col));
 
 class MgrList extends StatefulWidget {
@@ -284,7 +284,7 @@ class _MgrListState extends State<MgrList> {
                     .map((e) => e.width)
                     .reduce((value, element) => value + element);
 
-                Widget itemItemBuilder(ViewportOffset offset, Widget checkbox,
+                Widget offsetRowBuilder(ViewportOffset offset, Widget checkbox,
                     Widget builder(_Col col)) {
                   final middleContent =
                       Row(children: List.unmodifiable(middle.map(builder)));
@@ -393,14 +393,14 @@ class _MgrListState extends State<MgrList> {
                     controller: _horizontalScrollController,
                     axisDirection: AxisDirection.right,
                     viewportBuilder: (context, position) {
-                      _ItemBuilder itemBuilder = (checkbox, toWidget) =>
-                          itemItemBuilder(position, checkbox, toWidget);
+                      _RowBuilder rowBuilder = (checkbox, toWidget) =>
+                          offsetRowBuilder(position, checkbox, toWidget);
 
                       return ListenableBuilder(
                         listenable: _horizontalScrollController,
                         builder: (context) => Column(
                           children: [
-                            _buildTableHead(rowHeight, itemBuilder),
+                            _buildTableHead(rowHeight, rowBuilder),
                             Divider(
                               height: 2,
                               thickness: 2,
@@ -411,7 +411,7 @@ class _MgrListState extends State<MgrList> {
                                   NotificationListener<OverscrollNotification>(
                                 // Suppress OverscrollNotification events that escape from the inner scrollable
                                 onNotification: (notification) => true,
-                                child: _buildTableBody(rowHeight, itemBuilder),
+                                child: _buildTableBody(rowHeight, rowBuilder),
                               ),
                             ),
                           ],
@@ -425,7 +425,7 @@ class _MgrListState extends State<MgrList> {
                 final cols = List<_Col>.unmodifiable(coldata
                     .map((col) => _Col(col: col, width: col.width * factor)));
 
-                _ItemBuilder itemBuilder = (checkbox, toWidget) => Padding(
+                _RowBuilder rowBuilder = (checkbox, toWidget) => Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Row(
                         children: [
@@ -441,14 +441,14 @@ class _MgrListState extends State<MgrList> {
 
                 body = Column(
                   children: [
-                    _buildTableHead(rowHeight, itemBuilder),
+                    _buildTableHead(rowHeight, rowBuilder),
                     Divider(
                       height: 2,
                       thickness: 2,
                       indent: 16.0,
                     ),
                     Expanded(
-                      child: _buildTableBody(rowHeight, itemBuilder),
+                      child: _buildTableBody(rowHeight, rowBuilder),
                     ),
                   ],
                 );
@@ -470,10 +470,10 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  Widget _buildTableHead(double itemHeight, _ItemBuilder itemBuilder) =>
+  Widget _buildTableHead(double itemHeight, _RowBuilder rowBuilder) =>
       Material(
         color: Colors.transparent,
-        child: itemBuilder(
+        child: rowBuilder(
           ListenableBuilder(
               listenable: widget.controller.selection,
               builder: (context) => Checkbox(
@@ -558,7 +558,7 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  Widget _buildTableBody(double itemHeight, _ItemBuilder itemBuilder) =>
+  Widget _buildTableBody(double itemHeight, _RowBuilder rowBuilder) =>
       ListenableBuilder(
         listenable: widget.controller.selection,
         builder: (context) => ListenableBuilder(
@@ -576,13 +576,13 @@ class _MgrListState extends State<MgrList> {
               itemExtent: itemHeight,
               itemBuilder: (context, index) {
                 final elem = widget.controller.items[index];
-                late final placeholder = _buildItemPlaceholder(itemBuilder);
+                late final placeholder = _buildItemPlaceholder(rowBuilder);
                 return ValueAnimatedSwitcher(
                   value: elem == null,
                   duration: const Duration(milliseconds: 400),
                   child: elem == null
                       ? placeholder
-                      : _buildItem(itemBuilder, elem),
+                      : _buildItem(rowBuilder, elem),
                 );
               },
             ),
@@ -590,11 +590,11 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  Widget _buildItemPlaceholder(_ItemBuilder itemBuilder) => Center(
+  Widget _buildItemPlaceholder(_RowBuilder rowBuilder) => Center(
         child: Shimmer.fromColors(
           baseColor: Theme.of(context).splashColor,
           highlightColor: Theme.of(context).splashColor.withOpacity(0),
-          child: itemBuilder(
+          child: rowBuilder(
             Checkbox(
               value: false,
               onChanged: null,
@@ -615,7 +615,7 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  Widget _buildItem(_ItemBuilder itemBuilder, Map<String, String> elem) {
+  Widget _buildItem(_RowBuilder rowBuilder, Map<String, String> elem) {
     final key =
         widget.model.keyField == null ? null : elem[widget.model.keyField];
     final isSelected =
@@ -645,7 +645,7 @@ class _MgrListState extends State<MgrList> {
           child: SizedBox(
             width: double.infinity,
             height: double.infinity,
-            child: itemBuilder(
+            child: rowBuilder(
               Checkbox(
                   value: isSelected,
                   onChanged: key == null

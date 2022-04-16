@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_mgr5/extensions/map_extensions.dart';
 import 'package:flutter_mgr5/mgr5.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
-import 'package:xml/xml.dart';
 
 typedef MgrListElemKey = String;
 
@@ -13,6 +12,7 @@ class MgrListController {
   MgrClient mgrClient; // TODO вынести из контроллера
 
   late final MgrListItemKeys itemKeys = _MgrListItemKeys();
+  late final MgrListPages pages = _MgrListPages(this);
   late final MgrListItems items = _MgrListItems(this);
   final String func;
   final Map<String, String>? params;
@@ -29,10 +29,115 @@ class MgrListController {
 
   void update(MgrListModel model) {
     _keyField = model.keyField ?? 'id';
-    items.update(model);
+    pages.update(model);
   }
 
   void dispose() => items.dispose();
+}
+
+class MgrListPage extends ValueNotifier<List<MgrListElem>?> {
+  final MgrListController _controller;
+  final int index;
+  final String name;
+  final Map<MgrListElemKey, int> _keyToPositionMap = {};
+
+  bool _isDisposed = false, _isLoading = false;
+
+  MgrListPage(
+    this._controller,
+    this.index,
+    this.name, [
+    List<MgrListElem>? items,
+  ]) : super(items);
+
+  List<MgrListElem>? get items => value;
+
+  set items(List<MgrListElem>? items) => value = items;
+
+  @override
+  List<MgrListElem>? get value {
+    final items = super.value;
+    if (items == null) {
+      _load();
+    }
+
+    return items;
+  }
+
+  int? findPositionByKey(MgrListElemKey key) => _keyToPositionMap[key];
+
+  @override
+  void notifyListeners() {
+    super.notifyListeners();
+
+    _keyToPositionMap.clear();
+    final list = value;
+    if (list != null) {
+      var i = 0;
+      for (final elem in list) {
+        final key = elem[_controller._keyField];
+        if (key != null) {
+          _keyToPositionMap[key] = i++;
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
+
+  void _load() async {
+    assert(!_isDisposed);
+
+    if (_isLoading) {
+      return;
+    }
+
+    print('loading page $index');
+
+    _isLoading = true;
+
+    try {
+      final doc = await _controller.mgrClient.requestXmlDocument(
+        _controller.func,
+        (_controller.params ?? {}).copyWith(
+          map: {
+            'p_num': (index + 1).toString(),
+            'p_cnt': _controller.pages.pageSize.toString(),
+          },
+        ),
+      );
+
+      if (_isDisposed) {
+        return;
+      }
+
+      _controller.update(MgrListModel.fromXmlDocument(doc));
+    } finally {
+      _isLoading = false;
+    }
+  }
+}
+
+abstract class MgrListPages implements Listenable, Iterable<MgrListPage> {
+  int get pageCount;
+
+  int get itemCount;
+
+  int get pageSize;
+
+  set pageSize(int value);
+
+  MgrListPage operator [](int index);
+
+  int? findPositionByKey(MgrListElemKey key);
+
+  void update(MgrListModel model);
+
+  void reset();
 }
 
 abstract class MgrListItems implements Listenable, Iterable<MgrListElem?> {
@@ -42,14 +147,9 @@ abstract class MgrListItems implements Listenable, Iterable<MgrListElem?> {
 
   int? findPositionByKey(MgrListElemKey key);
 
-  void update(MgrListModel model);
-
   void clear();
 
   void dispose();
-
-  @deprecated
-  void requestFirstPage();
 }
 
 abstract class MgrListSelection implements Set<MgrListElemKey>, Listenable {}
@@ -58,69 +158,76 @@ abstract class MgrListItemKeys {
   Key operator [](MgrListElemKey key);
 }
 
-class _MgrListItems extends IterableBase<MgrListElem?>
-    with ChangeNotifier, MgrListItems {
+class _MgrListPages extends MgrListPages
+    with IterableMixin<MgrListPage>, ChangeNotifier {
   final MgrListController _controller;
-  final Map<int, List<MgrListElem>> _pages = {};
-  final Map<int, Future<XmlDocument>> _pageLoadingFutures = {};
-  final Map<MgrListElemKey, int> _keyToPositionMap = {};
-  final int _pageSize = 500;
+  final List<MgrListPage> _pages = [];
 
+  int _pageSize = 500;
   int _elemCount = 0;
 
-  _MgrListItems(this._controller);
+  _MgrListPages(this._controller);
 
   @override
-  int get length => _elemCount;
+  int get pageCount => _pages.length;
 
   @override
-  void clear() {
-    _pages.clear();
-    _pageLoadingFutures.clear();
+  int get itemCount => _elemCount;
+
+  @override
+  int get pageSize => _pageSize;
+
+  @override
+  set pageSize(int value) {
+    if (value != _pageSize) {
+      _pageSize = value;
+      reset();
+    }
+  }
+
+  @override
+  MgrListPage operator [](int index) => _pages[index];
+
+  @override
+  void reset() {
+    _pages.forEach((page) => page.value = null);
     notifyListeners();
   }
 
   @override
-  MgrListElem? operator [](int index) {
-    if (index < 0 || index >= length) {
-      throw RangeError('Index $index must be in the range [0..$length).');
+  int? findPositionByKey(MgrListElemKey key) {
+    var offset = 0;
+    for (var i = 0; i < _controller.pages.pageCount; i++) {
+      final page = _controller.pages[i];
+      final position = page.findPositionByKey(key);
+      if (position == null) {
+        offset += page.items?.length ?? _controller.pages.pageSize;
+      } else {
+        return offset + position;
+      }
     }
 
-    final pageIndex = (index / _pageSize).floor();
-    final elemIndex = index % _pageSize;
-    final page = _pages[pageIndex];
-    if (page == null) {
-      _requestPage(pageIndex);
-      return null;
-    }
-
-    return page[elemIndex];
+    return null;
   }
+
+  @override
+  Iterator<MgrListPage> get iterator => _pages.iterator;
 
   @override
   void update(MgrListModel model) {
     var notificationRequired = false;
-    if (model.elemCount != _elemCount) {
+    if (model.elemCount != _elemCount ||
+        _pages.length != model.pageNames.length) {
       _pages.clear();
-      _pageLoadingFutures.clear();
-      _keyToPositionMap.clear();
-
+      for (var i = 0; i < model.pageNames.length; i++)
+        _pages.add(MgrListPage(_controller, i, model.pageNames[i]));
       _elemCount = model.elemCount ?? 0;
       notificationRequired = true;
     }
 
     final index = model.pageIndex;
     if (index != null) {
-      _pages[index - 1] = model.pageData;
-
-      var i = (index - 1) * _pageSize;
-      for (final elem in model.pageData) {
-        final key = elem[_controller._keyField];
-        if (key != null) {
-          _keyToPositionMap[key] = i++;
-        }
-      }
-
+      _pages[index - 1].items = model.pageData;
       notificationRequired = true;
     }
 
@@ -128,40 +235,50 @@ class _MgrListItems extends IterableBase<MgrListElem?>
       notifyListeners();
     }
   }
+}
+
+class _MgrListItems extends IterableBase<MgrListElem?> with MgrListItems {
+  final MgrListController _controller;
+
+  _MgrListItems(this._controller);
 
   @override
-  int? findPositionByKey(MgrListElemKey key) => _keyToPositionMap[key];
+  int get length => _controller.pages.itemCount;
 
-  void _requestPage(int pageIndex) async {
-    Future<XmlDocument>? future;
+  @override
+  void clear() => _controller.pages.reset();
 
-    final doc = await _pageLoadingFutures.putIfAbsent(
-      pageIndex,
-      () => future = _controller.mgrClient.requestXmlDocument(
-        _controller.func,
-        (_controller.params ?? {}).copyWith(
-          map: {
-            'p_num': (pageIndex + 1).toString(),
-            'p_cnt': _pageSize.toString(),
-          },
-        ),
-      ),
-    );
-
-    if (future != null && _pageLoadingFutures[pageIndex] == future) {
-      update(MgrListModel.fromXmlDocument(doc));
-      _pageLoadingFutures.remove(pageIndex);
+  @override
+  MgrListElem? operator [](int index) {
+    if (index < 0 || index >= length) {
+      throw RangeError('Index $index must be in the range [0..$length).');
     }
+
+    final pageIndex = (index / _controller.pages.pageSize).floor();
+    final elemIndex = index % _controller.pages.pageSize;
+    final page = _controller.pages[pageIndex];
+    final items = page.value;
+    return items == null ? null : items[elemIndex];
   }
 
   @override
-  void requestFirstPage() {
-    _requestPage(0);
-  }
+  int? findPositionByKey(MgrListElemKey key) =>
+      _controller.pages.findPositionByKey(key);
 
   @override
   Iterator<MgrListElem?> get iterator =>
       Iterable.generate(length).map((e) => this[e]).iterator;
+
+  @override
+  void addListener(VoidCallback listener) =>
+      _controller.pages.addListener(listener);
+
+  @override
+  void dispose() {}
+
+  @override
+  void removeListener(VoidCallback listener) =>
+      _controller.pages.removeListener(listener);
 }
 
 class _MgrListSelection extends SetBase<MgrListElemKey>

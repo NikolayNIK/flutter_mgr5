@@ -96,8 +96,6 @@ class MgrListPage extends ValueNotifier<List<MgrListElem>?> {
       return;
     }
 
-    print('loading page $index');
-
     _isLoading = true;
 
     try {

@@ -663,36 +663,42 @@ class _MgrListState extends State<MgrList> {
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Builder(
                     builder: (context) {
-                      final text = Text(
-                        elem[col.col.name] ?? '',
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.fade,
-                        style: TextStyle(color: foregroundColor),
-                      );
+                      final text = elem[col.col.name];
+                      late final textWidget = text == null
+                          ? null
+                          : Text(
+                              text,
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.fade,
+                              style: TextStyle(color: foregroundColor),
+                            );
 
                       return col.col.props.isEmpty
-                          ? text
-                          : Row(
-                              children: [
-                                for (final prop in col.col.props)
-                                  if (prop.checkVisible(elem))
-                                    OptionalTooltip(
-                                      message: prop.extractLabel(elem),
-                                      child: Icon(
-                                        prop.icon,
-                                        size: max(
-                                            24.0,
-                                            24.0 +
-                                                6 *
-                                                    Theme.of(context)
-                                                        .visualDensity
-                                                        .vertical),
-                                        color: foregroundColor,
+                          ? textWidget ?? SizedBox()
+                          : OverflowBox(
+                              child: Row(
+                                children: [
+                                  for (final prop in col.col.props)
+                                    if (prop.checkVisible(elem))
+                                      OptionalTooltip(
+                                        message: prop.extractLabel(elem),
+                                        child: Icon(
+                                          prop.icon,
+                                          size: max(
+                                              24.0,
+                                              24.0 +
+                                                  6 *
+                                                      Theme.of(context)
+                                                          .visualDensity
+                                                          .vertical),
+                                          color: foregroundColor,
+                                        ),
                                       ),
-                                    ),
-                                text
-                              ],
+                                  if (textWidget != null)
+                                    Expanded(child: textWidget)
+                                ],
+                              ),
                             );
                     },
                   ),

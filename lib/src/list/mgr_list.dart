@@ -570,8 +570,7 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  Widget _buildTableHead(double itemHeight, _RowBuilder rowBuilder) =>
-      Material(
+  Widget _buildTableHead(double itemHeight, _RowBuilder rowBuilder) => Material(
         color: Colors.transparent,
         child: rowBuilder(
           ListenableBuilder(
@@ -680,9 +679,8 @@ class _MgrListState extends State<MgrList> {
                 return ValueAnimatedSwitcher(
                   value: elem == null,
                   duration: const Duration(milliseconds: 400),
-                  child: elem == null
-                      ? placeholder
-                      : _buildItem(rowBuilder, elem),
+                  child:
+                      elem == null ? placeholder : _buildItem(rowBuilder, elem),
                 );
               },
             ),

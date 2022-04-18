@@ -336,25 +336,22 @@ class _MgrListState extends State<MgrList> {
                       rightWidth = 0;
                       break;
                     } else {
-                      leftWidth = isLeftZero
-                          ? rowHeight
-                          : leftCount == 1
-                              ? coldata[0].width + rowHeight
-                              : coldata
-                                      .take(leftCount)
-                                      .map((e) => e.width)
-                                      .reduce(
-                                          (value, element) => value + element) +
-                                  rowHeight;
+                      leftWidth = coldata
+                              .take(leftCount)
+                              .map((e) => e.width)
+                              .fold<double>(
+                                0.0,
+                                (value, element) => value + element,
+                              ) +
+                          rowHeight;
 
-                      rightWidth = isRightZero
-                          ? 0
-                          : rightCount == 1
-                              ? coldata[coldata.length - 1].width
-                              : coldata
-                                  .skip(coldata.length - rightCount)
-                                  .map((e) => e.width)
-                                  .reduce((value, element) => value + element);
+                      rightWidth = coldata
+                          .skip(coldata.length - rightCount)
+                          .map((e) => e.width)
+                          .fold<double>(
+                            0.0,
+                            (value, element) => value + element,
+                          );
                     }
 
                     if (availableWidth - leftWidth - rightWidth >= minWidth) {

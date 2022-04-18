@@ -328,13 +328,15 @@ class _MgrListState extends State<MgrList> {
                 late double leftWidth;
                 late double rightWidth;
                 while (true) {
+                  final isLeftZero = leftCount == 0;
+                  final isRightZero = rightCount == 0;
                   if (leftCount + rightCount + 1 < coldata.length) {
-                    if (leftCount == 0 && rightCount == 0) {
+                    if (isLeftZero && isRightZero) {
                       leftWidth = rowHeight;
                       rightWidth = 0;
                       break;
                     } else {
-                      leftWidth = leftCount == 0
+                      leftWidth = isLeftZero
                           ? rowHeight
                           : leftCount == 1
                               ? coldata[0].width + rowHeight
@@ -345,7 +347,7 @@ class _MgrListState extends State<MgrList> {
                                           (value, element) => value + element) +
                                   rowHeight;
 
-                      rightWidth = rightCount == 0
+                      rightWidth = isRightZero
                           ? 0
                           : rightCount == 1
                               ? coldata[coldata.length - 1].width

@@ -269,7 +269,7 @@ class _MgrListState extends State<MgrList> {
 
   /// TODO
   static const _MIN_WIDTH = 200.0;
-  static const _MIN_WIDTH_RATIO = .5;
+  static const _MIN_WIDTH_RATIO = 1 / 1.61803398875;
 
   /// TODO
   static const _BREAK_DIVIDER_REVEAL_OFFSET = 8.0;

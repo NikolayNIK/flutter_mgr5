@@ -69,19 +69,30 @@ class _MgrListRowClipper extends CustomClipper<Path> {
 
 class _MgrListRowDividerPainter extends CustomPainter {
   final Color color;
+  final bool flip;
 
-  _MgrListRowDividerPainter(this.color);
+  _MgrListRowDividerPainter(
+    this.color, {
+    required this.flip,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     if (color.opacity > 0) {
       final oneForthHeight = size.height / 4;
       canvas.drawPath(
-          Path()
-            ..lineTo(size.width, oneForthHeight)
-            ..lineTo(0, 2 * oneForthHeight)
-            ..lineTo(size.width, 3 * oneForthHeight)
-            ..lineTo(0, size.height),
+          flip
+              ? (Path()
+                ..moveTo(size.width, 0)
+                ..lineTo(0, oneForthHeight)
+                ..lineTo(size.width, 2 * oneForthHeight)
+                ..lineTo(0, 3 * oneForthHeight)
+                ..lineTo(size.width, size.height))
+              : (Path()
+                ..lineTo(size.width, oneForthHeight)
+                ..lineTo(0, 2 * oneForthHeight)
+                ..lineTo(size.width, 3 * oneForthHeight)
+                ..lineTo(0, size.height)),
           Paint()
             ..color = color
             ..style = PaintingStyle.stroke
@@ -435,6 +446,7 @@ class _MgrListState extends State<MgrList> {
                                                   _horizontalScrollController
                                                       .position.extentBefore) /
                                               _BREAK_DIVIDER_REVEAL_OFFSET),
+                                      flip: false,
                                     ),
                                   ),
                                 ),
@@ -455,6 +467,7 @@ class _MgrListState extends State<MgrList> {
                                                     _horizontalScrollController
                                                         .position.extentAfter) /
                                                 _BREAK_DIVIDER_REVEAL_OFFSET))),
+                                        flip: true,
                                       ),
                                     ),
                                   ),

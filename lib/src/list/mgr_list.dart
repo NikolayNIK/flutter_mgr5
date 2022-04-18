@@ -362,7 +362,9 @@ class _MgrListState extends State<MgrList> {
                     }
                   }
 
-                  (alternating = !alternating) ? leftCount-- : rightCount--;
+                  isRightZero || (!isLeftZero && (alternating = !alternating))
+                      ? leftCount--
+                      : rightCount--;
                 }
 
                 final middle = List<_Col>.unmodifiable(coldata

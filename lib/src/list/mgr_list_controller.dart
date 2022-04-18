@@ -35,8 +35,9 @@ class MgrListController {
   void dispose() => items.dispose();
 }
 
-class MgrListPage extends ValueNotifier<List<MgrListElem>?> {
+class MgrListPage extends ValueListenable<List<MgrListElem>?> {
   final MgrListController _controller;
+  final _valueNotifier = ValueNotifier<List<MgrListElem>?>(null);
   final int index;
   final String name;
   final Map<MgrListElemKey, int> _keyToPositionMap = {};
@@ -48,15 +49,15 @@ class MgrListPage extends ValueNotifier<List<MgrListElem>?> {
     this.index,
     this.name, [
     List<MgrListElem>? items,
-  ]) : super(items);
-
-  List<MgrListElem>? get items => value;
-
-  set items(List<MgrListElem>? items) => value = items;
+  ]) {
+    _valueNotifier.addListener(_onItemsChanged);
+  }
 
   @override
-  List<MgrListElem>? get value {
-    final items = super.value;
+  List<MgrListElem>? get value => items;
+
+  List<MgrListElem>? get items {
+    final items = _valueNotifier.value;
     if (items == null) {
       _load();
     }
@@ -64,14 +65,21 @@ class MgrListPage extends ValueNotifier<List<MgrListElem>?> {
     return items;
   }
 
+  set _items(List<MgrListElem>? items) => _valueNotifier.value = items;
+
   int? findPositionByKey(MgrListElemKey key) => _keyToPositionMap[key];
 
   @override
-  void notifyListeners() {
-    super.notifyListeners();
+  void addListener(VoidCallback listener) =>
+      _valueNotifier.addListener(listener);
 
+  @override
+  void removeListener(VoidCallback listener) =>
+      _valueNotifier.removeListener(listener);
+
+  void _onItemsChanged() {
     _keyToPositionMap.clear();
-    final list = value;
+    final list = _valueNotifier.value;
     if (list != null) {
       var i = 0;
       for (final elem in list) {
@@ -83,10 +91,9 @@ class MgrListPage extends ValueNotifier<List<MgrListElem>?> {
     }
   }
 
-  @override
   void dispose() {
     _isDisposed = true;
-    super.dispose();
+    _valueNotifier.dispose();
   }
 
   void _load() async {
@@ -188,7 +195,7 @@ class _MgrListPages extends MgrListPages
 
   @override
   void reset() {
-    _pages.forEach((page) => page.value = null);
+    _pages.forEach((page) => page._items = null);
     notifyListeners();
   }
 
@@ -225,7 +232,7 @@ class _MgrListPages extends MgrListPages
 
     final index = model.pageIndex;
     if (index != null) {
-      _pages[index - 1].items = model.pageData;
+      _pages[index - 1]._items = model.pageData;
       notificationRequired = true;
     }
 

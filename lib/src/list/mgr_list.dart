@@ -25,6 +25,8 @@ typedef _RowBuilder = Widget Function(
     Widget checkbox, Widget Function(_Col col));
 
 const _dividerHedgeOffset = 8.0;
+const _dividerWidth = 2.0;
+const _dividerHalfWidth = _dividerWidth / 2.0;
 
 class _MgrListRowClipper extends CustomClipper<Path> {
   final bool doLeft, doRight;
@@ -36,25 +38,35 @@ class _MgrListRowClipper extends CustomClipper<Path> {
 
   @override
   Path getClip(Size size) {
-    final leftOffsetEdge = size.width - _dividerHedgeOffset;
-    final oneForthHeight = size.height / 4;
-    final path = Path()..lineTo(size.width, 0);
+    late final oneForthHeight = size.height / 4;
+    late final halfHeight = 2 * oneForthHeight;
+    late final twoThirdsHeight = 3  * oneForthHeight;
+    final rightEdge = size.width - _dividerHalfWidth;
+
+    final path = Path()
+      ..moveTo(_dividerHalfWidth, 0)
+      ..lineTo(rightEdge, 0);
+
     if (doRight) {
+      final rightOffsetEdge = size.width - _dividerHedgeOffset - _dividerHalfWidth;
+
       path
-        ..lineTo(leftOffsetEdge, oneForthHeight)
-        ..lineTo(size.width, 2 * oneForthHeight)
-        ..lineTo(leftOffsetEdge, 3 * oneForthHeight);
+        ..lineTo(rightOffsetEdge, oneForthHeight)
+        ..lineTo(rightEdge, halfHeight)
+        ..lineTo(rightOffsetEdge, twoThirdsHeight);
     }
 
     path
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height);
+      ..lineTo(rightEdge, size.height)
+      ..lineTo(_dividerHalfWidth, size.height);
 
     if (doLeft) {
+      final leftOffsetEdge = _dividerHedgeOffset + _dividerHalfWidth;
+
       path
-        ..lineTo(_dividerHedgeOffset, 3 * oneForthHeight)
-        ..lineTo(0, 2 * oneForthHeight)
-        ..lineTo(_dividerHedgeOffset, oneForthHeight);
+        ..lineTo(leftOffsetEdge, twoThirdsHeight)
+        ..lineTo(_dividerHalfWidth, halfHeight)
+        ..lineTo(leftOffsetEdge, oneForthHeight);
     }
 
     path.close();
@@ -97,7 +109,7 @@ class _MgrListRowDividerPainter extends CustomPainter {
             ..color = color
             ..style = PaintingStyle.stroke
             ..strokeCap = StrokeCap.butt
-            ..strokeWidth = 2.0);
+            ..strokeWidth = _dividerWidth);
     }
   }
 

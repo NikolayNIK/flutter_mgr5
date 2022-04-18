@@ -24,6 +24,77 @@ class _Col {
 typedef _RowBuilder = Widget Function(
     Widget checkbox, Widget Function(_Col col));
 
+const _dividerHedgeOffset = 8.0;
+
+class _MgrListRowClipper extends CustomClipper<Path> {
+  final bool doLeft, doRight;
+
+  _MgrListRowClipper({
+    required this.doLeft,
+    required this.doRight,
+  });
+
+  @override
+  Path getClip(Size size) {
+    final leftOffsetEdge = size.width - _dividerHedgeOffset;
+    final oneForthHeight = size.height / 4;
+    final path = Path()..lineTo(size.width, 0);
+    if (doRight) {
+      path
+        ..lineTo(leftOffsetEdge, oneForthHeight)
+        ..lineTo(size.width, 2 * oneForthHeight)
+        ..lineTo(leftOffsetEdge, 3 * oneForthHeight);
+    }
+
+    path
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height);
+
+    if (doLeft) {
+      path
+        ..lineTo(_dividerHedgeOffset, 3 * oneForthHeight)
+        ..lineTo(0, 2 * oneForthHeight)
+        ..lineTo(_dividerHedgeOffset, oneForthHeight);
+    }
+
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant _MgrListRowClipper oldClipper) =>
+      oldClipper.doLeft != doLeft || oldClipper.doRight != doRight;
+}
+
+class _MgrListRowDividerPainter extends CustomPainter {
+  final Color color;
+
+  _MgrListRowDividerPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (color.opacity > 0) {
+      final oneForthHeight = size.height / 4;
+      canvas.drawPath(
+          Path()
+            ..lineTo(size.width, oneForthHeight)
+            ..lineTo(0, 2 * oneForthHeight)
+            ..lineTo(size.width, 3 * oneForthHeight)
+            ..lineTo(0, size.height),
+          Paint()
+            ..color = color
+            ..style = PaintingStyle.stroke
+            ..strokeCap = StrokeCap.butt
+            ..strokeWidth = 2.0);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _MgrListRowDividerPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
 class MgrList extends StatefulWidget {
   final MgrListModel model;
   final MgrListController controller;
@@ -289,25 +360,39 @@ class _MgrListState extends State<MgrList> {
                   final middleContent =
                       Row(children: List.unmodifiable(middle.map(builder)));
 
-                  final content = SizedBox(
-                    height: rowHeight,
-                    child: Viewport(
-                      axisDirection: AxisDirection.right,
-                      offset: offset,
-                      slivers: [
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: rightCount == 0
-                                ? const EdgeInsets.only(right: 8.0)
-                                : EdgeInsets.zero,
-                            child: SizedBox(
-                              width: middleInnerWidth,
-                              height: rowHeight,
-                              child: middleContent,
+                  final content = ClipPath(
+                    clipBehavior: Clip.hardEdge,
+                    clipper: _MgrListRowClipper(
+                      doLeft: _horizontalScrollController
+                              .position.hasContentDimensions &&
+                          _horizontalScrollController.position.extentBefore >
+                              .1,
+                      doRight: rightCount != 0 &&
+                          _horizontalScrollController
+                              .position.hasContentDimensions &&
+                          _horizontalScrollController.position.extentAfter > .1,
+                    ),
+                    child: SizedBox(
+                      height: rowHeight,
+                      child: Viewport(
+                        clipBehavior: Clip.none,
+                        axisDirection: AxisDirection.right,
+                        offset: offset,
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: rightCount == 0
+                                  ? const EdgeInsets.only(right: 8.0)
+                                  : EdgeInsets.zero,
+                              child: SizedBox(
+                                width: middleInnerWidth,
+                                height: rowHeight,
+                                child: middleContent,
+                              ),
                             ),
-                          ),
-                        )
-                      ],
+                          )
+                        ],
+                      ),
                     ),
                   );
 
@@ -339,36 +424,38 @@ class _MgrListState extends State<MgrList> {
                               if (_horizontalScrollController
                                   .position.hasContentDimensions)
                                 SizedBox(
+                                  width: _dividerHedgeOffset,
                                   height: rowHeight,
-                                  child: VerticalDivider(
-                                    width: 1.0,
-                                    thickness: 1.0,
-                                    color: dividerColor.withOpacity(
-                                        dividerColor.opacity *
-                                            min(
-                                                _BREAK_DIVIDER_REVEAL_OFFSET,
-                                                _horizontalScrollController
-                                                    .position.extentBefore) /
-                                            _BREAK_DIVIDER_REVEAL_OFFSET),
+                                  child: CustomPaint(
+                                    painter: _MgrListRowDividerPainter(
+                                      dividerColor.withOpacity(
+                                          dividerColor.opacity *
+                                              min(
+                                                  _BREAK_DIVIDER_REVEAL_OFFSET,
+                                                  _horizontalScrollController
+                                                      .position.extentBefore) /
+                                              _BREAK_DIVIDER_REVEAL_OFFSET),
+                                    ),
                                   ),
                                 ),
                               if (_horizontalScrollController
                                       .position.hasContentDimensions &&
                                   rightCount > 0)
-                                SizedBox(
-                                  height: rowHeight,
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: VerticalDivider(
-                                      width: 1.0,
-                                      thickness: 1.0,
-                                      color: dividerColor.withOpacity(dividerColor
-                                              .opacity *
-                                          ((min(
-                                                  _BREAK_DIVIDER_REVEAL_OFFSET,
-                                                  _horizontalScrollController
-                                                      .position.extentAfter) /
-                                              _BREAK_DIVIDER_REVEAL_OFFSET))),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: SizedBox(
+                                    width: _dividerHedgeOffset,
+                                    height: rowHeight,
+                                    child: CustomPaint(
+                                      painter: _MgrListRowDividerPainter(
+                                        dividerColor.withOpacity(dividerColor
+                                                .opacity *
+                                            ((min(
+                                                    _BREAK_DIVIDER_REVEAL_OFFSET,
+                                                    _horizontalScrollController
+                                                        .position.extentAfter) /
+                                                _BREAK_DIVIDER_REVEAL_OFFSET))),
+                                      ),
                                     ),
                                   ),
                                 ),

@@ -466,7 +466,7 @@ class _MgrListState extends State<MgrList> {
                                 ),
                               if (_horizontalScrollController
                                       .position.hasContentDimensions &&
-                                  rightCount > 0)
+                                  isRightNonZero)
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: SizedBox(
@@ -489,7 +489,7 @@ class _MgrListState extends State<MgrList> {
                             ],
                           ),
                         ),
-                        if (rightCount > 0)
+                        if (isRightNonZero)
                           SizedBox(
                               width: rightWidth,
                               child: Row(

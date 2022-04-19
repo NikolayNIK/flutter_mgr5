@@ -386,6 +386,13 @@ class _MgrListState extends State<MgrList> {
                   doRight: isRightNonZero,
                 );
 
+                final itemInnerPadding = isRightNonZero
+                    ? EdgeInsets.zero
+                    : const EdgeInsets.only(right: 8.0);
+                final itemOuterPadding = isRightNonZero
+                    ? const EdgeInsets.symmetric(horizontal: 8.0)
+                    : const EdgeInsets.only(left: 8.0);
+
                 Widget offsetRowBuilder(ViewportOffset offset, Widget checkbox,
                     Widget builder(_Col col)) {
                   final middleContent =
@@ -403,9 +410,7 @@ class _MgrListState extends State<MgrList> {
                         slivers: [
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding: rightCount == 0
-                                  ? const EdgeInsets.only(right: 8.0)
-                                  : EdgeInsets.zero,
+                              padding: itemInnerPadding,
                               child: SizedBox(
                                 width: middleInnerWidth,
                                 height: rowHeight,
@@ -424,9 +429,7 @@ class _MgrListState extends State<MgrList> {
                   final dividerColor = Theme.of(context).dividerColor;
 
                   return Padding(
-                    padding: rightCount == 0
-                        ? const EdgeInsets.only(left: 8.0)
-                        : const EdgeInsets.symmetric(horizontal: 8.0),
+                    padding: itemOuterPadding,
                     child: Row(
                       children: [
                         SizedBox(

@@ -119,14 +119,18 @@ class _MgrListRowDividerPainter extends CustomPainter {
       oldDelegate.color != color;
 }
 
+typedef MgrListColumnPressedCallback = void Function(MgrListCol col);
+
 class MgrList extends StatefulWidget {
   final MgrListModel model;
   final MgrListController controller;
+  final MgrListColumnPressedCallback? onColumnPressed;
 
   const MgrList({
     Key? key,
     required this.model,
     required this.controller,
+    this.onColumnPressed,
   }) : super(key: key);
 
   @override
@@ -618,7 +622,9 @@ class _MgrListState extends State<MgrList> {
                 message: col.col.hint,
                 child: InkResponse(
                   radius: col.width / 2,
-                  onTap: () {},
+                  onTap: widget.onColumnPressed == null
+                      ? null
+                      : () => widget.onColumnPressed!(col.col),
                   child: SizedBox(
                     width: col.width,
                     height: itemHeight,

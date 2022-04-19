@@ -380,6 +380,12 @@ class _MgrListState extends State<MgrList> {
                     .map((e) => e.width)
                     .reduce((value, element) => value + element);
 
+                final isRightNonZero = rightCount != 0;
+                final clipper = _MgrListRowClipper(
+                  doLeft: true,
+                  doRight: isRightNonZero,
+                );
+
                 Widget offsetRowBuilder(ViewportOffset offset, Widget checkbox,
                     Widget builder(_Col col)) {
                   final middleContent =
@@ -387,16 +393,7 @@ class _MgrListState extends State<MgrList> {
 
                   final content = ClipPath(
                     clipBehavior: Clip.hardEdge,
-                    clipper: _MgrListRowClipper(
-                      doLeft: _horizontalScrollController
-                              .position.hasContentDimensions &&
-                          _horizontalScrollController.position.extentBefore >
-                              .1,
-                      doRight: rightCount != 0 &&
-                          _horizontalScrollController
-                              .position.hasContentDimensions &&
-                          _horizontalScrollController.position.extentAfter > .1,
-                    ),
+                    clipper: clipper,
                     child: SizedBox(
                       height: rowHeight,
                       child: Viewport(

@@ -40,7 +40,7 @@ class _MgrListRowClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     late final oneForthHeight = size.height / 4;
     late final halfHeight = 2 * oneForthHeight;
-    late final twoThirdsHeight = 3  * oneForthHeight;
+    late final twoThirdsHeight = 3 * oneForthHeight;
     final rightEdge = size.width - _dividerHalfWidth;
 
     final path = Path()
@@ -48,7 +48,8 @@ class _MgrListRowClipper extends CustomClipper<Path> {
       ..lineTo(rightEdge, 0);
 
     if (doRight) {
-      final rightOffsetEdge = size.width - _dividerHedgeOffset - _dividerHalfWidth;
+      final rightOffsetEdge =
+          size.width - _dividerHedgeOffset - _dividerHalfWidth;
 
       path
         ..lineTo(rightOffsetEdge, oneForthHeight)

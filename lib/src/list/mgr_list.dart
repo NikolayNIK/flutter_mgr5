@@ -676,36 +676,37 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  Widget _buildTableBody(double itemHeight, _RowBuilder rowBuilder) =>
-      ListenableBuilder(
-        listenable: widget.controller.selection,
-        builder: (context) => ListenableBuilder(
-          listenable: widget.controller.items,
-          builder: (context) => Scrollbar(
+  Widget _buildTableBody(double itemHeight, _RowBuilder rowBuilder) {
+    late final placeholder = _buildItemPlaceholder(rowBuilder);
+    return ListenableBuilder(
+      listenable: widget.controller.selection,
+      builder: (context) => ListenableBuilder(
+        listenable: widget.controller.items,
+        builder: (context) => Scrollbar(
+          controller: _verticalScrollController,
+          isAlwaysShown: true,
+          interactive: true,
+          trackVisibility: true,
+          thickness: 8.0,
+          radius: const Radius.circular(8.0),
+          child: ListView.builder(
             controller: _verticalScrollController,
-            isAlwaysShown: true,
-            interactive: true,
-            trackVisibility: true,
-            thickness: 8.0,
-            radius: const Radius.circular(8.0),
-            child: ListView.builder(
-              controller: _verticalScrollController,
-              itemCount: widget.controller.items.length,
-              itemExtent: itemHeight,
-              itemBuilder: (context, index) {
-                final elem = widget.controller.items[index];
-                late final placeholder = _buildItemPlaceholder(rowBuilder);
-                return ValueAnimatedSwitcher(
-                  value: elem == null,
-                  duration: const Duration(milliseconds: 400),
-                  child:
-                      elem == null ? placeholder : _buildItem(rowBuilder, elem),
-                );
-              },
-            ),
+            itemCount: widget.controller.items.length,
+            itemExtent: itemHeight,
+            itemBuilder: (context, index) {
+              final elem = widget.controller.items[index];
+              return ValueAnimatedSwitcher(
+                value: elem == null,
+                duration: const Duration(milliseconds: 400),
+                child:
+                    elem == null ? placeholder : _buildItem(rowBuilder, elem),
+              );
+            },
           ),
         ),
-      );
+      ),
+    );
+  }
 
   Widget _buildItemPlaceholder(_RowBuilder rowBuilder) => Center(
         child: Shimmer.fromColors(

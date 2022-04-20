@@ -740,14 +740,14 @@ class _MgrListState extends State<MgrList> {
         key == null ? false : widget.controller.selection.contains(key);
     final foregroundColor =
         isSelected ? Theme.of(context).colorScheme.onPrimaryContainer : null;
-    return ValueAnimatedSwitcher(
-      key: key == null ? null : widget.controller.itemKeys[key],
-      value: isSelected,
+    return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
+      color: isSelected
+          ? Theme.of(context).colorScheme.primaryContainer
+          : Theme.of(context).colorScheme.primaryContainer.withOpacity(0),
       child: Material(
-        color: isSelected
-            ? Theme.of(context).colorScheme.primaryContainer
-            : Colors.transparent,
+        key: key == null ? null : widget.controller.itemKeys[key],
+        color: Colors.transparent,
         child: InkWell(
           onTap: key == null
               ? null

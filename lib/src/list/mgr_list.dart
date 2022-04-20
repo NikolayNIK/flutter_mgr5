@@ -399,9 +399,6 @@ class _MgrListState extends State<MgrList> {
 
                 Widget offsetRowBuilder(ViewportOffset offset, Widget checkbox,
                     Widget builder(_Col col)) {
-                  final middleContent =
-                      Row(children: List.unmodifiable(middle.map(builder)));
-
                   final content = ClipPath(
                     clipBehavior: Clip.hardEdge,
                     clipper: clipper,
@@ -412,16 +409,18 @@ class _MgrListState extends State<MgrList> {
                         axisDirection: AxisDirection.right,
                         offset: offset,
                         slivers: [
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: itemInnerPadding,
-                              child: SizedBox(
-                                width: middleInnerWidth,
-                                height: rowHeight,
-                                child: middleContent,
+                          SliverPadding(
+                            padding: itemInnerPadding,
+                            sliver: SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) => Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: builder(middle[index]),
+                                ),
+                                childCount: middle.length,
                               ),
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),

@@ -413,10 +413,17 @@ class _MgrListState extends State<MgrList> {
                             padding: itemInnerPadding,
                             sliver: SliverList(
                               delegate: SliverChildBuilderDelegate(
-                                (context, index) => Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: builder(middle[index]),
-                                ),
+                                (context, index) {
+                                  final col = middle[index];
+                                  return SizedBox(
+                                    width: col.width,
+                                    height: rowHeight,
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: builder(col),
+                                    ),
+                                  );
+                                },
                                 childCount: middle.length,
                               ),
                             ),
@@ -443,7 +450,14 @@ class _MgrListState extends State<MgrList> {
                                 height: rowHeight,
                                 child: checkbox,
                               ),
-                              ...left.map(builder),
+                              ...left.map((e) => SizedBox(
+                                    width: e.width,
+                                    height: rowHeight,
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: builder(e),
+                                    ),
+                                  )),
                             ])),
                         Expanded(
                           child: Stack(
@@ -494,10 +508,20 @@ class _MgrListState extends State<MgrList> {
                         ),
                         if (isRightNonZero)
                           SizedBox(
-                              width: rightWidth,
-                              child: Row(
-                                  children:
-                                      List.unmodifiable(right.map(builder)))),
+                            width: rightWidth,
+                            child: Row(
+                              children: [
+                                ...right.map((e) => SizedBox(
+                                      width: e.width,
+                                      height: rowHeight,
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: builder(e),
+                                      ),
+                                    ))
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   );
@@ -624,49 +648,44 @@ class _MgrListState extends State<MgrList> {
                   onTap: widget.onColumnPressed == null
                       ? null
                       : () => widget.onColumnPressed!(col.col),
-                  child: SizedBox(
-                    width: col.width,
-                    height: itemHeight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: col.col.sorted == null
-                            ? text
-                            : Row(
-                                children: [
-                                  Flexible(child: text),
-                                  col.col.sorted!.index == 1
-                                      ? Icon(col.col.sorted!.ascending
-                                          ? Icons.arrow_drop_up
-                                          : Icons.arrow_drop_down)
-                                      : Stack(
-                                          alignment: Alignment.center,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  top: 8.0),
-                                              child: Icon(
-                                                  col.col.sorted!.ascending
-                                                      ? Icons.arrow_drop_up
-                                                      : Icons.arrow_drop_down),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: col.col.sorted == null
+                          ? text
+                          : Row(
+                              children: [
+                                Flexible(child: text),
+                                col.col.sorted!.index == 1
+                                    ? Icon(col.col.sorted!.ascending
+                                        ? Icons.arrow_drop_up
+                                        : Icons.arrow_drop_down)
+                                    : Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 8.0),
+                                            child: Icon(
+                                                col.col.sorted!.ascending
+                                                    ? Icons.arrow_drop_up
+                                                    : Icons.arrow_drop_down),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 8.0),
+                                            child: Text(
+                                              col.col.sorted!.index.toString(),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .labelSmall,
                                             ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  bottom: 8.0),
-                                              child: Text(
-                                                col.col.sorted!.index
-                                                    .toString(),
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .labelSmall,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                ],
-                              ),
-                      ),
+                                          ),
+                                        ],
+                                      ),
+                              ],
+                            ),
                     ),
                   ),
                 ),
@@ -774,51 +793,48 @@ class _MgrListState extends State<MgrList> {
                             widget.controller.selection.remove(key);
                           }
                         }),
-              (col) => SizedBox(
-                width: col.width,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Builder(
-                    builder: (context) {
-                      final text = elem[col.col.name];
-                      late final textWidget = text == null
-                          ? null
-                          : Text(
-                              text,
-                              maxLines: 1,
-                              softWrap: false,
-                              overflow: TextOverflow.fade,
-                              style: TextStyle(color: foregroundColor),
-                            );
+              (col) => Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Builder(
+                  builder: (context) {
+                    final text = elem[col.col.name];
+                    late final textWidget = text == null
+                        ? null
+                        : Text(
+                            text,
+                            maxLines: 1,
+                            softWrap: false,
+                            overflow: TextOverflow.fade,
+                            style: TextStyle(color: foregroundColor),
+                          );
 
-                      return col.col.props.isEmpty
-                          ? textWidget ?? SizedBox()
-                          : OverflowBox(
-                              child: Row(
-                                children: [
-                                  for (final prop in col.col.props)
-                                    if (prop.checkVisible(elem))
-                                      OptionalTooltip(
-                                        message: prop.extractLabel(elem),
-                                        child: Icon(
-                                          prop.icon,
-                                          size: max(
-                                              24.0,
-                                              24.0 +
-                                                  6 *
-                                                      Theme.of(context)
-                                                          .visualDensity
-                                                          .vertical),
-                                          color: foregroundColor,
-                                        ),
+                    return col.col.props.isEmpty
+                        ? textWidget ?? SizedBox()
+                        : OverflowBox(
+                            child: Row(
+                              children: [
+                                for (final prop in col.col.props)
+                                  if (prop.checkVisible(elem))
+                                    OptionalTooltip(
+                                      message: prop.extractLabel(elem),
+                                      child: Icon(
+                                        prop.icon,
+                                        size: max(
+                                            24.0,
+                                            24.0 +
+                                                6 *
+                                                    Theme.of(context)
+                                                        .visualDensity
+                                                        .vertical),
+                                        color: foregroundColor,
                                       ),
-                                  if (textWidget != null)
-                                    Expanded(child: textWidget)
-                                ],
-                              ),
-                            );
-                    },
-                  ),
+                                    ),
+                                if (textWidget != null)
+                                  Expanded(child: textWidget)
+                              ],
+                            ),
+                          );
+                  },
                 ),
               ),
             ),

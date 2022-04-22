@@ -611,8 +611,12 @@ class _MgrListState extends State<MgrList> {
         color: Colors.transparent,
         child: rowBuilder(
           ListenableBuilder(
-              listenable: widget.controller.selection,
-              builder: (context) => Checkbox(
+            listenable: widget.controller.selection,
+            builder: (context) => Tooltip(
+              message: widget.controller.selection.isNotEmpty
+                  ? 'Снять выделение'
+                  : 'Выделить все',
+              child: Checkbox(
                   value: widget.controller.selection.isNotEmpty
                       ? (widget.controller.selection.length ==
                               widget.controller.items.length
@@ -625,7 +629,9 @@ class _MgrListState extends State<MgrList> {
                           .controller.items
                           .map((e) => e?[widget.model.keyField])
                           .whereNotNull())
-                      : widget.controller.selection.clear())),
+                      : widget.controller.selection.clear()),
+            ),
+          ),
           (col) {
             final text = Text(
               col.col.label ?? '',

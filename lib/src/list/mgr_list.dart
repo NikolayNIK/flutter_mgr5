@@ -405,6 +405,7 @@ class _MgrListState extends State<MgrList> {
                       child: Viewport(
                         clipBehavior: Clip.none,
                         axisDirection: AxisDirection.right,
+                        crossAxisDirection: AxisDirection.down,
                         offset: offset,
                         slivers: [
                           SliverPadding(

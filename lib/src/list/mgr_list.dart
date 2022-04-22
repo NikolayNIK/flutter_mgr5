@@ -124,13 +124,11 @@ typedef MgrListColumnPressedCallback = void Function(MgrListCol col);
 class MgrList extends StatefulWidget {
   final MgrListModel model;
   final MgrListController controller;
-  final MgrListColumnPressedCallback? onColumnPressed;
 
   const MgrList({
     Key? key,
     required this.model,
     required this.controller,
-    this.onColumnPressed,
   }) : super(key: key);
 
   @override
@@ -645,9 +643,7 @@ class _MgrListState extends State<MgrList> {
                 message: col.col.hint,
                 child: InkResponse(
                   radius: col.width / 2,
-                  onTap: widget.onColumnPressed == null
-                      ? null
-                      : () => widget.onColumnPressed!(col.col),
+                  onTap: () {},
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Align(

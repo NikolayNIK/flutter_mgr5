@@ -443,8 +443,9 @@ class _MgrListState extends State<MgrList> {
                     child: Row(
                       children: [
                         SizedBox(
-                            width: leftWidth,
-                            child: Row(children: [
+                          width: leftWidth,
+                          child: Row(
+                            children: [
                               SizedBox(
                                 width: rowHeight,
                                 height: rowHeight,
@@ -458,7 +459,9 @@ class _MgrListState extends State<MgrList> {
                                       child: builder(e),
                                     ),
                                   )),
-                            ])),
+                            ],
+                          ),
+                        ),
                         Expanded(
                           child: Stack(
                             children: [

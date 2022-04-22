@@ -423,6 +423,7 @@ class _MgrListState extends State<MgrList> {
                                     ),
                                   );
                                 },
+                                addRepaintBoundaries: false,
                                 childCount: middle.length,
                               ),
                             ),

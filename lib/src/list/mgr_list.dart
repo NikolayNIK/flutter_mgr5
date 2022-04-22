@@ -525,7 +525,7 @@ class _MgrListState extends State<MgrList> {
                   );
                 }
 
-                body = Scrollbar(
+                return Scrollbar(
                   isAlwaysShown: true,
                   controller: _horizontalScrollController,
                   child: Scrollable(
@@ -553,6 +553,12 @@ class _MgrListState extends State<MgrList> {
                                 child: _buildTableBody(rowHeight, rowBuilder),
                               ),
                             ),
+                            Divider(
+                              height: 2,
+                              thickness: 2,
+                              indent: 16.0,
+                            ),
+                            _buildTableFooter(rowHeight, rowBuilder),
                           ],
                         ),
                       );
@@ -578,7 +584,7 @@ class _MgrListState extends State<MgrList> {
                       ),
                     );
 
-                body = Column(
+                return Column(
                   children: [
                     _buildTableHead(rowHeight, rowBuilder),
                     Divider(
@@ -586,24 +592,16 @@ class _MgrListState extends State<MgrList> {
                       thickness: 2,
                       indent: 16.0,
                     ),
-                    Expanded(
-                      child: _buildTableBody(rowHeight, rowBuilder),
+                    Expanded(child: _buildTableBody(rowHeight, rowBuilder)),
+                    Divider(
+                      height: 2,
+                      thickness: 2,
+                      indent: 16.0,
                     ),
+                    _buildTableFooter(rowHeight, rowBuilder),
                   ],
                 );
               }
-
-              return Column(
-                children: [
-                  Expanded(child: body),
-                  Divider(
-                    height: 2,
-                    thickness: 2,
-                    indent: 16.0,
-                  ),
-                  _buildTableFooter(),
-                ],
-              );
             },
           ),
         ),
@@ -841,22 +839,26 @@ class _MgrListState extends State<MgrList> {
     );
   }
 
-  Widget _buildTableFooter() => ListenableBuilder(
+  Widget _buildTableFooter(double rowHeight, _RowBuilder rowBuilder) =>
+      ListenableBuilder(
         listenable: widget.controller.selection,
         builder: (context) => ListenableBuilder(
           listenable: widget.controller.items,
-          builder: (context) => Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 8.0,
-              horizontal: 16.0,
-            ),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                widget.controller.selection.isEmpty
-                    ? 'Всего ${widget.controller.items.length}'
-                    : 'Выделено ${widget.controller.selection.length} из ${widget.controller.items.length}',
-                textAlign: TextAlign.left,
+          builder: (context) => SizedBox(
+            height: rowHeight,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 8.0,
+                horizontal: 16.0,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  widget.controller.selection.isEmpty
+                      ? 'Всего ${widget.controller.items.length}'
+                      : 'Выделено ${widget.controller.selection.length} из ${widget.controller.items.length}',
+                  textAlign: TextAlign.left,
+                ),
               ),
             ),
           ),

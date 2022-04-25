@@ -571,7 +571,8 @@ class _MgrListState extends State<MgrList> {
                   ),
                 );
               } else {
-                final factor = availableWidth / totalColWidth;
+                final factor =
+                    (availableWidth - rowHeight) / (totalColWidth - rowHeight);
                 final cols = List<_Col>.unmodifiable(coldata
                     .map((col) => _Col(col: col, width: col.width * factor)));
 

@@ -584,7 +584,10 @@ class _MgrListState extends State<MgrList> {
                             height: rowHeight,
                             child: checkbox,
                           ),
-                          ...cols.map(toWidget),
+                          ...cols.map((col) => SizedBox(
+                                width: col.width,
+                                child: toWidget(col),
+                              )),
                         ],
                       ),
                     );

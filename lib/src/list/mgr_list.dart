@@ -307,18 +307,22 @@ class _MgrListState extends State<MgrList> {
           valueListenable: widget.controller.rowHeightScale,
           builder: (context, rowScale, _) => LayoutBuilder(
             builder: (context, constraints) {
-              final coldata = widget.model.coldata;
-
               final rowHeight = rowScale * 56.0 +
                   8.0 * Theme.of(context).visualDensity.vertical;
 
               final availableWidth = constraints.maxWidth - 16.0;
 
-              final totalColWidth = coldata
+              final totalColWidth = widget.model.coldata
                       .map((e) => e.width)
                       .reduce((value, element) => value + element) +
                   rowHeight;
               final needsBreaks = totalColWidth > availableWidth;
+
+              final factor = needsBreaks
+                  ? 1.0
+                  : (availableWidth - rowHeight) / (totalColWidth - rowHeight);
+              final coldata = List<_Col>.unmodifiable(widget.model.coldata
+                  .map((col) => _Col(col: col, width: col.width * factor)));
 
               if (needsBreaks) {
                 final minWidth =
@@ -368,14 +372,10 @@ class _MgrListState extends State<MgrList> {
 
                 final middle = List<_Col>.unmodifiable(coldata
                     .skip(leftCount)
-                    .take(coldata.length - rightCount - leftCount)
-                    .map((col) => _Col(col: col, width: col.width)));
-                final left = List<_Col>.unmodifiable(coldata
-                    .take(leftCount)
-                    .map((col) => _Col(col: col, width: col.width)));
-                final right = List<_Col>.unmodifiable(coldata
-                    .skip(coldata.length - rightCount)
-                    .map((col) => _Col(col: col, width: col.width)));
+                    .take(coldata.length - rightCount - leftCount));
+                final left = List<_Col>.unmodifiable(coldata.take(leftCount));
+                final right = List<_Col>.unmodifiable(
+                    coldata.skip(coldata.length - rightCount));
 
                 final middleInnerWidth = middle
                     .map((e) => e.width)
@@ -570,11 +570,6 @@ class _MgrListState extends State<MgrList> {
                   ),
                 );
               } else {
-                final factor =
-                    (availableWidth - rowHeight) / (totalColWidth - rowHeight);
-                final cols = List<_Col>.unmodifiable(coldata
-                    .map((col) => _Col(col: col, width: col.width * factor)));
-
                 _RowBuilder rowBuilder = (checkbox, toWidget) => Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Row(
@@ -584,7 +579,7 @@ class _MgrListState extends State<MgrList> {
                             height: rowHeight,
                             child: checkbox,
                           ),
-                          ...cols.map((col) => SizedBox(
+                          ...coldata.map((col) => SizedBox(
                                 width: col.width,
                                 child: toWidget(col),
                               )),

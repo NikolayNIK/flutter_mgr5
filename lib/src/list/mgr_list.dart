@@ -320,7 +320,6 @@ class _MgrListState extends State<MgrList> {
                   rowHeight;
               final needsBreaks = totalColWidth > availableWidth;
 
-              final Widget body;
               if (needsBreaks) {
                 final minWidth =
                     max(_MIN_WIDTH, _MIN_WIDTH_RATIO * availableWidth);

@@ -730,6 +730,7 @@ class _MgrListState extends State<MgrList> {
               radius: const Radius.circular(8.0),
               child: ListView.builder(
                 controller: _verticalScrollController,
+                addRepaintBoundaries: false,
                 itemCount: widget.controller.items.length,
                 itemExtent: itemHeight,
                 itemBuilder: (context, index) {
@@ -821,63 +822,65 @@ class _MgrListState extends State<MgrList> {
                   widget.controller.selection.clear();
                   widget.controller.selection.add(key);
                 },
-          child: SizedBox(
-            width: double.infinity,
-            height: double.infinity,
-            child: rowBuilder(
-              Checkbox(
-                  value: isSelected,
-                  onChanged: key == null
-                      ? null
-                      : (value) {
-                          if (value ?? false) {
-                            widget.controller.selection.add(key);
-                          } else {
-                            widget.controller.selection.remove(key);
-                          }
-                        }),
-              (col) => Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Builder(
-                  builder: (context) {
-                    final text = elem[col.col.name];
-                    late final textWidget = text == null
+          child: RepaintBoundary(
+            child: SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: rowBuilder(
+                Checkbox(
+                    value: isSelected,
+                    onChanged: key == null
                         ? null
-                        : Text(
-                            text,
-                            maxLines: 1,
-                            softWrap: false,
-                            overflow: TextOverflow.fade,
-                            style: TextStyle(color: foregroundColor),
-                          );
+                        : (value) {
+                            if (value ?? false) {
+                              widget.controller.selection.add(key);
+                            } else {
+                              widget.controller.selection.remove(key);
+                            }
+                          }),
+                (col) => Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Builder(
+                    builder: (context) {
+                      final text = elem[col.col.name];
+                      late final textWidget = text == null
+                          ? null
+                          : Text(
+                              text,
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.fade,
+                              style: TextStyle(color: foregroundColor),
+                            );
 
-                    return col.col.props.isEmpty
-                        ? textWidget ?? SizedBox()
-                        : OverflowBox(
-                            child: Row(
-                              children: [
-                                for (final prop in col.col.props)
-                                  if (prop.checkVisible(elem))
-                                    OptionalTooltip(
-                                      message: prop.extractLabel(elem),
-                                      child: Icon(
-                                        prop.icon,
-                                        size: max(
-                                            24.0,
-                                            24.0 +
-                                                6 *
-                                                    Theme.of(context)
-                                                        .visualDensity
-                                                        .vertical),
-                                        color: foregroundColor,
+                      return col.col.props.isEmpty
+                          ? textWidget ?? SizedBox()
+                          : OverflowBox(
+                              child: Row(
+                                children: [
+                                  for (final prop in col.col.props)
+                                    if (prop.checkVisible(elem))
+                                      OptionalTooltip(
+                                        message: prop.extractLabel(elem),
+                                        child: Icon(
+                                          prop.icon,
+                                          size: max(
+                                              24.0,
+                                              24.0 +
+                                                  6 *
+                                                      Theme.of(context)
+                                                          .visualDensity
+                                                          .vertical),
+                                          color: foregroundColor,
+                                        ),
                                       ),
-                                    ),
-                                if (textWidget != null)
-                                  Expanded(child: textWidget)
-                              ],
-                            ),
-                          );
-                  },
+                                  if (textWidget != null)
+                                    Expanded(child: textWidget)
+                                ],
+                              ),
+                            );
+                    },
+                  ),
                 ),
               ),
             ),

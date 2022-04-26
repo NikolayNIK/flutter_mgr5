@@ -303,6 +303,13 @@ class _MgrListPages extends MgrListPages
 
     notifyListeners();
   }
+
+  @override
+  void notifyListeners() {
+    super.notifyListeners();
+
+    _controller.selection.removeWhere((key) => findElemByKey(key) == null);
+  }
 }
 
 class _MgrListItems extends IterableBase<MgrListElem?> with MgrListItems {

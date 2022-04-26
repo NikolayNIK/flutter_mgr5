@@ -264,6 +264,21 @@ class _MgrListState extends State<MgrList> {
                     ),
                   const SizedBox(width: 24.0),
                 ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Center(
+                    child: SizedBox(
+                      width: 192.0,
+                      child: TextField(
+                        controller: widget.controller.searchTextEditingController,
+                        decoration: const InputDecoration(
+                          filled: true,
+                          labelText: 'Быстрый поиск',
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

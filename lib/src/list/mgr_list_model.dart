@@ -82,6 +82,7 @@ class MgrListCol {
   final String name;
   final String? label, hint;
   final double width;
+  final MgrListColTotal? total;
   final List<MgrListColProp> props;
   final MgrListColSorted? sorted;
 
@@ -91,6 +92,7 @@ class MgrListCol {
     required this.hint,
     required this.sorted,
     required this.width,
+    required this.total,
     required this.props,
   });
 
@@ -117,6 +119,9 @@ class MgrListCol {
           ),
       sorted: element.convertAttribute('sorted',
           converter: MgrListColSorted.fromXmlAttribute),
+      total: element.boolAttribute('stat') || element.attribute('total') != null
+          ? MgrListColTotal.sum
+          : null,
       props: props,
     );
   }
@@ -148,6 +153,12 @@ class MgrListCol {
 
     return 16.0 + 16.0 * (maxLength / 2.0).ceilToDouble();
   }
+}
+
+enum MgrListColTotal {
+  sum,
+  sumRound,
+  average,
 }
 
 @immutable

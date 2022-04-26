@@ -14,12 +14,16 @@ class MgrListController {
   late final MgrListItemKeys itemKeys = _MgrListItemKeys();
   late final MgrListPages pages = _MgrListPages(this);
   late final MgrListItems items = _MgrListItems(this);
+  late final TextEditingController searchTextEditingController =
+      _createSearchController();
+
   final String func;
   final Map<String, String>? params;
   final MgrListSelection selection = _MgrListSelection();
   final rowHeightScale = ValueNotifier<double>(1.0);
 
   late String _keyField;
+  String? _filter;
 
   MgrListController({
     required this.mgrClient,
@@ -27,21 +31,42 @@ class MgrListController {
     this.params,
   });
 
+  String? get searchPattern => _filter;
+
   void update(MgrListModel model) {
     _keyField = model.keyField ?? 'id';
     pages.update(model);
   }
 
   void dispose() => items.dispose();
+
+  TextEditingController _createSearchController() {
+    final controller = TextEditingController();
+    controller.addListener(_searchTextChanged);
+    return controller;
+  }
+
+  void _searchTextChanged() {
+    String? value = searchTextEditingController.text.trim().toLowerCase();
+    if (value.isEmpty) {
+      value = null;
+    }
+
+    if (_filter != value) {
+      _filter = value;
+      pages._search(value);
+    }
+  }
 }
 
-class MgrListPage extends ValueListenable<List<MgrListElem>?> {
+class MgrListPage extends ValueListenable<List<MgrListElem>?>
+    with ChangeNotifier {
   final MgrListController _controller;
-  final _valueNotifier = ValueNotifier<List<MgrListElem>?>(null);
   final int index;
   final String name;
   final Map<MgrListElemKey, MgrListElem> _keyToElemMap = {};
 
+  List<MgrListElem>? _items, _searchItems;
   bool _isDisposed = false, _isLoading = false;
 
   MgrListPage(
@@ -49,27 +74,33 @@ class MgrListPage extends ValueListenable<List<MgrListElem>?> {
     this.index,
     this.name, [
     List<MgrListElem>? items,
-  ]) {
-    _valueNotifier.addListener(_onItemsChanged);
-  }
+  ]);
+
+  int get length =>
+      _searchItems?.length ?? _items?.length ?? _controller.pages.pageSize;
 
   @override
   List<MgrListElem>? get value => items;
 
   List<MgrListElem>? get items {
-    final items = _valueNotifier.value;
+    final items = _items;
     if (items == null) {
       _load();
     }
 
-    return items;
+    return _searchItems ?? items;
   }
 
-  set _items(List<MgrListElem>? items) => _valueNotifier.value = items;
+  set items(List<MgrListElem>? items) {
+    _items = items;
+    _keyToElemMap.clear();
+    _search(_controller.searchPattern);
+    notifyListeners();
+  }
 
   MgrListElem? findElemByKey(MgrListElemKey key) {
     if (_keyToElemMap.isEmpty) {
-      final list = _valueNotifier.value;
+      final list = _items;
       if (list != null) {
         for (final elem in list) {
           final key = elem[_controller._keyField];
@@ -84,20 +115,10 @@ class MgrListPage extends ValueListenable<List<MgrListElem>?> {
   }
 
   @override
-  void addListener(VoidCallback listener) =>
-      _valueNotifier.addListener(listener);
-
-  @override
-  void removeListener(VoidCallback listener) =>
-      _valueNotifier.removeListener(listener);
-
-  void _onItemsChanged() {
-    _keyToElemMap.clear();
-  }
-
   void dispose() {
+    super.dispose();
+
     _isDisposed = true;
-    _valueNotifier.dispose();
   }
 
   void _load() async {
@@ -129,6 +150,13 @@ class MgrListPage extends ValueListenable<List<MgrListElem>?> {
       _isLoading = false;
     }
   }
+
+  void _search(String? filter) {
+    _searchItems = filter == null || _items == null
+        ? _items
+        : List.unmodifiable(_items!.where((element) => element.values
+            .any((value) => value.toLowerCase().contains(filter))));
+  }
 }
 
 abstract class MgrListPages implements Listenable, Iterable<MgrListPage> {
@@ -147,6 +175,8 @@ abstract class MgrListPages implements Listenable, Iterable<MgrListPage> {
   void update(MgrListModel model);
 
   void reset();
+
+  void _search(String? filter);
 }
 
 abstract class MgrListItems implements Listenable, Iterable<MgrListElem?> {
@@ -181,7 +211,15 @@ class _MgrListPages extends MgrListPages
   int get pageCount => _pages.length;
 
   @override
-  int get itemCount => _elemCount;
+  int get itemCount {
+    if (_pages.isEmpty) {
+      return _elemCount;
+    }
+
+    var count = 0;
+    for (final page in _pages) count += page.length;
+    return count;
+  }
 
   @override
   int get pageSize => _pageSize;
@@ -199,7 +237,7 @@ class _MgrListPages extends MgrListPages
 
   @override
   void reset() {
-    _pages.forEach((page) => page._items = null);
+    _pages.forEach((page) => page.items = null);
     notifyListeners();
   }
 
@@ -232,13 +270,22 @@ class _MgrListPages extends MgrListPages
 
     final index = model.pageIndex;
     if (index != null) {
-      _pages[index - 1]._items = model.pageData;
+      _pages[index - 1].items = model.pageData;
       notificationRequired = true;
     }
 
     if (notificationRequired) {
       notifyListeners();
     }
+  }
+
+  @override
+  void _search(String? filter) {
+    for (final page in _pages) {
+      page._search(filter);
+    }
+
+    notifyListeners();
   }
 }
 
@@ -255,15 +302,22 @@ class _MgrListItems extends IterableBase<MgrListElem?> with MgrListItems {
 
   @override
   MgrListElem? operator [](int index) {
-    if (index < 0 || index >= length) {
-      throw RangeError('Index $index must be in the range [0..$length).');
+    late final rangeError =
+        RangeError('Index $index must be in the range [0..$length).');
+    if (index < 0) {
+      throw rangeError;
     }
 
-    final pageIndex = (index / _controller.pages.pageSize).floor();
-    final elemIndex = index % _controller.pages.pageSize;
-    final page = _controller.pages[pageIndex];
-    final items = page.value;
-    return items == null ? null : items[elemIndex];
+    var runningCount = 0;
+    for (final page in _controller.pages) {
+      final len = page.length;
+      runningCount += len;
+      if (runningCount > index) {
+        return page.items?[index - runningCount + len];
+      }
+    }
+
+    throw rangeError;
   }
 
   @override

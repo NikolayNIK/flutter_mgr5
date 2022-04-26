@@ -76,6 +76,8 @@ class MgrListPage extends ValueListenable<List<MgrListElem>?>
     List<MgrListElem>? items,
   ]);
 
+  bool get loaded => _items != null;
+
   int get length =>
       _searchItems?.length ?? _items?.length ?? _controller.pages.pageSize;
 
@@ -164,6 +166,8 @@ abstract class MgrListPages implements Listenable, Iterable<MgrListPage> {
 
   int get itemCount;
 
+  int get loadedItemCount;
+
   int get pageSize;
 
   set pageSize(int value);
@@ -181,6 +185,7 @@ abstract class MgrListPages implements Listenable, Iterable<MgrListPage> {
 
 abstract class MgrListItems implements Listenable, Iterable<MgrListElem?> {
   int get length;
+  int get loadedItemCount;
 
   MgrListElem? operator [](int index);
 
@@ -218,6 +223,17 @@ class _MgrListPages extends MgrListPages
 
     var count = 0;
     for (final page in _pages) count += page.length;
+    return count;
+  }
+
+  @override
+  int get loadedItemCount {
+    if (_pages.isEmpty) {
+      return _elemCount;
+    }
+
+    var count = 0;
+    for (final page in _pages) if (page.loaded) count += page.length;
     return count;
   }
 
@@ -296,6 +312,9 @@ class _MgrListItems extends IterableBase<MgrListElem?> with MgrListItems {
 
   @override
   int get length => _controller.pages.itemCount;
+
+  @override
+  int get loadedItemCount => _controller.pages.loadedItemCount;
 
   @override
   void clear() => _controller.pages.reset();

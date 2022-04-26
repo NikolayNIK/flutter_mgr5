@@ -40,7 +40,7 @@ class MgrListPage extends ValueListenable<List<MgrListElem>?> {
   final _valueNotifier = ValueNotifier<List<MgrListElem>?>(null);
   final int index;
   final String name;
-  final Map<MgrListElemKey, int> _keyToPositionMap = {};
+  final Map<MgrListElemKey, MgrListElem> _keyToElemMap = {};
 
   bool _isDisposed = false, _isLoading = false;
 
@@ -67,7 +67,21 @@ class MgrListPage extends ValueListenable<List<MgrListElem>?> {
 
   set _items(List<MgrListElem>? items) => _valueNotifier.value = items;
 
-  int? findPositionByKey(MgrListElemKey key) => _keyToPositionMap[key];
+  MgrListElem? findElemByKey(MgrListElemKey key) {
+    if (_keyToElemMap.isEmpty) {
+      final list = _valueNotifier.value;
+      if (list != null) {
+        for (final elem in list) {
+          final key = elem[_controller._keyField];
+          if (key != null) {
+            _keyToElemMap[key] = elem;
+          }
+        }
+      }
+    }
+
+    return _keyToElemMap[key];
+  }
 
   @override
   void addListener(VoidCallback listener) =>
@@ -78,17 +92,7 @@ class MgrListPage extends ValueListenable<List<MgrListElem>?> {
       _valueNotifier.removeListener(listener);
 
   void _onItemsChanged() {
-    _keyToPositionMap.clear();
-    final list = _valueNotifier.value;
-    if (list != null) {
-      var i = 0;
-      for (final elem in list) {
-        final key = elem[_controller._keyField];
-        if (key != null) {
-          _keyToPositionMap[key] = i++;
-        }
-      }
-    }
+    _keyToElemMap.clear();
   }
 
   void dispose() {
@@ -138,7 +142,7 @@ abstract class MgrListPages implements Listenable, Iterable<MgrListPage> {
 
   MgrListPage operator [](int index);
 
-  int? findPositionByKey(MgrListElemKey key);
+  MgrListElem? findElemByKey(MgrListElemKey key);
 
   void update(MgrListModel model);
 
@@ -150,7 +154,7 @@ abstract class MgrListItems implements Listenable, Iterable<MgrListElem?> {
 
   MgrListElem? operator [](int index);
 
-  int? findPositionByKey(MgrListElemKey key);
+  MgrListElem? findElemByKey(MgrListElemKey key);
 
   void clear();
 
@@ -200,15 +204,11 @@ class _MgrListPages extends MgrListPages
   }
 
   @override
-  int? findPositionByKey(MgrListElemKey key) {
-    var offset = 0;
-    for (var i = 0; i < _controller.pages.pageCount; i++) {
-      final page = _controller.pages[i];
-      final position = page.findPositionByKey(key);
-      if (position == null) {
-        offset += page.items?.length ?? _controller.pages.pageSize;
-      } else {
-        return offset + position;
+  MgrListElem? findElemByKey(MgrListElemKey key) {
+    for (final page in _controller.pages) {
+      final elem = page.findElemByKey(key);
+      if (elem != null) {
+        return elem;
       }
     }
 
@@ -267,8 +267,8 @@ class _MgrListItems extends IterableBase<MgrListElem?> with MgrListItems {
   }
 
   @override
-  int? findPositionByKey(MgrListElemKey key) =>
-      _controller.pages.findPositionByKey(key);
+  MgrListElem? findElemByKey(MgrListElemKey key) =>
+      _controller.pages.findElemByKey(key);
 
   @override
   Iterator<MgrListElem?> get iterator =>

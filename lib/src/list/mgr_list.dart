@@ -719,27 +719,51 @@ class _MgrListState extends State<MgrList> {
       listenable: widget.controller.selection,
       builder: (context) => ListenableBuilder(
         listenable: widget.controller.items,
-        builder: (context) => Scrollbar(
-          controller: _verticalScrollController,
-          isAlwaysShown: true,
-          interactive: true,
-          trackVisibility: true,
-          thickness: 8.0,
-          radius: const Radius.circular(8.0),
-          child: ListView.builder(
-            controller: _verticalScrollController,
-            itemCount: widget.controller.items.length,
-            itemExtent: itemHeight,
-            itemBuilder: (context, index) {
-              final elem = widget.controller.items[index];
-              return ValueAnimatedSwitcher(
-                value: elem == null,
-                duration: const Duration(milliseconds: 400),
-                child:
-                    elem == null ? placeholder : _buildItem(rowBuilder, elem),
-              );
-            },
-          ),
+        builder: (context) => Stack(
+          children: [
+            Scrollbar(
+              controller: _verticalScrollController,
+              isAlwaysShown: true,
+              interactive: true,
+              trackVisibility: true,
+              thickness: 8.0,
+              radius: const Radius.circular(8.0),
+              child: ListView.builder(
+                controller: _verticalScrollController,
+                itemCount: widget.controller.items.length,
+                itemExtent: itemHeight,
+                itemBuilder: (context, index) {
+                  final elem = widget.controller.items[index];
+                  return ValueAnimatedSwitcher(
+                    value: elem == null,
+                    duration: const Duration(milliseconds: 400),
+                    child: elem == null
+                        ? placeholder
+                        : _buildItem(rowBuilder, elem),
+                  );
+                },
+              ),
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: widget.controller.items.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          widget.controller.searchPattern == null
+                              ? 'Список пуст'
+                              : 'Не найдено похожих элементов',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )
+                  : const SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+            ),
+          ],
         ),
       ),
     );

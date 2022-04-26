@@ -868,24 +868,34 @@ class _MgrListState extends State<MgrList> {
         listenable: widget.controller.selection,
         builder: (context) => ListenableBuilder(
           listenable: widget.controller.items,
-          builder: (context) => SizedBox(
-            height: rowHeight,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 8.0,
-                horizontal: 16.0,
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  widget.controller.selection.isEmpty
-                      ? 'Всего ${widget.controller.items.length}'
-                      : 'Выделено ${widget.controller.selection.length} из ${widget.controller.items.length}',
-                  textAlign: TextAlign.left,
+          builder: (context) {
+            final itemCount = widget.controller.items.length;
+            final loadedItemCount = widget.controller.items.loadedItemCount;
+            final totalText = widget.controller.searchPattern == null ||
+                    itemCount == loadedItemCount
+                ? '$itemCount'
+                : '$loadedItemCount–$itemCount';
+            return SizedBox(
+              height: rowHeight,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 16.0,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    widget.controller.selection.isEmpty
+                        ? (widget.controller.searchPattern == null
+                            ? 'Всего $totalText'
+                            : 'Найдено $totalText')
+                        : 'Выделено ${widget.controller.selection.length} из $totalText',
+                    textAlign: TextAlign.left,
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       );
 

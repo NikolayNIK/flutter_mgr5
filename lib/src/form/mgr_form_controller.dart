@@ -185,8 +185,6 @@ class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
     const [SlistEntry(null, '-- не указано --', null)],
   ); // TODO localize
 
-  bool _isInitialized = false;
-
   _MgrFormSlistMap(this.controller);
 
   @override
@@ -275,8 +273,6 @@ class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
     if (isChanged) {
       controller._notifyChanged(null);
     }
-
-    _isInitialized = true;
   }
 
   @override

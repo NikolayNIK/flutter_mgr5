@@ -735,7 +735,7 @@ class _MgrListState extends State<MgrList> {
       );
 
   Widget _buildTableBody(double itemHeight, _RowBuilder rowBuilder) {
-    late final placeholder = _buildItemPlaceholder(rowBuilder);
+    late final placeholder = _buildTableItemPlaceholder(rowBuilder);
     return ListenableBuilder(
       listenable: widget.controller.selection,
       builder: (context) => ListenableBuilder(
@@ -761,7 +761,7 @@ class _MgrListState extends State<MgrList> {
                     duration: const Duration(milliseconds: 400),
                     child: elem == null
                         ? placeholder
-                        : _buildItem(rowBuilder, elem),
+                        : _buildTableItem(rowBuilder, elem),
                   );
                 },
               ),
@@ -791,7 +791,7 @@ class _MgrListState extends State<MgrList> {
     );
   }
 
-  Widget _buildItemPlaceholder(_RowBuilder rowBuilder) => Center(
+  Widget _buildTableItemPlaceholder(_RowBuilder rowBuilder) => Center(
         child: Shimmer.fromColors(
           baseColor: Theme.of(context).splashColor,
           highlightColor: Theme.of(context).splashColor.withOpacity(0),
@@ -816,7 +816,7 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  Widget _buildItem(_RowBuilder rowBuilder, Map<String, String> elem) {
+  Widget _buildTableItem(_RowBuilder rowBuilder, Map<String, String> elem) {
     final key =
         widget.model.keyField == null ? null : elem[widget.model.keyField];
     final isSelected =

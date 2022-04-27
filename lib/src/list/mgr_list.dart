@@ -688,7 +688,7 @@ class _MgrListState extends State<MgrList> {
                   radius: col.width / 2,
                   onTap: () {},
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.only(left: 8.0),
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: col.col.sorted == null

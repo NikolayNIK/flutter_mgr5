@@ -16,6 +16,8 @@ class MgrListController {
   late final MgrListItems items = _MgrListItems(this);
   late final TextEditingController searchTextEditingController =
       _createSearchController();
+  late final verticalTableScrollController = ScrollController();
+  late final horizontalTableScrollController = ScrollController();
 
   final String func;
   final Map<String, String>? params;
@@ -185,6 +187,7 @@ abstract class MgrListPages implements Listenable, Iterable<MgrListPage> {
 
 abstract class MgrListItems implements Listenable, Iterable<MgrListElem?> {
   int get length;
+
   int get loadedItemCount;
 
   MgrListElem? operator [](int index);

@@ -183,7 +183,35 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  Widget _buildToolbar() => Align(
+  static const _searchTextFieldWidth = 192.0;
+
+  Widget _buildToolbar() => LayoutBuilder(
+        builder: (context, constraints) =>
+            constraints.maxWidth >= 3 * _searchTextFieldWidth
+                ? Row(
+                    children: [
+                      Expanded(child: _buildToolbarButtons()),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: SizedBox(
+                          width: _searchTextFieldWidth,
+                          child: Center(child: _buildToolbarSearch()),
+                        ),
+                      ),
+                    ],
+                  )
+                : Column(
+                    children: [
+                      _buildToolbarButtons(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: _buildToolbarSearch(),
+                      ),
+                    ],
+                  ),
+      );
+
+  Widget _buildToolbarButtons() => Align(
         alignment: Alignment.centerLeft,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -264,24 +292,17 @@ class _MgrListState extends State<MgrList> {
                     ),
                   const SizedBox(width: 24.0),
                 ],
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Center(
-                    child: SizedBox(
-                      width: 192.0,
-                      child: TextField(
-                        controller: widget.controller.searchTextEditingController,
-                        decoration: const InputDecoration(
-                          filled: true,
-                          labelText: 'Быстрый поиск',
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
+        ),
+      );
+
+  Widget _buildToolbarSearch() => TextField(
+        controller: widget.controller.searchTextEditingController,
+        decoration: const InputDecoration(
+          filled: true,
+          labelText: 'Быстрый поиск',
         ),
       );
 

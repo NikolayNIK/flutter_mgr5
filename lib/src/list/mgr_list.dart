@@ -22,7 +22,9 @@ class _Col {
 }
 
 typedef _RowBuilder = Widget Function(
-    Widget checkbox, Widget Function(_Col col));
+  Widget checkbox,
+  Widget Function(_Col col),
+);
 
 const _dividerHedgeOffset = 8.0;
 const _dividerWidth = 2.0;

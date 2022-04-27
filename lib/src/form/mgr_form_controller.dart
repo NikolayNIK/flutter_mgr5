@@ -109,7 +109,7 @@ class _MgrFormControllerParamMap extends MapBase<String, MgrFormControllerParam>
     final name = key.toString();
     return _map.putIfAbsent(
         name,
-        () => MgrFormControllerParam()
+        () => MgrFormControllerParam(name, _controller)
           ..addListener(() => _controller._notifyChanged(name)));
   }
 
@@ -294,18 +294,6 @@ class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
           .putIfAbsent(dependency.key, () => ValueNotifier(filteredSlist))
           .value = filteredSlist;
     }
-
-    if (_isInitialized) {
-      // пройтись по всем slist'ам, поменять значения, если те не входят в slist
-      // может быть затратным
-      for (final entry in entries) {
-        if (!entry.value.value
-            .map((e) => e.key)
-            .contains(controller.stringParams[entry.key])) {
-          controller.stringParams[entry.key] = entry.value.value.first.key;
-        }
-      }
-    }
   }
 }
 
@@ -406,9 +394,14 @@ class MgrFormController implements Listenable {
 }
 
 class MgrFormControllerParam implements ValueListenable<String?> {
+  final String name;
+
   late final FocusNode focusNode = FocusNode();
   final Set<VoidCallback> _listeners = {};
+  final MgrFormController _formController;
   _MgrFormControlController? _controller;
+
+  MgrFormControllerParam(this.name, this._formController);
 
   @override
   String? get value => _controller?.value;
@@ -425,8 +418,8 @@ class MgrFormControllerParam implements ValueListenable<String?> {
   MgrCheckBoxController get checkBoxController =>
       _getController(() => MgrCheckBoxController(this));
 
-  MgrSelectController get selectController =>
-      _getController(() => MgrSelectController(this));
+  MgrSingleSelectController get singleSelectController => _getController(
+      () => MgrSingleSelectController(this, _formController.slists[name]));
 
   MgrDatetimeController get datetimeController =>
       _getController(() => MgrDatetimeController(this));
@@ -548,31 +541,46 @@ class MgrCheckBoxController extends _MgrFormControlController {
   void dispose() => container.dispose();
 }
 
-class MgrSelectController extends _MgrFormControlController {
-  final MgrFormControllerParam param;
-  final ValueNotifier<String?> container;
+class MgrSingleSelectController extends _MgrFormControlController {
+  final MgrFormControllerParam _param;
+  final ValueNotifier<String?> _container;
+  final ValueListenable<Slist> _slist;
 
-  MgrSelectController(this.param, [String? initialValue])
-      : container = ValueNotifier(initialValue ?? '');
+  MgrSingleSelectController(this._param, this._slist, [String? initialValue])
+      : _container = ValueNotifier(null) {
+    value = initialValue;
 
-  @override
-  FocusNode get focusNode => param.focusNode;
-
-  @override
-  String? get value => container.value;
-
-  @override
-  set value(String? value) => container.value = value;
+    // вызов сеттера для проверки наличия значения в измененном slist'е
+    _slist.addListener(() => value = value);
+  }
 
   @override
-  void addListener(VoidCallback listener) => container.addListener(listener);
+  FocusNode get focusNode => _param.focusNode;
+
+  @override
+  String? get value => _container.value;
+
+  @override
+  set value(String? value) {
+    for (final entry in _slist.value) {
+      if (entry.key == value) {
+        _container.value = entry.key;
+        return;
+      }
+    }
+
+    _container.value = _slist.value.first.key;
+  }
+
+  @override
+  void addListener(VoidCallback listener) => _container.addListener(listener);
 
   @override
   void removeListener(VoidCallback listener) =>
-      container.removeListener(listener);
+      _container.removeListener(listener);
 
   @override
-  void dispose() => container.dispose();
+  void dispose() => _container.dispose();
 }
 
 class MgrDatetimeController extends _MgrFormControlController {

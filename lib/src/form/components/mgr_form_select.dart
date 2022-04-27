@@ -61,7 +61,8 @@ class MgrFormSelect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isReadOnly = forceReadOnly || model.isReadonly;
-    final controller = this.controller.params[model.name].selectController;
+    final controller =
+        this.controller.params[model.name].singleSelectController;
     return ValueListenableBuilder<Slist>(
       valueListenable: this.controller.slists[model.name],
       builder: (context, slist, _) {

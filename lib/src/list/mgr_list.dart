@@ -136,12 +136,15 @@ class MgrList extends StatefulWidget {
 }
 
 class _MgrListState extends State<MgrList> {
-  final ScrollController _verticalScrollController = ScrollController();
-  final ScrollController _horizontalScrollController = ScrollController();
-
   double _baseRowHeightScale = 1.0;
   double? _baseVerticalScrollPositionPixels;
   double _baseLocalPointY = 0.0;
+
+  ScrollController get _verticalScrollController =>
+      widget.controller.verticalTableScrollController;
+
+  ScrollController get _horizontalScrollController =>
+      widget.controller.horizontalTableScrollController;
 
   @override
   Widget build(BuildContext context) {

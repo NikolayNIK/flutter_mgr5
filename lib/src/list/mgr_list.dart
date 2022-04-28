@@ -956,12 +956,4 @@ class _MgrListState extends State<MgrList> {
           },
         ),
       );
-
-  @override
-  void dispose() {
-    super.dispose();
-
-    _verticalScrollController.dispose();
-    _horizontalScrollController.dispose();
-  }
 }

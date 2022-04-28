@@ -767,7 +767,7 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  bool? _dragToSelectTargetState = true;
+  bool? _dragToSelectTargetState;
   late double _dragToSelectItemHeight;
   late double _dragToSelectVerticalPosition;
   late int _dragToSelectLatestIndex;

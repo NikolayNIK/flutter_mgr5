@@ -149,6 +149,34 @@ class _MgrListState extends State<MgrList> {
       widget.controller.horizontalTableScrollController;
 
   @override
+  void initState() {
+    super.initState();
+
+    widget.controller.verticalTableScrollController
+        .addListener(_dragToSelectUpdate);
+  }
+
+  @override
+  void didUpdateWidget(covariant MgrList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.verticalTableScrollController
+          .removeListener(_dragToSelectUpdate);
+      widget.controller.verticalTableScrollController
+          .addListener(_dragToSelectUpdate);
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    widget.controller.verticalTableScrollController
+        .removeListener(_dragToSelectUpdate);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
@@ -739,7 +767,12 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
+  bool? _dragToSelectTargetState = true;
+  late double _dragToSelectItemHeight;
+  late double _dragToSelectVerticalPosition;
+
   Widget _buildTableBody(double itemHeight, _RowBuilder rowBuilder) {
+    _dragToSelectItemHeight = itemHeight;
     late final placeholder = _buildTableItemPlaceholder(rowBuilder);
     return ListenableBuilder(
       listenable: widget.controller.selection,
@@ -771,6 +804,50 @@ class _MgrListState extends State<MgrList> {
                 },
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: SizedBox(
+                  width: itemHeight,
+                  height: double.infinity,
+                  child: GestureDetector(
+                    onVerticalDragDown: (details) {
+                      _dragToSelectVerticalPosition = details.localPosition.dy;
+
+                      final position = widget
+                          .controller.verticalTableScrollController.position;
+                      if (position.hasPixels) {
+                        final item = widget.controller.items[
+                            (position.pixels + _dragToSelectVerticalPosition) ~/
+                                _dragToSelectItemHeight];
+                        if (item != null) {
+                          final key = item[widget.model.keyField];
+                          if (key != null) {
+                            _dragToSelectTargetState =
+                                !widget.controller.selection.contains(key);
+                          }
+                        }
+                      }
+                    },
+                    onVerticalDragCancel: () {
+                      _dragToSelectTargetState = null;
+                    },
+                    onVerticalDragStart: (details) {
+                      _dragToSelectVerticalPosition = details.localPosition.dy;
+                      _dragToSelectUpdate();
+                    },
+                    onVerticalDragUpdate: (details) {
+                      _dragToSelectVerticalPosition = details.localPosition.dy;
+                      _dragToSelectUpdate();
+                    },
+                    onVerticalDragEnd: (details) {
+                      _dragToSelectTargetState = null;
+                    },
+                  ),
+                ),
+              ),
+            ),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child: widget.controller.items.isEmpty
@@ -794,6 +871,32 @@ class _MgrListState extends State<MgrList> {
         ),
       ),
     );
+  }
+
+  void _dragToSelectUpdate() {
+    final state = _dragToSelectTargetState;
+    if (state == null) {
+      return;
+    }
+
+    final position = widget.controller.verticalTableScrollController.position;
+    if (position.hasPixels) {
+      final index = (position.pixels + _dragToSelectVerticalPosition) ~/
+          _dragToSelectItemHeight;
+      if (index >= 0) {
+        final item = widget.controller.items[index];
+        if (item != null) {
+          final key = item[widget.model.keyField];
+          if (key != null) {
+            if (state) {
+              widget.controller.selection.add(key);
+            } else {
+              widget.controller.selection.remove(key);
+            }
+          }
+        }
+      }
+    }
   }
 
   Widget _buildTableItemPlaceholder(_RowBuilder rowBuilder) => Center(

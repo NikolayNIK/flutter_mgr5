@@ -770,6 +770,7 @@ class _MgrListState extends State<MgrList> {
   bool? _dragToSelectTargetState = true;
   late double _dragToSelectItemHeight;
   late double _dragToSelectVerticalPosition;
+  late int _dragToSelectLatestIndex;
 
   Widget _buildTableBody(double itemHeight, _RowBuilder rowBuilder) {
     _dragToSelectItemHeight = itemHeight;
@@ -818,9 +819,10 @@ class _MgrListState extends State<MgrList> {
                       final position = widget
                           .controller.verticalTableScrollController.position;
                       if (position.hasPixels) {
-                        final item = widget.controller.items[
+                        final index = _dragToSelectLatestIndex =
                             (position.pixels + _dragToSelectVerticalPosition) ~/
-                                _dragToSelectItemHeight];
+                                _dragToSelectItemHeight;
+                        final item = widget.controller.items[index];
                         if (item != null) {
                           final key = item[widget.model.keyField];
                           if (key != null) {
@@ -887,17 +889,32 @@ class _MgrListState extends State<MgrList> {
               0,
               (position.pixels + _dragToSelectVerticalPosition) ~/
                   _dragToSelectItemHeight));
-      final item = widget.controller.items[index];
-      if (item != null) {
-        final key = item[widget.model.keyField];
-        if (key != null) {
-          if (state) {
-            widget.controller.selection.add(key);
-          } else {
-            widget.controller.selection.remove(key);
+
+      final bool Function(int i) cmpClosure;
+      final int Function(int i) incClosure;
+      if (index > _dragToSelectLatestIndex) {
+        cmpClosure = (i) => i <= index;
+        incClosure = (i) => i + 1;
+      } else {
+        cmpClosure = (i) => i >= index;
+        incClosure = (i) => i - 1;
+      }
+
+      for (var i = _dragToSelectLatestIndex; cmpClosure(i); i = incClosure(i)) {
+        final item = widget.controller.items[i];
+        if (item != null) {
+          final key = item[widget.model.keyField];
+          if (key != null) {
+            if (state) {
+              widget.controller.selection.add(key);
+            } else {
+              widget.controller.selection.remove(key);
+            }
           }
         }
       }
+
+      _dragToSelectLatestIndex = index;
     }
   }
 

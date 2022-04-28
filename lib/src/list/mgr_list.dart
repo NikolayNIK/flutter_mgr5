@@ -881,18 +881,20 @@ class _MgrListState extends State<MgrList> {
 
     final position = widget.controller.verticalTableScrollController.position;
     if (position.hasPixels) {
-      final index = (position.pixels + _dragToSelectVerticalPosition) ~/
-          _dragToSelectItemHeight;
-      if (index >= 0) {
-        final item = widget.controller.items[index];
-        if (item != null) {
-          final key = item[widget.model.keyField];
-          if (key != null) {
-            if (state) {
-              widget.controller.selection.add(key);
-            } else {
-              widget.controller.selection.remove(key);
-            }
+      final index = min(
+          widget.controller.items.length,
+          max(
+              0,
+              (position.pixels + _dragToSelectVerticalPosition) ~/
+                  _dragToSelectItemHeight));
+      final item = widget.controller.items[index];
+      if (item != null) {
+        final key = item[widget.model.keyField];
+        if (key != null) {
+          if (state) {
+            widget.controller.selection.add(key);
+          } else {
+            widget.controller.selection.remove(key);
           }
         }
       }

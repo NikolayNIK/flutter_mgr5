@@ -15,7 +15,7 @@ class MgrListModel extends MgrModel {
   final String title;
   final String? keyField, keyNameField;
   final List<MgrListCol> coldata;
-  final List<List<MgrListToolbtn>> toolbar;
+  final List<MgrListToolgrp> toolbar;
   final List<String> pageNames;
   final List<MgrListElem> pageData;
   final int? pageIndex;
@@ -60,14 +60,10 @@ class MgrListModel extends MgrModel {
             .expand((coldata) => coldata.findElements('col'))
             .map((col) => MgrListCol.fromXmlElement(pageData, col, messages)),
       ),
-      toolbar: List<List<MgrListToolbtn>>.unmodifiable(
-        metadata
-            .expand((metadata) => metadata.findElements('toolbar'))
-            .expand((toolbar) => toolbar.findElements('toolgrp'))
-            .map((toolgrp) => List<MgrListToolbtn>.unmodifiable(toolgrp
-                .findElements('toolbtn')
-                .map((e) => MgrListToolbtn.fromXmlElement(e, messages)))),
-      ),
+      toolbar: List<MgrListToolgrp>.unmodifiable(metadata
+          .expand((metadata) => metadata.findElements('toolbar'))
+          .expand((toolbar) => toolbar.findElements('toolgrp'))
+          .map((element) => MgrListToolgrp.fromXmlElement(element, messages))),
       pageNames:
           List.unmodifiable(doc.findElements('page').map((e) => e.innerText)),
       pageData: pageData,
@@ -278,6 +274,9 @@ IconData _parseIconRequire(String name) {
   return result;
 }
 
+IconData? _parseIconOrNull(String? name) =>
+    name == null ? null : _parseIcon(name);
+
 IconData? _parseIcon(String name) {
   switch (name) {
     case 't-new':
@@ -372,6 +371,23 @@ IconData? _parseIcon(String name) {
     default:
       return null;
   }
+}
+
+class MgrListToolgrp {
+  final String? name;
+  final IconData? img;
+  final List<MgrListToolbtn> buttons;
+
+  MgrListToolgrp({this.name, this.img, required this.buttons});
+
+  factory MgrListToolgrp.fromXmlElement(
+      XmlElement element, MgrMessages messages) =>
+      MgrListToolgrp(
+          name: element.attribute('name'),
+          img: element.convertAttribute('img', converter: _parseIconOrNull),
+          buttons: List<MgrListToolbtn>.unmodifiable(element
+              .findElements('toolbtn')
+              .map((e) => MgrListToolbtn.fromXmlElement(e, messages))));
 }
 
 enum MgrListToolbtnActivateSelectionType {

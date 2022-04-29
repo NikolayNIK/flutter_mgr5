@@ -254,7 +254,7 @@ class _MgrListState extends State<MgrList> {
               children: [
                 for (final toolgrp in widget.model.toolbar) ...[
                   const SizedBox(width: 8.0),
-                  for (final toolbtn in toolgrp)
+                  for (final toolbtn in toolgrp.buttons)
                     OptionalTooltip(
                       message: toolbtn.hint,
                       child: Builder(builder: (context) {

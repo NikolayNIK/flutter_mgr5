@@ -774,6 +774,9 @@ class _MgrListState extends State<MgrList> {
 
   Widget _buildTableBody(double itemHeight, _RowBuilder rowBuilder) {
     _dragToSelectItemHeight = itemHeight;
+    const dividerHeight = 1.0;
+
+    final itemCount = widget.controller.items.length;
     late final placeholder = _buildTableItemPlaceholder(rowBuilder);
     return ListenableBuilder(
       listenable: widget.controller.selection,
@@ -791,17 +794,32 @@ class _MgrListState extends State<MgrList> {
               child: ListView.builder(
                 controller: _verticalScrollController,
                 addRepaintBoundaries: false,
-                itemCount: widget.controller.items.length,
+                itemCount: itemCount,
                 itemExtent: itemHeight,
                 itemBuilder: (context, index) {
                   final elem = widget.controller.items[index];
-                  return ValueAnimatedSwitcher(
+                  final itemWidget = ValueAnimatedSwitcher(
                     value: elem == null,
                     duration: const Duration(milliseconds: 400),
                     child: elem == null
                         ? placeholder
                         : _buildTableItem(rowBuilder, elem),
                   );
+
+                  return index == itemCount - 1
+                      ? itemWidget
+                      : Stack(
+                          children: [
+                            itemWidget,
+                            const Align(
+                              alignment: Alignment.bottomLeft,
+                              child: Divider(
+                                height: dividerHeight,
+                                thickness: dividerHeight,
+                              ),
+                            ),
+                          ],
+                        );
                 },
               ),
             ),

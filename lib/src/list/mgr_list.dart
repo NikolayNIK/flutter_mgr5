@@ -468,36 +468,32 @@ class _MgrListState extends State<MgrList> {
                   final content = ClipPath(
                     clipBehavior: Clip.hardEdge,
                     clipper: clipper,
-                    child: SizedBox(
-                      height: rowHeight,
-                      child: Viewport(
-                        clipBehavior: Clip.none,
-                        axisDirection: AxisDirection.right,
-                        crossAxisDirection: AxisDirection.down,
-                        offset: offset,
-                        slivers: [
-                          SliverPadding(
-                            padding: itemInnerPadding,
-                            sliver: SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) {
-                                  final col = middle[index];
-                                  return SizedBox(
-                                    width: col.width,
-                                    height: rowHeight,
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: builder(col),
-                                    ),
-                                  );
-                                },
-                                addRepaintBoundaries: false,
-                                childCount: middle.length,
-                              ),
+                    child: Viewport(
+                      clipBehavior: Clip.none,
+                      axisDirection: AxisDirection.right,
+                      crossAxisDirection: AxisDirection.down,
+                      offset: offset,
+                      slivers: [
+                        SliverPadding(
+                          padding: itemInnerPadding,
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final col = middle[index];
+                                return SizedBox(
+                                  width: col.width,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: builder(col),
+                                  ),
+                                );
+                              },
+                              addRepaintBoundaries: false,
+                              childCount: middle.length,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   );
 
@@ -679,91 +675,95 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  Widget _buildTableHead(double itemHeight, _RowBuilder rowBuilder) => Material(
-        color: Colors.transparent,
-        child: rowBuilder(
-          ListenableBuilder(
-            listenable: widget.controller.selection,
-            builder: (context) => Tooltip(
-              message: widget.controller.selection.isNotEmpty
-                  ? 'Снять выделение'
-                  : 'Выделить все',
-              child: Checkbox(
-                  value: widget.controller.selection.isNotEmpty
-                      ? (widget.controller.selection.length ==
-                              widget.controller.items.length
-                          ? true
-                          : null)
-                      : false,
-                  tristate: true,
-                  onChanged: (value) => value ?? false
-                      ? widget.controller.selection.addAll(widget
-                          .controller.items
-                          .map((e) => e?[widget.model.keyField])
-                          .whereNotNull())
-                      : widget.controller.selection.clear()),
+  Widget _buildTableHead(double itemHeight, _RowBuilder rowBuilder) => SizedBox(
+        height: itemHeight,
+        child: Material(
+          color: Colors.transparent,
+          child: rowBuilder(
+            ListenableBuilder(
+              listenable: widget.controller.selection,
+              builder: (context) => Tooltip(
+                message: widget.controller.selection.isNotEmpty
+                    ? 'Снять выделение'
+                    : 'Выделить все',
+                child: Checkbox(
+                    value: widget.controller.selection.isNotEmpty
+                        ? (widget.controller.selection.length ==
+                                widget.controller.items.length
+                            ? true
+                            : null)
+                        : false,
+                    tristate: true,
+                    onChanged: (value) => value ?? false
+                        ? widget.controller.selection.addAll(widget
+                            .controller.items
+                            .map((e) => e?[widget.model.keyField])
+                            .whereNotNull())
+                        : widget.controller.selection.clear()),
+              ),
             ),
-          ),
-          (col) {
-            final text = Text(
-              col.col.label ?? '',
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.fade,
-              style: Theme.of(context).textTheme.titleSmall,
-            );
+            (col) {
+              final text = Text(
+                col.col.label ?? '',
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.fade,
+                style: Theme.of(context).textTheme.titleSmall,
+              );
 
-            return Material(
-              color: Colors.transparent,
-              child: OptionalTooltip(
-                message: col.col.hint,
-                child: InkResponse(
-                  radius: col.width / 2,
-                  onTap: () {},
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: col.col.sorted == null
-                          ? text
-                          : Row(
-                              children: [
-                                Flexible(child: text),
-                                col.col.sorted!.index == 1
-                                    ? Icon(col.col.sorted!.ascending
-                                        ? Icons.arrow_drop_up
-                                        : Icons.arrow_drop_down)
-                                    : Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 8.0),
-                                            child: Icon(
-                                                col.col.sorted!.ascending
-                                                    ? Icons.arrow_drop_up
-                                                    : Icons.arrow_drop_down),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                bottom: 8.0),
-                                            child: Text(
-                                              col.col.sorted!.index.toString(),
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelSmall,
+              return Material(
+                color: Colors.transparent,
+                child: OptionalTooltip(
+                  message: col.col.hint,
+                  child: InkResponse(
+                    radius: col.width / 2,
+                    onTap: () {},
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: col.col.sorted == null
+                            ? text
+                            : Row(
+                                children: [
+                                  Flexible(child: text),
+                                  col.col.sorted!.index == 1
+                                      ? Icon(col.col.sorted!.ascending
+                                          ? Icons.arrow_drop_up
+                                          : Icons.arrow_drop_down)
+                                      : Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 8.0),
+                                              child: Icon(
+                                                  col.col.sorted!.ascending
+                                                      ? Icons.arrow_drop_up
+                                                      : Icons.arrow_drop_down),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                              ],
-                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 8.0),
+                                              child: Text(
+                                                col.col.sorted!.index
+                                                    .toString(),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelSmall,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                ],
+                              ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       );
 

@@ -816,6 +816,8 @@ class _MgrListState extends State<MgrList> {
                               child: Divider(
                                 height: dividerHeight,
                                 thickness: dividerHeight,
+                                indent: 16.0,
+                                endIndent: 16.0,
                               ),
                             ),
                           ],

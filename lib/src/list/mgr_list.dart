@@ -512,12 +512,12 @@ class _MgrListState extends State<MgrList> {
                             children: [
                               SizedBox(
                                 width: rowHeight,
-                                height: rowHeight,
+                                height: double.infinity,
                                 child: checkbox,
                               ),
                               ...left.map((e) => SizedBox(
                                     width: e.width,
-                                    height: rowHeight,
+                                    height: double.infinity,
                                     child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: builder(e),
@@ -534,7 +534,7 @@ class _MgrListState extends State<MgrList> {
                                   .position.hasContentDimensions)
                                 SizedBox(
                                   width: _dividerHedgeOffset,
-                                  height: rowHeight,
+                                  height: double.infinity,
                                   child: CustomPaint(
                                     painter: _MgrListRowDividerPainter(
                                       dividerColor.withOpacity(
@@ -555,7 +555,7 @@ class _MgrListState extends State<MgrList> {
                                   alignment: Alignment.centerRight,
                                   child: SizedBox(
                                     width: _dividerHedgeOffset,
-                                    height: rowHeight,
+                                    height: double.infinity,
                                     child: CustomPaint(
                                       painter: _MgrListRowDividerPainter(
                                         dividerColor.withOpacity(dividerColor
@@ -580,7 +580,7 @@ class _MgrListState extends State<MgrList> {
                               children: [
                                 ...right.map((e) => SizedBox(
                                       width: e.width,
-                                      height: rowHeight,
+                                      height: double.infinity,
                                       child: Align(
                                         alignment: Alignment.centerLeft,
                                         child: builder(e),

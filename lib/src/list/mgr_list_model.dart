@@ -388,7 +388,7 @@ class MgrListToolgrp {
   MgrListToolgrp({this.name, this.img, required this.buttons});
 
   factory MgrListToolgrp.fromXmlElement(
-      XmlElement element, MgrMessages messages) =>
+          XmlElement element, MgrMessages messages) =>
       MgrListToolgrp(
           name: element.attribute('name'),
           img: element.convertAttribute('img', converter: _parseIconOrNull),

@@ -17,6 +17,7 @@ class MgrListController {
       _createSearchController();
   late final verticalTableScrollController = ScrollController();
   late final horizontalTableScrollController = ScrollController();
+  late final isFilterOpen = ValueNotifier(false);
 
   final String func;
   final Map<String, String>? params;

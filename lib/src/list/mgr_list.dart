@@ -182,6 +182,7 @@ class _MgrListState extends State<MgrList> {
       children: [
         _buildTitle(context),
         _buildToolbar(),
+        _buildFilter(),
         Expanded(child: _buildTable()),
       ],
     );
@@ -337,6 +338,125 @@ class _MgrListState extends State<MgrList> {
           filled: true,
           labelText: 'Быстрый поиск',
         ),
+      );
+
+  Widget _buildFilter() => ValueListenableBuilder<bool>(
+        valueListenable: widget.controller.isFilterOpen,
+        builder: (context, isFilterOpen, child) => widget.model.filterMessage ==
+                    null &&
+                !isFilterOpen
+            ? SizedBox()
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                child: Material(
+                  type: MaterialType.card,
+                  elevation: 2.0,
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  child: InkWell(
+                    onTap: isFilterOpen
+                        ? null
+                        : () => widget.controller.isFilterOpen.value = true,
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 56.0),
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 16.0,
+                            right: 8.0,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16.0,
+                                ),
+                                child: Icon(Icons.filter_alt),
+                              ),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: isFilterOpen
+                                        ? Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 0.0),
+                                            child: Shimmer.fromColors(
+                                              baseColor:
+                                                  Theme.of(context).splashColor,
+                                              highlightColor: Theme.of(context)
+                                                  .splashColor
+                                                  .withOpacity(0),
+                                              child: Wrap(
+                                                crossAxisAlignment:
+                                                    WrapCrossAlignment.start,
+                                                children: [
+                                                  for (var i = 0; i < 16; i++)
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                        4.0,
+                                                      ),
+                                                      child: Container(
+                                                        width: 240.0,
+                                                        height: 48.0,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                            Radius.circular(8),
+                                                          ),
+                                                          color: Colors.red,
+                                                        ),
+                                                      ),
+                                                    )
+                                                ],
+                                              ),
+                                            ),
+                                          )
+                                        : ConstrainedBox(
+                                            constraints: const BoxConstraints(
+                                              minHeight: 24.0,
+                                            ),
+                                            child: Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: Text(
+                                                widget.model.filterMessage ??
+                                                    '',
+                                              ),
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 56.0,
+                                height: 56.0,
+                                child: IconButton(
+                                  onPressed: () {},
+                                  icon: Icon(Icons.filter_alt_off),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 56.0,
+                                height: 56.0,
+                                child: ExpandIcon(
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                  isExpanded: isFilterOpen,
+                                  onPressed: (value) => widget
+                                      .controller.isFilterOpen.value = !value,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
       );
 
   /// TODO

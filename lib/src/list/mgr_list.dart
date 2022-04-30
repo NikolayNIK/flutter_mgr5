@@ -904,7 +904,7 @@ class _MgrListState extends State<MgrList> {
     final position = widget.controller.verticalTableScrollController.position;
     if (position.hasPixels) {
       final index = min(
-          widget.controller.items.length,
+          widget.controller.items.length - 1,
           max(
               0,
               (position.pixels + _dragToSelectVerticalPosition) ~/

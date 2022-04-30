@@ -11,7 +11,6 @@ typedef MgrListElemKey = String;
 class MgrListController {
   MgrClient mgrClient; // TODO вынести из контроллера
 
-  late final MgrListItemKeys itemKeys = _MgrListItemKeys();
   late final MgrListPages pages = _MgrListPages(this);
   late final MgrListItems items = _MgrListItems(this);
   late final TextEditingController searchTextEditingController =
@@ -200,10 +199,6 @@ abstract class MgrListItems implements Listenable, Iterable<MgrListElem?> {
 }
 
 abstract class MgrListSelection implements Set<MgrListElemKey>, Listenable {}
-
-abstract class MgrListItemKeys {
-  Key operator [](MgrListElemKey key);
-}
 
 class _MgrListPages extends MgrListPages
     with IterableMixin<MgrListPage>, ChangeNotifier {
@@ -407,12 +402,4 @@ class _MgrListSelection extends SetBase<MgrListElemKey>
 
   @override
   Set<MgrListElemKey> toSet() => _set.toSet();
-}
-
-class _MgrListItemKeys implements MgrListItemKeys {
-  final _map = <MgrListElemKey, Key>{};
-
-  @override
-  Key operator [](MgrListElemKey key) =>
-      _map.putIfAbsent(key, () => GlobalKey());
 }

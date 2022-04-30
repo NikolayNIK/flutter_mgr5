@@ -18,6 +18,7 @@ class MgrListModel extends MgrModel {
   final List<MgrListToolgrp> toolbar;
   final List<String> pageNames;
   final List<MgrListElem> pageData;
+  final String? filterMessage;
   final int? pageIndex;
   final int? elemCount;
 
@@ -32,6 +33,7 @@ class MgrListModel extends MgrModel {
     required this.pageData,
     required this.pageIndex,
     required this.elemCount,
+    required this.filterMessage,
   }) : super(func);
 
   factory MgrListModel.fromXmlDocument(XmlDocument doc,
@@ -69,6 +71,11 @@ class MgrListModel extends MgrModel {
       pageData: pageData,
       pageIndex: pNum == null ? null : int.tryParse(pNum.innerText),
       elemCount: pElems == null ? null : int.tryParse(pElems.innerText),
+      filterMessage: doc.findElements('p_filter').fold(
+          null,
+          (previousValue, element) => previousValue == null
+              ? element.innerText
+              : '$previousValue\n${element.innerText}'),
     );
   }
 }

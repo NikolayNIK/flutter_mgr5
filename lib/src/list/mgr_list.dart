@@ -176,17 +176,34 @@ class _MgrListState extends State<MgrList> {
         .removeListener(_dragToSelectUpdate);
   }
 
+  static const _filterHeight = 240.0;
+
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildTitle(context),
-        _buildToolbar(),
-        _buildFilter(),
-        Expanded(child: _buildTable()),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Column(
+        children: [
+          _buildTitle(context),
+          _buildToolbar(),
+          Expanded(
+            child: ValueListenableBuilder<bool>(
+              valueListenable: widget.controller.isFilterOpen,
+              builder: (context, isFilterOpen, child) => LayoutBuilder(
+                builder: (context, constraints) {
+                  bool expandFilter =
+                      isFilterOpen && constraints.maxHeight <= _filterHeight;
+                  return Column(
+                    children: expandFilter
+                        ? [Expanded(child: _buildFilter())]
+                        : [
+                            _buildFilter(),
+                            Expanded(child: _buildTable()),
+                          ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      );
 
   Widget _buildTitle(BuildContext context) => InkWell(
         onTap: () => widget.controller.items.clear(),
@@ -346,8 +363,8 @@ class _MgrListState extends State<MgrList> {
                     null &&
                 !isFilterOpen
             ? SizedBox()
-            : Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0.0),
+            : ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: _filterHeight),
                 child: Material(
                   type: MaterialType.card,
                   elevation: 2.0,

@@ -19,6 +19,7 @@ import 'package:flutter_mgr5/src/form/components/mgr_form_ticket.dart';
 import 'package:flutter_mgr5/src/form/components/mgr_form_tree.dart';
 import 'package:flutter_mgr5/src/form/mgr_exception_holder.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
+import 'package:flutter_mgr5/src/form/slist.dart';
 import 'package:flutter_mgr5/src/mgr_format.dart';
 import 'package:flutter_mgr5/src/mgr_messages.dart';
 import 'package:flutter_mgr5/src/mgr_model.dart';
@@ -38,6 +39,7 @@ class MgrFormModel extends MgrModel {
   final List<MgrFormPageModel> pages;
   final List<MgrFormButtonModel> buttons;
   final Map<String, MgrConditionalStateChecker> conditionalStateChecks;
+  final Map<String, Slist> slists;
 
   MgrFormModel({
     required String func,
@@ -47,6 +49,7 @@ class MgrFormModel extends MgrModel {
     required this.pages,
     required this.buttons,
     required this.conditionalStateChecks,
+    required this.slists,
   }) : super(func);
 
   factory MgrFormModel.fromXmlDocument(XmlDocument doc,
@@ -89,6 +92,18 @@ class MgrFormModel extends MgrModel {
       pages: _parsePages(messages, conditionalHideConsumer, form),
       buttons: _parseButtons(messages, form),
       conditionalStateChecks: Map.unmodifiable(conditionalStateChecks),
+      slists: {
+        for (final slist in rootElement.findElements('slist'))
+          slist.requireAttribute('name'): List.unmodifiable(
+            slist.childElements.map(
+              (item) => SlistEntry(
+                item.attribute('key'),
+                item.innerText,
+                item.attribute('depend'),
+              ),
+            ),
+          ),
+      },
     );
   }
 

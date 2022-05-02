@@ -5,12 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mgr5/extensions/datetime_extensions.dart';
 import 'package:flutter_mgr5/extensions/iterator_extensions.dart';
-import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:flutter_mgr5/src/form/components/mgr_form_select.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/src/form/slist.dart';
 import 'package:flutter_mgr5/src/mgr_exception.dart';
-import 'package:xml/xml.dart';
 
 abstract class MgrFormControllerStringParamMap implements Map<String, String> {
   @override
@@ -31,7 +29,7 @@ abstract class MgrFormSlistMap implements Map<String, ValueNotifier<Slist>> {
   @override
   ValueNotifier<Slist> operator [](covariant Object key);
 
-  void _update({XmlDocument? doc, MgrFormModel? model});
+  void set(MgrFormModel model);
 
   void _notifyChanged();
 }
@@ -234,44 +232,36 @@ class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
   }
 
   @override
-  void _update({XmlDocument? doc, MgrFormModel? model}) {
+  void set(MgrFormModel model) {
     bool isChanged = false;
-    if (doc != null) {
-      for (final slist in doc.rootElement.findElements('slist')) {
-        isChanged = true;
-        _original
-            .putIfAbsent(slist.requireAttribute('name'),
-                () => ValueNotifier(_emptySlist))
-            .value = [
-          for (final item in slist.childElements)
-            if (item.name.local == 'val')
-              SlistEntry(item.attribute('key'), item.innerText,
-                  item.attribute('depend')),
-        ];
-      }
+    for (final slist in model.slists.entries) {
+      isChanged = true;
+      _original.putIfAbsent(slist.key, () => ValueNotifier(_emptySlist)).value =
+          slist.value;
     }
 
-    if (model != null) {
-      for (final control in model.pages
-          .expand((element) => element.fields)
-          .expand((element) => element.controls)
-          .whereType<SelectFormFieldControlModel>()) {
-        final depend = control.depend;
-        if (depend == null) {
-          if (_dependencies.remove(control.name) != null) {
-            isChanged = true;
-          }
-        } else {
-          if (_dependencies[control.name] != depend) {
-            _dependencies[control.name] = depend;
-            isChanged = true;
-          }
+    for (final control in model.pages
+        .expand((element) => element.fields)
+        .expand((element) => element.controls)
+        .whereType<SelectFormFieldControlModel>()) {
+      final depend = control.depend;
+      if (depend == null) {
+        /*
+         // на setvalues depend почему-то обрезается,
+         // поэтому зависимости не удаляем
+        if (_dependencies.remove(control.name) != null) {
+          isChanged = true;
+        }*/
+      } else {
+        if (_dependencies[control.name] != depend) {
+          _dependencies[control.name] = depend;
+          isChanged = true;
         }
       }
     }
 
     if (isChanged) {
-      controller._notifyChanged(null);
+      _notifyChanged();
     }
   }
 
@@ -346,8 +336,7 @@ class MgrFormController implements Listenable {
   final ValueNotifier<MgrException?> exception = ValueNotifier(null);
 
   MgrFormController(MgrFormModel model) {
-    params.set(model);
-    slists._update(model: model);
+    update(model);
 
     for (final control in model.pages
         .expand((page) => page.fields)
@@ -362,8 +351,9 @@ class MgrFormController implements Listenable {
         .forEach((name) => pages[name].collapse());
   }
 
-  void update({required XmlDocument doc}) {
-    slists._update(doc: doc);
+  void update(MgrFormModel model) {
+    slists.set(model);
+    params.set(model);
   }
 
   @override

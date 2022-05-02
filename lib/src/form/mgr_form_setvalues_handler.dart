@@ -133,8 +133,7 @@ class MgrFormSetValuesHandlerImpl extends MgrFormHandler
           _finalSvFields.add(name);
         }
 
-        formController.params.set(MgrFormModel.fromXmlDocument(doc));
-        formController.update(doc: doc);
+        formController.update(MgrFormModel.fromXmlDocument(doc));
 
         if (isFinal) {
           _finalSvFields.remove(name);

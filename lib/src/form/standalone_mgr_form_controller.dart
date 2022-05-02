@@ -15,11 +15,11 @@ class StandaloneMgrFormController extends MgrFormController {
   factory StandaloneMgrFormController.fromXmlDocument(
       MgrClient mgrClient, XmlDocument doc,
       [MgrFormModel? model]) {
+    model ??= MgrFormModel.fromXmlDocument(doc);
     final controller = StandaloneMgrFormController(
       mgrClient: mgrClient,
-      model: model ?? MgrFormModel.fromXmlDocument(doc),
+      model: model,
     );
-    controller.update(doc: doc);
     return controller;
   }
 

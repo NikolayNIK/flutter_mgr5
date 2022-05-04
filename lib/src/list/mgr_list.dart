@@ -1217,9 +1217,9 @@ class _Col {
 }
 
 typedef _RowBuilder = Widget Function(
-    Widget checkbox,
-    Widget Function(_Col col),
-    );
+  Widget checkbox,
+  Widget Function(_Col col),
+);
 
 const _dividerHedgeOffset = 8.0;
 const _dividerWidth = 2.0;
@@ -1282,9 +1282,9 @@ class _MgrListRowDividerPainter extends CustomPainter {
   final bool flip;
 
   _MgrListRowDividerPainter(
-      this.color, {
-        required this.flip,
-      });
+    this.color, {
+    required this.flip,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1293,16 +1293,16 @@ class _MgrListRowDividerPainter extends CustomPainter {
       canvas.drawPath(
           flip
               ? (Path()
-            ..moveTo(size.width, 0)
-            ..lineTo(0, oneForthHeight)
-            ..lineTo(size.width, 2 * oneForthHeight)
-            ..lineTo(0, 3 * oneForthHeight)
-            ..lineTo(size.width, size.height))
+                ..moveTo(size.width, 0)
+                ..lineTo(0, oneForthHeight)
+                ..lineTo(size.width, 2 * oneForthHeight)
+                ..lineTo(0, 3 * oneForthHeight)
+                ..lineTo(size.width, size.height))
               : (Path()
-            ..lineTo(size.width, oneForthHeight)
-            ..lineTo(0, 2 * oneForthHeight)
-            ..lineTo(size.width, 3 * oneForthHeight)
-            ..lineTo(0, size.height)),
+                ..lineTo(size.width, oneForthHeight)
+                ..lineTo(0, 2 * oneForthHeight)
+                ..lineTo(size.width, 3 * oneForthHeight)
+                ..lineTo(0, size.height)),
           Paint()
             ..color = color
             ..style = PaintingStyle.stroke

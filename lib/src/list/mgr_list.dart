@@ -11,116 +11,6 @@ import 'package:flutter_mgr5/src/optional_tooltip.dart';
 import 'package:flutter_mgr5/value_animated_switcher.dart';
 import 'package:shimmer/shimmer.dart';
 
-class _Col {
-  final MgrListCol col;
-  final double width;
-
-  _Col({
-    required this.col,
-    required this.width,
-  });
-}
-
-typedef _RowBuilder = Widget Function(
-  Widget checkbox,
-  Widget Function(_Col col),
-);
-
-const _dividerHedgeOffset = 8.0;
-const _dividerWidth = 2.0;
-const _dividerHalfWidth = _dividerWidth / 2.0;
-
-class _MgrListRowClipper extends CustomClipper<Path> {
-  final bool doLeft, doRight;
-
-  _MgrListRowClipper({
-    required this.doLeft,
-    required this.doRight,
-  });
-
-  @override
-  Path getClip(Size size) {
-    late final oneForthHeight = size.height / 4;
-    late final halfHeight = 2 * oneForthHeight;
-    late final twoThirdsHeight = 3 * oneForthHeight;
-    final rightEdge = size.width - _dividerHalfWidth;
-
-    final path = Path()
-      ..moveTo(_dividerHalfWidth, 0)
-      ..lineTo(rightEdge, 0);
-
-    if (doRight) {
-      final rightOffsetEdge =
-          size.width - _dividerHedgeOffset - _dividerHalfWidth;
-
-      path
-        ..lineTo(rightOffsetEdge, oneForthHeight)
-        ..lineTo(rightEdge, halfHeight)
-        ..lineTo(rightOffsetEdge, twoThirdsHeight);
-    }
-
-    path
-      ..lineTo(rightEdge, size.height)
-      ..lineTo(_dividerHalfWidth, size.height);
-
-    if (doLeft) {
-      final leftOffsetEdge = _dividerHedgeOffset + _dividerHalfWidth;
-
-      path
-        ..lineTo(leftOffsetEdge, twoThirdsHeight)
-        ..lineTo(_dividerHalfWidth, halfHeight)
-        ..lineTo(leftOffsetEdge, oneForthHeight);
-    }
-
-    path.close();
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant _MgrListRowClipper oldClipper) =>
-      oldClipper.doLeft != doLeft || oldClipper.doRight != doRight;
-}
-
-class _MgrListRowDividerPainter extends CustomPainter {
-  final Color color;
-  final bool flip;
-
-  _MgrListRowDividerPainter(
-    this.color, {
-    required this.flip,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (color.opacity > 0) {
-      final oneForthHeight = size.height / 4;
-      canvas.drawPath(
-          flip
-              ? (Path()
-                ..moveTo(size.width, 0)
-                ..lineTo(0, oneForthHeight)
-                ..lineTo(size.width, 2 * oneForthHeight)
-                ..lineTo(0, 3 * oneForthHeight)
-                ..lineTo(size.width, size.height))
-              : (Path()
-                ..lineTo(size.width, oneForthHeight)
-                ..lineTo(0, 2 * oneForthHeight)
-                ..lineTo(size.width, 3 * oneForthHeight)
-                ..lineTo(0, size.height)),
-          Paint()
-            ..color = color
-            ..style = PaintingStyle.stroke
-            ..strokeCap = StrokeCap.butt
-            ..strokeWidth = _dividerWidth);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _MgrListRowDividerPainter oldDelegate) =>
-      oldDelegate.color != color;
-}
-
 typedef MgrListColumnPressedCallback = void Function(MgrListCol col);
 
 typedef MgrListToolbtnCallback = void Function(
@@ -1275,4 +1165,114 @@ class _MgrListState extends State<MgrList> {
           },
         ),
       );
+}
+
+class _Col {
+  final MgrListCol col;
+  final double width;
+
+  _Col({
+    required this.col,
+    required this.width,
+  });
+}
+
+typedef _RowBuilder = Widget Function(
+    Widget checkbox,
+    Widget Function(_Col col),
+    );
+
+const _dividerHedgeOffset = 8.0;
+const _dividerWidth = 2.0;
+const _dividerHalfWidth = _dividerWidth / 2.0;
+
+class _MgrListRowClipper extends CustomClipper<Path> {
+  final bool doLeft, doRight;
+
+  _MgrListRowClipper({
+    required this.doLeft,
+    required this.doRight,
+  });
+
+  @override
+  Path getClip(Size size) {
+    late final oneForthHeight = size.height / 4;
+    late final halfHeight = 2 * oneForthHeight;
+    late final twoThirdsHeight = 3 * oneForthHeight;
+    final rightEdge = size.width - _dividerHalfWidth;
+
+    final path = Path()
+      ..moveTo(_dividerHalfWidth, 0)
+      ..lineTo(rightEdge, 0);
+
+    if (doRight) {
+      final rightOffsetEdge =
+          size.width - _dividerHedgeOffset - _dividerHalfWidth;
+
+      path
+        ..lineTo(rightOffsetEdge, oneForthHeight)
+        ..lineTo(rightEdge, halfHeight)
+        ..lineTo(rightOffsetEdge, twoThirdsHeight);
+    }
+
+    path
+      ..lineTo(rightEdge, size.height)
+      ..lineTo(_dividerHalfWidth, size.height);
+
+    if (doLeft) {
+      final leftOffsetEdge = _dividerHedgeOffset + _dividerHalfWidth;
+
+      path
+        ..lineTo(leftOffsetEdge, twoThirdsHeight)
+        ..lineTo(_dividerHalfWidth, halfHeight)
+        ..lineTo(leftOffsetEdge, oneForthHeight);
+    }
+
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant _MgrListRowClipper oldClipper) =>
+      oldClipper.doLeft != doLeft || oldClipper.doRight != doRight;
+}
+
+class _MgrListRowDividerPainter extends CustomPainter {
+  final Color color;
+  final bool flip;
+
+  _MgrListRowDividerPainter(
+      this.color, {
+        required this.flip,
+      });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (color.opacity > 0) {
+      final oneForthHeight = size.height / 4;
+      canvas.drawPath(
+          flip
+              ? (Path()
+            ..moveTo(size.width, 0)
+            ..lineTo(0, oneForthHeight)
+            ..lineTo(size.width, 2 * oneForthHeight)
+            ..lineTo(0, 3 * oneForthHeight)
+            ..lineTo(size.width, size.height))
+              : (Path()
+            ..lineTo(size.width, oneForthHeight)
+            ..lineTo(0, 2 * oneForthHeight)
+            ..lineTo(size.width, 3 * oneForthHeight)
+            ..lineTo(0, size.height)),
+          Paint()
+            ..color = color
+            ..style = PaintingStyle.stroke
+            ..strokeCap = StrokeCap.butt
+            ..strokeWidth = _dividerWidth);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _MgrListRowDividerPainter oldDelegate) =>
+      oldDelegate.color != color;
 }

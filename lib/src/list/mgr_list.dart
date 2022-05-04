@@ -194,9 +194,9 @@ class _MgrListState extends State<MgrList> {
                               message: toolbtn.hint,
                               child: InkResponse(
                                 onTap: enabled
-                                    ? () => widget.onToolbtnPressed!(
-                                        toolbtn,
-                                        Iterable.generate(selectionList.length)
+                                    ? () async {
+                                        final elems = Iterable.generate(
+                                                selectionList.length)
                                             .where((i) {
                                           final elem = selectedElems[i] ??
                                               widget.controller.items
@@ -205,7 +205,46 @@ class _MgrListState extends State<MgrList> {
                                           return elem == null ||
                                               toolbtn.elemStateChecker(elem) ==
                                                   MgrListToolbtnState.shown;
-                                        }).map((i) => selectionList[i]))
+                                        });
+
+                                        if (toolbtn.confirmationRequired) {
+                                          if (await showDialog<dynamic>(
+                                                context: context,
+                                                builder: (context) =>
+                                                    AlertDialog(
+                                                  scrollable: true,
+                                                  content: Text(toolbtn
+                                                          .confirmationMessageBuilder!(
+                                                        elems.map((i) =>
+                                                            selectedElems[i]),
+                                                      ) ??
+                                                      ''),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                              context, false),
+                                                      child: Text('ОТМЕНА'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                              context, true),
+                                                      child: Text('OK'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ) !=
+                                              true) {
+                                            return;
+                                          }
+                                        }
+
+                                        widget.onToolbtnPressed!(
+                                          toolbtn,
+                                          elems.map((i) => selectionList[i]),
+                                        );
+                                      }
                                     : null,
                                 child: AnimatedSwitcher(
                                   duration: const Duration(milliseconds: 200),

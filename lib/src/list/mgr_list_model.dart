@@ -453,12 +453,23 @@ extension MgrListToolbtnActivateSelectionTypeExtension
   }
 }
 
+enum MgrListToolbtnState {
+  shown,
+  disabled,
+  hidden,
+}
+
+typedef MgrListToolbtnStateChecker = MgrListToolbtnState Function(
+  Iterable<MgrListElem?> selection,
+);
+
 @immutable
 class MgrListToolbtn {
   final String name;
   final String? label, hint;
   final IconData? icon;
   final MgrListToolbtnActivateSelectionType selectionType;
+  final MgrListToolbtnStateChecker stateChecker;
 
   const MgrListToolbtn({
     required this.name,
@@ -466,18 +477,77 @@ class MgrListToolbtn {
     required this.hint,
     required this.icon,
     required this.selectionType,
+    required this.stateChecker,
   });
 
   factory MgrListToolbtn.fromXmlElement(
-      XmlElement element, MgrMessages messages) {
+    XmlElement element,
+    MgrMessages messages,
+  ) {
     final name = element.requireAttribute('name');
+    final MgrListToolbtnState defaultState =
+        element.childElements.any((element) => element.name.local == 'show')
+            ? MgrListToolbtnState.disabled
+            : MgrListToolbtnState.shown;
+
+    MgrListToolbtnState Function(MgrListElem elem) stateChecker =
+        (elem) => defaultState;
+    for (final condition in element.childElements) {
+      final previous = stateChecker;
+      final name = condition.attribute('name');
+      final value = condition.attribute('value');
+      final MgrListToolbtnState targetState;
+      switch (condition.name.local) {
+        case 'hide':
+          targetState = MgrListToolbtnState.disabled;
+          break;
+        case 'show':
+          targetState = MgrListToolbtnState.shown;
+          break;
+        case 'remove':
+          targetState = MgrListToolbtnState.hidden;
+          break;
+        default:
+          throw MgrFormatException(
+              'Invalid child name ${condition.positionDescription}');
+      }
+
+      stateChecker = name == null || value == null
+          ? (elem) => targetState
+          : (elem) {
+              if (elem[name] == value) {
+                return targetState;
+              }
+
+              return previous(elem);
+            };
+    }
+
+    final finalStateChecker = stateChecker;
+    final selectionType =
+        MgrListToolbtnActivateSelectionTypeExtension.fromXmlElement(element);
+
     return MgrListToolbtn(
       name: element.requireAttribute('name'),
       label: messages['short_$name'],
       hint: messages['hint_$name'],
       icon: element.requireConvertAttribute('img', converter: _parseIcon),
-      selectionType:
-          MgrListToolbtnActivateSelectionTypeExtension.fromXmlElement(element),
+      selectionType: selectionType,
+      stateChecker: (selection) {
+        if (selectionType.check(selection.length)) {
+          MgrListToolbtnState? state;
+          for (final elem in selection.whereNotNull()) {
+            state = finalStateChecker(elem);
+            if (state == MgrListToolbtnState.shown) {
+              return state;
+            }
+          }
+
+          return state ?? MgrListToolbtnState.shown;
+        } else {
+          return MgrListToolbtnState.disabled;
+        }
+      },
     );
   }
 }

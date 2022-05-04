@@ -123,14 +123,21 @@ class _MgrListRowDividerPainter extends CustomPainter {
 
 typedef MgrListColumnPressedCallback = void Function(MgrListCol col);
 
+typedef MgrListToolbtnCallback = void Function(
+  MgrListToolbtn button,
+  Iterable<MgrListElemKey> keys,
+);
+
 class MgrList extends StatefulWidget {
   final MgrListModel model;
   final MgrListController controller;
+  final MgrListToolbtnCallback? onToolbtnPressed;
 
   const MgrList({
     Key? key,
     required this.model,
     required this.controller,
+    required this.onToolbtnPressed,
   }) : super(key: key);
 
   @override
@@ -262,110 +269,125 @@ class _MgrListState extends State<MgrList> {
                   ),
       );
 
-  Widget _buildToolbarButtons() => Align(
-        alignment: Alignment.centerLeft,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: ListenableBuilder(
-            listenable: widget.controller.selection,
-            builder: (context) {
-              final selectionList =
-                  widget.controller.selection.toList(growable: false);
+  Widget _buildToolbarButtons() => widget.onToolbtnPressed == null
+      ? SizedBox()
+      : Align(
+          alignment: Alignment.centerLeft,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ListenableBuilder(
+              listenable: widget.controller.selection,
+              builder: (context) {
+                final selectionList =
+                    widget.controller.selection.toList(growable: false);
 
-              final selectedElems = List<MgrListElem?>.filled(
-                selectionList.length,
-                null,
-              );
+                final selectedElems = List<MgrListElem?>.filled(
+                  selectionList.length,
+                  null,
+                );
 
-              return Row(
-                children: [
-                  for (final toolgrp in widget.model.toolbar) ...[
-                    const SizedBox(width: 8.0),
-                    for (final toolbtn in toolgrp.buttons)
-                      Builder(builder: (context) {
-                        final state = toolbtn.stateChecker(
-                            Iterable.generate(selectedElems.length).map((i) =>
-                                selectedElems[i] ??= widget.controller.items
-                                    .findElemByKey(selectionList[i])));
-                        if (state == MgrListToolbtnState.hidden) {
-                          return SizedBox();
-                        } else {
-                          final enabled = state == MgrListToolbtnState.shown;
-                          return OptionalTooltip(
-                            message: toolbtn.hint,
-                            child: InkResponse(
-                              onTap: enabled ? () {} : null,
-                              child: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 200),
-                                child: ConstrainedBox(
-                                  key: ValueKey(enabled),
-                                  constraints: BoxConstraints(
-                                      minWidth: 56.0 +
-                                          4.0 *
-                                              Theme.of(context)
-                                                  .visualDensity
-                                                  .horizontal,
-                                      minHeight: 56.0 +
-                                          4.0 *
-                                              Theme.of(context)
-                                                  .visualDensity
-                                                  .vertical),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                      left: 8.0,
-                                      right: 8.0,
-                                      bottom: 8.0,
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          toolbtn.icon,
-                                          color: enabled
-                                              ? Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface
-                                              : Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface
-                                                  .withOpacity(.25),
-                                        ),
-                                        if (toolbtn.label != null)
-                                          Text(
-                                            toolbtn.label!,
-                                            textAlign: TextAlign.center,
-                                            style: (Theme.of(context)
-                                                        .textTheme
-                                                        .labelMedium ??
-                                                    TextStyle())
-                                                .copyWith(
-                                                    color: enabled
-                                                        ? Theme.of(context)
-                                                            .colorScheme
-                                                            .onSurface
-                                                        : Theme.of(context)
-                                                            .colorScheme
-                                                            .onSurface
-                                                            .withOpacity(.5)),
+                return Row(
+                  children: [
+                    for (final toolgrp in widget.model.toolbar) ...[
+                      const SizedBox(width: 8.0),
+                      for (final toolbtn in toolgrp.buttons)
+                        Builder(builder: (context) {
+                          final state = toolbtn.selectionStateChecker(
+                              Iterable.generate(selectedElems.length).map((i) =>
+                                  selectedElems[i] ??= widget.controller.items
+                                      .findElemByKey(selectionList[i])));
+                          if (state == MgrListToolbtnState.hidden) {
+                            return SizedBox();
+                          } else {
+                            final enabled = state == MgrListToolbtnState.shown;
+                            return OptionalTooltip(
+                              message: toolbtn.hint,
+                              child: InkResponse(
+                                onTap: enabled
+                                    ? () => widget.onToolbtnPressed!(
+                                        toolbtn,
+                                        Iterable.generate(selectionList.length)
+                                            .where((i) {
+                                          final elem = selectedElems[i] ??
+                                              widget.controller.items
+                                                  .findElemByKey(
+                                                      selectionList[i]);
+                                          return elem == null ||
+                                              toolbtn.elemStateChecker(elem) ==
+                                                  MgrListToolbtnState.shown;
+                                        }).map((i) => selectionList[i]))
+                                    : null,
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 200),
+                                  child: ConstrainedBox(
+                                    key: ValueKey(enabled),
+                                    constraints: BoxConstraints(
+                                        minWidth: 56.0 +
+                                            4.0 *
+                                                Theme.of(context)
+                                                    .visualDensity
+                                                    .horizontal,
+                                        minHeight: 56.0 +
+                                            4.0 *
+                                                Theme.of(context)
+                                                    .visualDensity
+                                                    .vertical),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                        left: 8.0,
+                                        right: 8.0,
+                                        bottom: 8.0,
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            toolbtn.icon,
+                                            color: enabled
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                : Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withOpacity(.25),
                                           ),
-                                      ],
+                                          if (toolbtn.label != null)
+                                            Text(
+                                              toolbtn.label!,
+                                              textAlign: TextAlign.center,
+                                              style: (Theme.of(context)
+                                                          .textTheme
+                                                          .labelMedium ??
+                                                      TextStyle())
+                                                  .copyWith(
+                                                      color: enabled
+                                                          ? Theme.of(context)
+                                                              .colorScheme
+                                                              .onSurface
+                                                          : Theme.of(context)
+                                                              .colorScheme
+                                                              .onSurface
+                                                              .withOpacity(.5)),
+                                            ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        }
-                      }),
-                    const SizedBox(width: 24.0),
+                            );
+                          }
+                        }),
+                      const SizedBox(width: 24.0),
+                    ],
                   ],
-                ],
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
-      );
+        );
 
   Widget _buildToolbarSearch() => TextField(
         controller: widget.controller.searchTextEditingController,

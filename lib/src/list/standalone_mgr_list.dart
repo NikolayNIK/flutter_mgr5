@@ -7,12 +7,14 @@ class StandaloneMgrList extends StatefulWidget {
   final MgrClient mgrClient;
   final String func;
   final Map<String, String>? params;
+  final MgrListToolbtnCallback? onToolbtnPressed;
 
   const StandaloneMgrList({
     Key? key,
     required this.mgrClient,
     required this.func,
     this.params,
+    required this.onToolbtnPressed,
   }) : super(key: key);
 
   @override
@@ -63,5 +65,9 @@ class _StandaloneMgrListState extends State<StandaloneMgrList> {
           builder: (context, snapshot) => snapshot.hasError
               ? Text(snapshot.error?.toString() ?? 'unknown error')
               : const Center(child: CircularProgressIndicator.adaptive()))
-      : MgrList(model: _model!, controller: _controller!);
+      : MgrList(
+          model: _model!,
+          controller: _controller!,
+          onToolbtnPressed: widget.onToolbtnPressed,
+        );
 }

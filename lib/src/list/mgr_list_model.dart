@@ -13,7 +13,7 @@ typedef MgrListElem = Map<String, String>;
 @immutable
 class MgrListModel extends MgrModel {
   final String title;
-  final String? keyField, keyNameField;
+  final String keyField, keyNameField;
   final List<MgrListCol> coldata;
   final List<MgrListToolgrp> toolbar;
   final List<String> pageNames;
@@ -51,11 +51,13 @@ class MgrListModel extends MgrModel {
         .map((e) => Map.fromIterable(e.childElements,
             key: (element) => (element as XmlElement).name.local,
             value: (element) => (element as XmlElement).innerText)));
+    final keyField = metadata.maybeFirst?.attribute('key') ?? 'id';
+    final keynameField = metadata.maybeFirst?.attribute('keyname') ?? keyField;
     return MgrListModel(
       func: doc.requireAttribute('func'),
       title: messages['title'] ?? '',
-      keyField: metadata.maybeFirst?.attribute('key'),
-      keyNameField: doc.attribute('keyname'),
+      keyField: keyField,
+      keyNameField: keynameField,
       coldata: List.unmodifiable(
         metadata
             .expand((metadata) => metadata.findElements('coldata'))
@@ -65,7 +67,8 @@ class MgrListModel extends MgrModel {
       toolbar: List<MgrListToolgrp>.unmodifiable(metadata
           .expand((metadata) => metadata.findElements('toolbar'))
           .expand((toolbar) => toolbar.findElements('toolgrp'))
-          .map((element) => MgrListToolgrp.fromXmlElement(element, messages))),
+          .map((element) =>
+              MgrListToolgrp.fromXmlElement(keynameField, element, messages))),
       pageNames:
           List.unmodifiable(doc.findElements('page').map((e) => e.innerText)),
       pageData: pageData,
@@ -388,13 +391,17 @@ class MgrListToolgrp {
   MgrListToolgrp({this.name, this.img, required this.buttons});
 
   factory MgrListToolgrp.fromXmlElement(
-          XmlElement element, MgrMessages messages) =>
+    String keynameField,
+    XmlElement element,
+    MgrMessages messages,
+  ) =>
       MgrListToolgrp(
           name: element.attribute('name'),
           img: element.convertAttribute('img', converter: _parseIconOrNull),
           buttons: List<MgrListToolbtn>.unmodifiable(element
               .findElements('toolbtn')
-              .map((e) => MgrListToolbtn.fromXmlElement(e, messages))));
+              .map((e) =>
+                  MgrListToolbtn.fromXmlElement(keynameField, e, messages))));
 }
 
 enum MgrListToolbtnActivateSelectionType {
@@ -475,6 +482,9 @@ class MgrListToolbtn {
   final MgrListToolbtnActivateSelectionType selectionType;
   final MgrListToolbtnElemStateChecker elemStateChecker;
   final MgrListToolbtnSelectionStateChecker selectionStateChecker;
+  final bool confirmationRequired;
+  final String? Function(Iterable<MgrListElem?> elems)?
+      confirmationMessageBuilder;
 
   const MgrListToolbtn({
     required this.name,
@@ -484,9 +494,12 @@ class MgrListToolbtn {
     required this.selectionType,
     required this.elemStateChecker,
     required this.selectionStateChecker,
+    required this.confirmationRequired,
+    required this.confirmationMessageBuilder,
   });
 
   factory MgrListToolbtn.fromXmlElement(
+    final String keynameField,
     XmlElement element,
     MgrMessages messages,
   ) {
@@ -496,8 +509,7 @@ class MgrListToolbtn {
             ? MgrListToolbtnState.disabled
             : MgrListToolbtnState.shown;
 
-    MgrListToolbtnElemStateChecker stateChecker =
-        (elem) => defaultState;
+    MgrListToolbtnElemStateChecker stateChecker = (elem) => defaultState;
     for (final condition in element.childElements) {
       final previous = stateChecker;
       final name = condition.attribute('name');
@@ -532,9 +544,21 @@ class MgrListToolbtn {
     final finalStateChecker = stateChecker;
     final selectionType =
         MgrListToolbtnActivateSelectionTypeExtension.fromXmlElement(element);
+    final confirmationRequired = {
+      'group',
+      'groupdownload',
+    }.contains(element.requireAttribute('type'));
+
+    final confirmationMessage = messages['msg_confirm_$name'];
+    final confirmationDelimiter =
+        '${messages['msg_confirm_delimiter'] ?? ','}\n';
+    final confirmationMessageBuilder = confirmationRequired
+        ? (Iterable<MgrListElem?> elems) =>
+            '$confirmationMessage\n${elems.whereNotNull().map((e) => e[keynameField]).join(confirmationDelimiter)}?'
+        : null;
 
     return MgrListToolbtn(
-      name: element.requireAttribute('name'),
+      name: name,
       label: messages['short_$name'],
       hint: messages['hint_$name'],
       icon: element.requireConvertAttribute('img', converter: _parseIcon),
@@ -555,6 +579,8 @@ class MgrListToolbtn {
           return MgrListToolbtnState.disabled;
         }
       },
+      confirmationRequired: confirmationRequired,
+      confirmationMessageBuilder: confirmationMessageBuilder,
     );
   }
 }

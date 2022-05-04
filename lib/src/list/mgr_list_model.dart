@@ -459,7 +459,11 @@ enum MgrListToolbtnState {
   hidden,
 }
 
-typedef MgrListToolbtnStateChecker = MgrListToolbtnState Function(
+typedef MgrListToolbtnElemStateChecker = MgrListToolbtnState Function(
+  MgrListElem elem,
+);
+
+typedef MgrListToolbtnSelectionStateChecker = MgrListToolbtnState Function(
   Iterable<MgrListElem?> selection,
 );
 
@@ -469,7 +473,8 @@ class MgrListToolbtn {
   final String? label, hint;
   final IconData? icon;
   final MgrListToolbtnActivateSelectionType selectionType;
-  final MgrListToolbtnStateChecker stateChecker;
+  final MgrListToolbtnElemStateChecker elemStateChecker;
+  final MgrListToolbtnSelectionStateChecker selectionStateChecker;
 
   const MgrListToolbtn({
     required this.name,
@@ -477,7 +482,8 @@ class MgrListToolbtn {
     required this.hint,
     required this.icon,
     required this.selectionType,
-    required this.stateChecker,
+    required this.elemStateChecker,
+    required this.selectionStateChecker,
   });
 
   factory MgrListToolbtn.fromXmlElement(
@@ -490,7 +496,7 @@ class MgrListToolbtn {
             ? MgrListToolbtnState.disabled
             : MgrListToolbtnState.shown;
 
-    MgrListToolbtnState Function(MgrListElem elem) stateChecker =
+    MgrListToolbtnElemStateChecker stateChecker =
         (elem) => defaultState;
     for (final condition in element.childElements) {
       final previous = stateChecker;
@@ -533,7 +539,8 @@ class MgrListToolbtn {
       hint: messages['hint_$name'],
       icon: element.requireConvertAttribute('img', converter: _parseIcon),
       selectionType: selectionType,
-      stateChecker: (selection) {
+      elemStateChecker: finalStateChecker,
+      selectionStateChecker: (selection) {
         if (selectionType.check(selection.length)) {
           MgrListToolbtnState? state;
           for (final elem in selection.whereNotNull()) {

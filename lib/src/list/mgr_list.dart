@@ -389,176 +389,217 @@ class _MgrListState extends State<MgrList> {
                     null &&
                 !isFilterOpen
             ? SizedBox()
-            : ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: _filterHeight),
-                child: Material(
-                  type: MaterialType.card,
-                  elevation: 2.0,
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  child: InkWell(
-                    onTap: isFilterOpen
-                        ? null
-                        : () => widget.controller.isFilterOpen.value = true,
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(minHeight: 56.0),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            left: 16.0,
-                            right: 8.0,
+            : LayoutBuilder(
+                builder: (context, constraints) {
+                  final isVertical = constraints.maxWidth <= 512;
+                  late final form = widget.filterModel == null ||
+                          widget.filterController == null
+                      ? SingleChildScrollView(
+                          child: Shimmer.fromColors(
+                            baseColor: Theme.of(context).splashColor,
+                            highlightColor:
+                                Theme.of(context).splashColor.withOpacity(0),
+                            child: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.start,
+                              children: [
+                                for (var i = 0; i < 16; i++)
+                                  Padding(
+                                    padding: const EdgeInsets.all(
+                                      4.0,
+                                    ),
+                                    child: Container(
+                                      width: 240.0,
+                                      height: 48.0,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(8),
+                                        ),
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  )
+                              ],
+                            ),
                           ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        )
+                      : _MgrListFilterForm(
+                          model: widget.filterModel!,
+                          controller: widget.filterController!,
+                        );
+
+                  Widget body = Padding(
+                    padding: const EdgeInsets.only(
+                      left: 16.0,
+                      right: 8.0,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16.0,
+                          ),
+                          child: Icon(Icons.filter_alt),
+                        ),
+                        Expanded(
+                          child: isFilterOpen
+                              ? isVertical
+                                  ? SizedBox()
+                                  : form
+                              : Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: IntrinsicHeight(
+                                    child: ConstrainedBox(
+                                      constraints: const BoxConstraints(
+                                        minHeight: 24.0,
+                                      ),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          widget.model.filterMessage ?? '',
+                                          textAlign: TextAlign.start,
+                                          maxLines: 4,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                        ),
+                        IntrinsicHeight(
+                          child: IntrinsicWidth(
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    if (widget.onFilterDisablePressed != null)
+                                      SizedBox(
+                                        width: 56.0,
+                                        height: 56.0,
+                                        child: IconButton(
+                                          onPressed:
+                                              widget.onFilterDisablePressed,
+                                          icon: Icon(Icons.filter_alt_off),
+                                        ),
+                                      ),
+                                    SizedBox(
+                                      width: 56.0,
+                                      height: 56.0,
+                                      child: ExpandIcon(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                        isExpanded: isFilterOpen,
+                                        onPressed: (value) => widget.controller
+                                            .isFilterOpen.value = !value,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (isFilterOpen && !isVertical) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: 8.0,
+                                      top: 8.0,
+                                    ),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: OutlinedButton(
+                                        onPressed: widget.onFilterSubmitPressed,
+                                        child: Text('НАЙТИ'),
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: 8.0,
+                                      top: 16.0,
+                                    ),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: OutlinedButton(
+                                        onPressed: () => widget
+                                            .filterController!.params
+                                            .clear(),
+                                        child: Text('ОЧИСТИТЬ'),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (isVertical && isFilterOpen) {
+                    body = Column(
+                      children: [
+                        body,
+                        const Divider(
+                          height: 2.0,
+                          thickness: 2.0,
+                          indent: 16.0,
+                        ),
+                        Expanded(child: form),
+                        const Divider(
+                          height: 2.0,
+                          thickness: 2.0,
+                          indent: 16.0,
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Wrap(
+                            direction: Axis.horizontal,
+                            alignment: WrapAlignment.end,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16.0,
+                                padding: const EdgeInsets.all(8.0),
+                                child: OutlinedButton(
+                                  onPressed: () =>
+                                      widget.filterController!.params.clear(),
+                                  child: Text('ОЧИСТИТЬ'),
                                 ),
-                                child: Icon(Icons.filter_alt),
                               ),
-                              Expanded(
-                                child: isFilterOpen
-                                    ? widget.filterModel == null ||
-                                            widget.filterController == null
-                                        ? SingleChildScrollView(
-                                            child: Shimmer.fromColors(
-                                              baseColor:
-                                                  Theme.of(context).splashColor,
-                                              highlightColor: Theme.of(context)
-                                                  .splashColor
-                                                  .withOpacity(0),
-                                              child: Wrap(
-                                                crossAxisAlignment:
-                                                    WrapCrossAlignment.start,
-                                                children: [
-                                                  for (var i = 0; i < 16; i++)
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                        4.0,
-                                                      ),
-                                                      child: Container(
-                                                        width: 240.0,
-                                                        height: 48.0,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                            Radius.circular(8),
-                                                          ),
-                                                          color: Colors.red,
-                                                        ),
-                                                      ),
-                                                    )
-                                                ],
-                                              ),
-                                            ),
-                                          )
-                                        : _MgrListFilterForm(
-                                            model: widget.filterModel!,
-                                            controller:
-                                                widget.filterController!,
-                                          )
-                                    : Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: IntrinsicHeight(
-                                          child: ConstrainedBox(
-                                            constraints: const BoxConstraints(
-                                              minHeight: 24.0,
-                                            ),
-                                            child: Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: Text(
-                                                widget.model.filterMessage ??
-                                                    '',
-                                                textAlign: TextAlign.start,
-                                                maxLines: 4,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                              ),
-                              IntrinsicHeight(
-                                child: IntrinsicWidth(
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          if (widget.onFilterDisablePressed !=
-                                              null)
-                                            SizedBox(
-                                              width: 56.0,
-                                              height: 56.0,
-                                              child: IconButton(
-                                                onPressed: widget
-                                                    .onFilterDisablePressed,
-                                                icon:
-                                                    Icon(Icons.filter_alt_off),
-                                              ),
-                                            ),
-                                          SizedBox(
-                                            width: 56.0,
-                                            height: 56.0,
-                                            child: ExpandIcon(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface,
-                                              isExpanded: isFilterOpen,
-                                              onPressed: (value) => widget
-                                                  .controller
-                                                  .isFilterOpen
-                                                  .value = !value,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      if (isFilterOpen) ...[
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            left: 8.0,
-                                            top: 8.0,
-                                          ),
-                                          child: SizedBox(
-                                            width: double.infinity,
-                                            child: OutlinedButton(
-                                              onPressed:
-                                                  widget.onFilterSubmitPressed,
-                                              child: Text('НАЙТИ'),
-                                            ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            left: 8.0,
-                                            top: 16.0,
-                                          ),
-                                          child: SizedBox(
-                                            width: double.infinity,
-                                            child: OutlinedButton(
-                                              onPressed: () => widget
-                                                  .filterController!.params
-                                                  .clear(),
-                                              child: Text('ОЧИСТИТЬ'),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: OutlinedButton(
+                                  onPressed: widget.onFilterSubmitPressed,
+                                  child: Text('НАЙТИ'),
                                 ),
                               ),
                             ],
                           ),
                         ),
+                      ],
+                    );
+                  }
+
+                  return ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: _filterHeight),
+                    child: Material(
+                      type: MaterialType.card,
+                      elevation: 2.0,
+                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      child: InkWell(
+                        onTap: isFilterOpen
+                            ? null
+                            : () => widget.controller.isFilterOpen.value = true,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 56.0),
+                            child: body,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
       );
 

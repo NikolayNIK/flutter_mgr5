@@ -121,6 +121,28 @@ class MgrFormModel extends MgrModel {
     return null;
   }
 
+  MgrFormModel copyWith({
+    String? func,
+    String? title,
+    String? elid,
+    String? plid,
+    List<MgrFormPageModel>? pages,
+    List<MgrFormButtonModel>? buttons,
+    Map<String, MgrConditionalStateChecker>? conditionalStateChecks,
+    Map<String, Slist>? slists,
+  }) =>
+      MgrFormModel(
+        func: func ?? this.func,
+        title: title ?? this.title,
+        elid: elid ?? this.elid,
+        plid: plid ?? this.plid,
+        pages: pages ?? this.pages,
+        buttons: buttons ?? this.buttons,
+        conditionalStateChecks:
+            conditionalStateChecks ?? this.conditionalStateChecks,
+        slists: slists ?? this.slists,
+      );
+
   static List<MgrFormPageModel> _parsePages(
       MgrMessages messages,
       ConditionalStateCheckerConsumer conditionalStateCheckerConsumer,

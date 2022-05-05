@@ -5,6 +5,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mgr5/extensions/iterator_extensions.dart';
 import 'package:flutter_mgr5/listenable_builder.dart';
+import 'package:flutter_mgr5/mgr5.dart';
+import 'package:flutter_mgr5/mgr5_form.dart';
+import 'package:flutter_mgr5/src/form/components/mgr_form_field.dart';
+import 'package:flutter_mgr5/src/form/mgr_form_field_hint_mode.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_controller.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
 import 'package:flutter_mgr5/src/optional_tooltip.dart';
@@ -22,12 +26,20 @@ class MgrList extends StatefulWidget {
   final MgrListModel model;
   final MgrListController controller;
   final MgrListToolbtnCallback? onToolbtnPressed;
+  final MgrFormModel? filterModel;
+  final MgrFormController? filterController;
+  final VoidCallback? onFilterSubmitPressed;
+  final VoidCallback? onFilterDisablePressed;
 
   const MgrList({
     Key? key,
     required this.model,
     required this.controller,
+    required this.filterModel,
+    required this.filterController,
     required this.onToolbtnPressed,
+    required this.onFilterSubmitPressed,
+    required this.onFilterDisablePressed,
   }) : super(key: key);
 
   @override
@@ -73,7 +85,7 @@ class _MgrListState extends State<MgrList> {
         .removeListener(_dragToSelectUpdate);
   }
 
-  static const _filterHeight = 240.0;
+  static const _filterHeight = 480.0;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -133,31 +145,62 @@ class _MgrListState extends State<MgrList> {
 
   static const _searchTextFieldWidth = 192.0;
 
-  Widget _buildToolbar() => LayoutBuilder(
-        builder: (context, constraints) =>
-            constraints.maxWidth >= 3 * _searchTextFieldWidth
-                ? Row(
-                    children: [
-                      Expanded(child: _buildToolbarButtons()),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 16.0),
-                        child: SizedBox(
-                          width: _searchTextFieldWidth,
-                          child: Center(child: _buildToolbarSearch()),
-                        ),
-                      ),
-                    ],
-                  )
-                : Column(
-                    children: [
-                      _buildToolbarButtons(),
-                      Padding(
+  Widget _buildToolbar() {
+    final filterToolbtn = widget.model.toolbar
+        .expand((toolgrp) => toolgrp.buttons)
+        .where((toolbtn) => toolbtn.name == 'filter')
+        .maybeFirst;
+
+    return LayoutBuilder(
+      builder: (context, constraints) => constraints.maxWidth >=
+              3 * _searchTextFieldWidth
+          ? Row(
+              children: [
+                Expanded(child: _buildToolbarButtons()),
+                Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: SizedBox(
+                    width: _searchTextFieldWidth,
+                    child: Center(child: _buildToolbarSearch()),
+                  ),
+                ),
+                if (filterToolbtn != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: IconButton(
+                      onPressed: () =>
+                          widget.controller.isFilterOpen.value ^= true,
+                      icon: Icon(Icons.filter_alt),
+                    ),
+                  ),
+              ],
+            )
+          : Column(
+              children: [
+                _buildToolbarButtons(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: _buildToolbarSearch(),
                       ),
-                    ],
-                  ),
-      );
+                    ),
+                    if (filterToolbtn != null)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: IconButton(
+                          onPressed: () =>
+                              widget.controller.isFilterOpen.value ^= true,
+                          icon: Icon(Icons.filter_alt),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+    );
+  }
 
   Widget _buildToolbarButtons() => widget.onToolbtnPressed == null
       ? SizedBox()
@@ -181,134 +224,148 @@ class _MgrListState extends State<MgrList> {
                     for (final toolgrp in widget.model.toolbar) ...[
                       const SizedBox(width: 8.0),
                       for (final toolbtn in toolgrp.buttons)
-                        Builder(builder: (context) {
-                          final state = toolbtn.selectionStateChecker(
-                              Iterable.generate(selectedElems.length).map((i) =>
-                                  selectedElems[i] ??= widget.controller.items
-                                      .findElemByKey(selectionList[i])));
-                          if (state == MgrListToolbtnState.hidden) {
-                            return SizedBox();
-                          } else {
-                            final enabled = state == MgrListToolbtnState.shown;
-                            return OptionalTooltip(
-                              message: toolbtn.hint,
-                              child: InkResponse(
-                                onTap: enabled
-                                    ? () async {
-                                        final elems = Iterable.generate(
-                                                selectionList.length)
-                                            .where((i) {
-                                          final elem = selectedElems[i] ??
-                                              widget.controller.items
-                                                  .findElemByKey(
-                                                      selectionList[i]);
-                                          return elem == null ||
-                                              toolbtn.elemStateChecker(elem) ==
-                                                  MgrListToolbtnState.shown;
-                                        });
+                        if (toolbtn.name != 'filter')
+                          Builder(
+                            builder: (context) {
+                              final state = toolbtn.selectionStateChecker(
+                                  Iterable.generate(selectedElems.length).map(
+                                      (i) => selectedElems[i] ??= widget
+                                          .controller.items
+                                          .findElemByKey(selectionList[i])));
+                              if (state == MgrListToolbtnState.hidden) {
+                                return SizedBox();
+                              } else {
+                                final enabled =
+                                    state == MgrListToolbtnState.shown;
+                                return OptionalTooltip(
+                                  message: toolbtn.hint,
+                                  child: InkResponse(
+                                    onTap: enabled
+                                        ? () async {
+                                            final elems = Iterable.generate(
+                                                    selectionList.length)
+                                                .where((i) {
+                                              final elem = selectedElems[i] ??
+                                                  widget.controller.items
+                                                      .findElemByKey(
+                                                          selectionList[i]);
+                                              return elem == null ||
+                                                  toolbtn.elemStateChecker(
+                                                          elem) ==
+                                                      MgrListToolbtnState.shown;
+                                            });
 
-                                        if (toolbtn.confirmationRequired) {
-                                          if (await showDialog<dynamic>(
-                                                context: context,
-                                                builder: (context) =>
-                                                    AlertDialog(
-                                                  scrollable: true,
-                                                  content: Text(toolbtn
-                                                          .confirmationMessageBuilder!(
-                                                        elems.map((i) =>
-                                                            selectedElems[i]),
-                                                      ) ??
-                                                      ''),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              context, false),
-                                                      child: Text('ОТМЕНА'),
+                                            if (toolbtn.confirmationRequired) {
+                                              if (await showDialog<dynamic>(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                      scrollable: true,
+                                                      content: Text(toolbtn
+                                                              .confirmationMessageBuilder!(
+                                                            elems.map((i) =>
+                                                                selectedElems[
+                                                                    i]),
+                                                          ) ??
+                                                          ''),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                  context,
+                                                                  false),
+                                                          child: Text('ОТМЕНА'),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                  context,
+                                                                  true),
+                                                          child: Text('OK'),
+                                                        ),
+                                                      ],
                                                     ),
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              context, true),
-                                                      child: Text('OK'),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ) !=
-                                              true) {
-                                            return;
+                                                  ) !=
+                                                  true) {
+                                                return;
+                                              }
+                                            }
+
+                                            widget.onToolbtnPressed!(
+                                              toolbtn,
+                                              elems
+                                                  .map((i) => selectionList[i]),
+                                            );
                                           }
-                                        }
-
-                                        widget.onToolbtnPressed!(
-                                          toolbtn,
-                                          elems.map((i) => selectionList[i]),
-                                        );
-                                      }
-                                    : null,
-                                child: AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 200),
-                                  child: ConstrainedBox(
-                                    key: ValueKey(enabled),
-                                    constraints: BoxConstraints(
-                                        minWidth: 56.0 +
-                                            4.0 *
-                                                Theme.of(context)
-                                                    .visualDensity
-                                                    .horizontal,
-                                        minHeight: 56.0 +
-                                            4.0 *
-                                                Theme.of(context)
-                                                    .visualDensity
-                                                    .vertical),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                        left: 8.0,
-                                        right: 8.0,
-                                        bottom: 8.0,
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            toolbtn.icon,
-                                            color: enabled
-                                                ? Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface
-                                                : Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface
-                                                    .withOpacity(.25),
+                                        : null,
+                                    child: AnimatedSwitcher(
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      child: ConstrainedBox(
+                                        key: ValueKey(enabled),
+                                        constraints: BoxConstraints(
+                                            minWidth: 56.0 +
+                                                4.0 *
+                                                    Theme.of(context)
+                                                        .visualDensity
+                                                        .horizontal,
+                                            minHeight: 56.0 +
+                                                4.0 *
+                                                    Theme.of(context)
+                                                        .visualDensity
+                                                        .vertical),
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                            left: 8.0,
+                                            right: 8.0,
+                                            bottom: 8.0,
                                           ),
-                                          if (toolbtn.label != null)
-                                            Text(
-                                              toolbtn.label!,
-                                              textAlign: TextAlign.center,
-                                              style: (Theme.of(context)
-                                                          .textTheme
-                                                          .labelMedium ??
-                                                      TextStyle())
-                                                  .copyWith(
-                                                      color: enabled
-                                                          ? Theme.of(context)
-                                                              .colorScheme
-                                                              .onSurface
-                                                          : Theme.of(context)
-                                                              .colorScheme
-                                                              .onSurface
-                                                              .withOpacity(.5)),
-                                            ),
-                                        ],
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                toolbtn.icon,
+                                                color: enabled
+                                                    ? Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                    : Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withOpacity(.25),
+                                              ),
+                                              if (toolbtn.label != null)
+                                                Text(
+                                                  toolbtn.label!,
+                                                  textAlign: TextAlign.center,
+                                                  style: (Theme.of(context)
+                                                              .textTheme
+                                                              .labelMedium ??
+                                                          TextStyle())
+                                                      .copyWith(
+                                                          color: enabled
+                                                              ? Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .onSurface
+                                                              : Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .onSurface
+                                                                  .withOpacity(
+                                                                      .5)),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            );
-                          }
-                        }),
+                                );
+                              }
+                            },
+                          ),
                       const SizedBox(width: 24.0),
                     ],
                   ],
@@ -361,13 +418,10 @@ class _MgrListState extends State<MgrList> {
                                 child: Icon(Icons.filter_alt),
                               ),
                               Expanded(
-                                child: SingleChildScrollView(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: isFilterOpen
-                                        ? Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 0.0),
+                                child: isFilterOpen
+                                    ? widget.filterModel == null ||
+                                            widget.filterController == null
+                                        ? SingleChildScrollView(
                                             child: Shimmer.fromColors(
                                               baseColor:
                                                   Theme.of(context).splashColor,
@@ -401,7 +455,15 @@ class _MgrListState extends State<MgrList> {
                                               ),
                                             ),
                                           )
-                                        : ConstrainedBox(
+                                        : _MgrListFilterForm(
+                                            model: widget.filterModel!,
+                                            controller:
+                                                widget.filterController!,
+                                          )
+                                    : Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: IntrinsicHeight(
+                                          child: ConstrainedBox(
                                             constraints: const BoxConstraints(
                                               minHeight: 24.0,
                                             ),
@@ -410,29 +472,82 @@ class _MgrListState extends State<MgrList> {
                                               child: Text(
                                                 widget.model.filterMessage ??
                                                     '',
+                                                textAlign: TextAlign.start,
                                               ),
                                             ),
                                           ),
+                                        ),
+                                      ),
+                              ),
+                              IntrinsicHeight(
+                                child: IntrinsicWidth(
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          if (widget.onFilterDisablePressed !=
+                                              null)
+                                            SizedBox(
+                                              width: 56.0,
+                                              height: 56.0,
+                                              child: IconButton(
+                                                onPressed: widget
+                                                    .onFilterDisablePressed,
+                                                icon:
+                                                    Icon(Icons.filter_alt_off),
+                                              ),
+                                            ),
+                                          SizedBox(
+                                            width: 56.0,
+                                            height: 56.0,
+                                            child: ExpandIcon(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface,
+                                              isExpanded: isFilterOpen,
+                                              onPressed: (value) => widget
+                                                  .controller
+                                                  .isFilterOpen
+                                                  .value = !value,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (isFilterOpen) ...[
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            left: 8.0,
+                                            top: 8.0,
+                                          ),
+                                          child: SizedBox(
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed:
+                                                  widget.onFilterSubmitPressed,
+                                              child: Text('НАЙТИ'),
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            left: 8.0,
+                                            top: 16.0,
+                                          ),
+                                          child: SizedBox(
+                                            width: double.infinity,
+                                            child: OutlinedButton(
+                                              onPressed: () => widget
+                                                  .filterController!.params
+                                                  .clear(),
+                                              child: Text('ОЧИСТИТЬ'),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 56.0,
-                                height: 56.0,
-                                child: IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(Icons.filter_alt_off),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 56.0,
-                                height: 56.0,
-                                child: ExpandIcon(
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                  isExpanded: isFilterOpen,
-                                  onPressed: (value) => widget
-                                      .controller.isFilterOpen.value = !value,
                                 ),
                               ),
                             ],
@@ -1320,4 +1435,96 @@ class _MgrListRowDividerPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _MgrListRowDividerPainter oldDelegate) =>
       oldDelegate.color != color;
+}
+
+class _MgrListFilterForm extends StatelessWidget {
+  final MgrFormModel model;
+  final MgrFormController controller;
+
+  const _MgrListFilterForm({
+    Key? key,
+    required this.model,
+    required this.controller,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    MgrFormState state;
+    return FocusTraversalGroup(
+      child: Scrollbar(
+        controller: controller.scrollController,
+        isAlwaysShown: true,
+        trackVisibility: true,
+        child: ListenableBuilder(
+          listenable: controller,
+          builder: (context) {
+            return ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.only(top: 2.0),
+              controller: controller.scrollController,
+              children: [
+                for (final page in model.pages)
+                  if (!page.isHidden &&
+                      (state = page.name == null
+                              ? MgrFormState.visible
+                              : model.getStateChecker(page.name!)(
+                                  controller.stringParams)) !=
+                          MgrFormState.gone)
+                    _buildPage(page, state == MgrFormState.readOnly),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPage(MgrFormPageModel page, bool forceReadOnly) => Padding(
+        padding: const EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          bottom: 16.0,
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            const preferredLabelWidth = 120.0;
+            const preferredControlWidth = 192.0;
+            const additionalFieldWidth = 32.0 + 16.0;
+
+            final countX = max(
+                1,
+                constraints.maxWidth ~/
+                    (preferredLabelWidth +
+                        preferredControlWidth +
+                        additionalFieldWidth));
+            final fieldWidth = constraints.maxWidth / countX;
+            final controlWidth =
+                fieldWidth - preferredLabelWidth - additionalFieldWidth;
+
+            MgrFormState state;
+            return Wrap(
+              runAlignment: WrapAlignment.spaceEvenly,
+              children: [
+                for (final field in page.fields)
+                  if ((state = model.getStateChecker(field.name)(
+                          controller.stringParams)) !=
+                      MgrFormState.gone)
+                    SizedBox(
+                      width: fieldWidth,
+                      child: MgrFormField(
+                        controller: controller,
+                        model: field,
+                        exceptionHolder: null,
+                        hintMode: MgrFormFieldHintMode.floating,
+                        labelWidth: preferredLabelWidth,
+                        controlsWidth: controlWidth,
+                        forceReadOnly:
+                            forceReadOnly || state == MgrFormState.readOnly,
+                      ),
+                    ),
+              ],
+            );
+          },
+        ),
+      );
 }

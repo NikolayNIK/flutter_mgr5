@@ -54,17 +54,9 @@ class MgrForm extends StatefulWidget {
 }
 
 class _MgrFormState extends State<MgrForm> {
-  late ScrollController _scrollController;
-
   MgrFormController get controller => widget.controller;
 
   MgrFormModel get model => widget.model;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-  }
 
   @override
   Widget build(BuildContext context) => Stack(
@@ -131,7 +123,7 @@ class _MgrFormState extends State<MgrForm> {
           Flexible(
             child: FocusTraversalGroup(
               child: ListView(
-                controller: _scrollController,
+                controller: controller.scrollController,
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 children: [
@@ -285,10 +277,4 @@ class _MgrFormState extends State<MgrForm> {
         fieldControlsWidth: widget.fieldControlsWidth,
         forceReadOnly: widget.forceReadOnly,
       );
-
-  @override
-  void dispose() {
-    super.dispose();
-    _scrollController.dispose();
-  }
 }

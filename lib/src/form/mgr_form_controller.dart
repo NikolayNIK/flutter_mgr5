@@ -331,6 +331,7 @@ class MgrFormController implements Listenable {
       _MgrFormControllerStringParamMap(this);
   late final MgrFormSlistMap slists = _MgrFormSlistMap(this);
   final MgrFormPagesController pages = _MgrFormPageController();
+  late final ScrollController scrollController = ScrollController();
 
   final Set<VoidCallback> _listeners = {};
   final ValueNotifier<MgrException?> exception = ValueNotifier(null);
@@ -366,6 +367,7 @@ class MgrFormController implements Listenable {
     params.clear();
     slists.clear();
     _listeners.clear();
+    scrollController.dispose();
   }
 
   void _notifyChanged(String? name) {

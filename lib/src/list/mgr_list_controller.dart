@@ -284,7 +284,7 @@ class _MgrListPages extends MgrListPages
     }
 
     final index = model.pageIndex;
-    if (index != null) {
+    if (index != null && _pages.isNotEmpty) {
       _pages[index - 1].items = model.pageData;
       notificationRequired = true;
     }

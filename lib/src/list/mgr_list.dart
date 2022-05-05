@@ -1493,39 +1493,45 @@ class _MgrListFilterForm extends StatelessWidget {
             const preferredControlWidth = 192.0;
             const additionalFieldWidth = 32.0 + 16.0;
 
-            final countX = max(
-                1,
-                constraints.maxWidth ~/
-                    (preferredLabelWidth +
-                        preferredControlWidth +
-                        additionalFieldWidth));
-            final fieldWidth = constraints.maxWidth / countX;
-            final controlWidth =
-                fieldWidth - preferredLabelWidth - additionalFieldWidth;
+            final countX = constraints.maxWidth ~/
+                (preferredLabelWidth +
+                    preferredControlWidth +
+                    additionalFieldWidth);
+            final fieldWidth = countX == 0
+                ? constraints.maxWidth
+                : constraints.maxWidth / countX;
+            final controlWidth = countX == 0
+                ? (fieldWidth - additionalFieldWidth) / 2
+                : fieldWidth - preferredLabelWidth - additionalFieldWidth;
+            final labelWidth = countX == 0
+                ? fieldWidth - additionalFieldWidth - controlWidth
+                : preferredLabelWidth;
 
             MgrFormState state;
-            return Wrap(
-              runAlignment: WrapAlignment.spaceEvenly,
-              children: [
-                for (final field in page.fields)
-                  if ((state = model.getStateChecker(field.name)(
-                          controller.stringParams)) !=
-                      MgrFormState.gone)
-                    SizedBox(
-                      width: fieldWidth,
-                      child: MgrFormField(
-                        controller: controller,
-                        model: field,
-                        exceptionHolder: null,
-                        hintMode: MgrFormFieldHintMode.floating,
-                        labelWidth: preferredLabelWidth,
-                        controlsWidth: controlWidth,
-                        forceReadOnly:
-                            forceReadOnly || state == MgrFormState.readOnly,
-                      ),
-                    ),
-              ],
-            );
+            return controlWidth < 0 || labelWidth < 0
+                ? SizedBox()
+                : Wrap(
+                    runAlignment: WrapAlignment.spaceEvenly,
+                    children: [
+                      for (final field in page.fields)
+                        if ((state = model.getStateChecker(field.name)(
+                                controller.stringParams)) !=
+                            MgrFormState.gone)
+                          SizedBox(
+                            width: fieldWidth,
+                            child: MgrFormField(
+                              controller: controller,
+                              model: field,
+                              exceptionHolder: null,
+                              hintMode: MgrFormFieldHintMode.floating,
+                              labelWidth: labelWidth,
+                              controlsWidth: controlWidth,
+                              forceReadOnly: forceReadOnly ||
+                                  state == MgrFormState.readOnly,
+                            ),
+                          ),
+                    ],
+                  );
           },
         ),
       );

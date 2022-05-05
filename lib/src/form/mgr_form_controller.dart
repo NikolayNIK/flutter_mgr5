@@ -118,10 +118,7 @@ class _MgrFormControllerParamMap extends MapBase<String, MgrFormControllerParam>
   }
 
   @override
-  void clear() {
-    _map.forEach((key, value) => value.dispose());
-    _map.clear();
-  }
+  void clear() => _map.values.forEach((element) => element.value = null);
 
   @override
   MgrFormControllerParam? remove(Object? key) => _map.remove(key)?..dispose();

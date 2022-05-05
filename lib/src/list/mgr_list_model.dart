@@ -476,7 +476,7 @@ typedef MgrListToolbtnSelectionStateChecker = MgrListToolbtnState Function(
 
 @immutable
 class MgrListToolbtn {
-  final String name;
+  final String name, func;
   final String? label, hint;
   final IconData? icon;
   final MgrListToolbtnActivateSelectionType selectionType;
@@ -488,6 +488,7 @@ class MgrListToolbtn {
 
   const MgrListToolbtn({
     required this.name,
+    required this.func,
     required this.label,
     required this.hint,
     required this.icon,
@@ -559,6 +560,7 @@ class MgrListToolbtn {
 
     return MgrListToolbtn(
       name: name,
+      func: element.requireAttribute('func'),
       label: messages['short_$name'],
       hint: messages['hint_$name'],
       icon: element.requireConvertAttribute('img', converter: _parseIcon),

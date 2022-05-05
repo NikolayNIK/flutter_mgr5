@@ -882,121 +882,127 @@ class _MgrListState extends State<MgrList> {
     _dragToSelectItemHeight = itemHeight;
     const dividerHeight = 1.0;
 
-    final itemCount = widget.controller.items.length;
     late final placeholder = _buildTableItemPlaceholder(rowBuilder);
     return ListenableBuilder(
       listenable: widget.controller.selection,
       builder: (context) => ListenableBuilder(
         listenable: widget.controller.items,
-        builder: (context) => Stack(
-          children: [
-            Scrollbar(
-              controller: _verticalScrollController,
-              isAlwaysShown: true,
-              interactive: true,
-              trackVisibility: true,
-              thickness: 8.0,
-              radius: const Radius.circular(8.0),
-              child: ListView.builder(
+        builder: (context) {
+          final itemCount = widget.controller.items.length;
+          return Stack(
+            children: [
+              Scrollbar(
                 controller: _verticalScrollController,
-                addRepaintBoundaries: false,
-                itemCount: itemCount,
-                itemExtent: itemHeight,
-                itemBuilder: (context, index) {
-                  final elem = widget.controller.items[index];
-                  final itemWidget = ValueAnimatedSwitcher(
-                    value: elem == null,
-                    duration: const Duration(milliseconds: 400),
-                    child: elem == null
-                        ? placeholder
-                        : _buildTableItem(rowBuilder, elem),
-                  );
+                isAlwaysShown: true,
+                interactive: true,
+                trackVisibility: true,
+                thickness: 8.0,
+                radius: const Radius.circular(8.0),
+                child: ListView.builder(
+                  controller: _verticalScrollController,
+                  addRepaintBoundaries: false,
+                  itemCount: itemCount,
+                  itemExtent: itemHeight,
+                  itemBuilder: (context, index) {
+                    final elem = widget.controller.items[index];
+                    final itemWidget = ValueAnimatedSwitcher(
+                      value: elem == null,
+                      duration: const Duration(milliseconds: 400),
+                      child: elem == null
+                          ? placeholder
+                          : _buildTableItem(rowBuilder, elem),
+                    );
 
-                  return index == itemCount - 1
-                      ? itemWidget
-                      : Stack(
-                          children: [
-                            itemWidget,
-                            const Align(
-                              alignment: Alignment.bottomLeft,
-                              child: Divider(
-                                height: dividerHeight,
-                                thickness: dividerHeight,
-                                indent: 16.0,
-                                endIndent: 16.0,
+                    return index == itemCount - 1
+                        ? itemWidget
+                        : Stack(
+                            children: [
+                              itemWidget,
+                              const Align(
+                                alignment: Alignment.bottomLeft,
+                                child: Divider(
+                                  height: dividerHeight,
+                                  thickness: dividerHeight,
+                                  indent: 16.0,
+                                  endIndent: 16.0,
+                                ),
                               ),
-                            ),
-                          ],
-                        );
-                },
+                            ],
+                          );
+                  },
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: SizedBox(
-                  width: itemHeight,
-                  height: double.infinity,
-                  child: GestureDetector(
-                    onVerticalDragDown: (details) {
-                      _dragToSelectVerticalPosition = details.localPosition.dy;
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    width: itemHeight,
+                    height: double.infinity,
+                    child: GestureDetector(
+                      onVerticalDragDown: (details) {
+                        _dragToSelectVerticalPosition =
+                            details.localPosition.dy;
 
-                      final position = widget
-                          .controller.verticalTableScrollController.position;
-                      if (position.hasPixels) {
-                        final index = _dragToSelectLatestIndex =
-                            (position.pixels + _dragToSelectVerticalPosition) ~/
-                                _dragToSelectItemHeight;
-                        final item = widget.controller.items[index];
-                        if (item != null) {
-                          final key = item[widget.model.keyField];
-                          if (key != null) {
-                            _dragToSelectTargetState =
-                                !widget.controller.selection.contains(key);
+                        final position = widget
+                            .controller.verticalTableScrollController.position;
+                        if (position.hasPixels) {
+                          final index = _dragToSelectLatestIndex =
+                              (position.pixels +
+                                      _dragToSelectVerticalPosition) ~/
+                                  _dragToSelectItemHeight;
+                          final item = widget.controller.items[index];
+                          if (item != null) {
+                            final key = item[widget.model.keyField];
+                            if (key != null) {
+                              _dragToSelectTargetState =
+                                  !widget.controller.selection.contains(key);
+                            }
                           }
                         }
-                      }
-                    },
-                    onVerticalDragCancel: () {
-                      _dragToSelectTargetState = null;
-                    },
-                    onVerticalDragStart: (details) {
-                      _dragToSelectVerticalPosition = details.localPosition.dy;
-                      _dragToSelectUpdate();
-                    },
-                    onVerticalDragUpdate: (details) {
-                      _dragToSelectVerticalPosition = details.localPosition.dy;
-                      _dragToSelectUpdate();
-                    },
-                    onVerticalDragEnd: (details) {
-                      _dragToSelectTargetState = null;
-                    },
+                      },
+                      onVerticalDragCancel: () {
+                        _dragToSelectTargetState = null;
+                      },
+                      onVerticalDragStart: (details) {
+                        _dragToSelectVerticalPosition =
+                            details.localPosition.dy;
+                        _dragToSelectUpdate();
+                      },
+                      onVerticalDragUpdate: (details) {
+                        _dragToSelectVerticalPosition =
+                            details.localPosition.dy;
+                        _dragToSelectUpdate();
+                      },
+                      onVerticalDragEnd: (details) {
+                        _dragToSelectTargetState = null;
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: widget.controller.items.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          widget.controller.searchPattern == null
-                              ? 'Список пуст'
-                              : 'Не найдено похожих элементов',
-                          textAlign: TextAlign.center,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: widget.controller.items.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            widget.controller.searchPattern == null
+                                ? 'Список пуст'
+                                : 'Не найдено похожих элементов',
+                            textAlign: TextAlign.center,
+                          ),
                         ),
+                      )
+                    : const SizedBox(
+                        width: double.infinity,
+                        height: double.infinity,
                       ),
-                    )
-                  : const SizedBox(
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-            ),
-          ],
-        ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

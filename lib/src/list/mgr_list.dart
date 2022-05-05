@@ -473,6 +473,8 @@ class _MgrListState extends State<MgrList> {
                                                 widget.model.filterMessage ??
                                                     '',
                                                 textAlign: TextAlign.start,
+                                                maxLines: 4,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                           ),

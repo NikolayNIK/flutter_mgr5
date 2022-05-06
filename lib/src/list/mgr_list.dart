@@ -98,17 +98,13 @@ class _MgrListState extends State<MgrList> {
   void _resetTotals() => _colTotals.clear();
 
   String? _totalFor(MgrListCol col) {
-    if (col.total == null) {
+    if (col.total == null || widget.controller.selection.isEmpty) {
       return null;
     }
 
     final cached = _colTotals[col.name];
     if (cached != null) {
       return cached;
-    }
-
-    if (widget.controller.selection.isEmpty) {
-      return null;
     }
 
     final items = widget.controller.selection
@@ -123,13 +119,13 @@ class _MgrListState extends State<MgrList> {
       return null;
     }
 
-    final double total;
+    final String total;
     switch (col.total) {
       case MgrListColTotal.sum:
-        total = items.fold(0.0, (a, b) => a + b);
+        total = items.fold<double>(0.0, (a, b) => a + b).toString();
         break;
       case MgrListColTotal.sumRound:
-        total = items.fold(0.0, (a, b) => a + b);
+        total = items.fold<double>(0.0, (a, b) => a + b).round().toString();
         break;
       case MgrListColTotal.average:
         var count = 0;
@@ -139,13 +135,13 @@ class _MgrListState extends State<MgrList> {
           subtotal += item;
         }
 
-        total = subtotal / count;
+        total = (subtotal / count).toString();
         break;
       case null:
         return null;
     }
 
-    return _colTotals[col.name] = total.toString();
+    return _colTotals[col.name] = total;
   }
 
   static const _checkboxWidth = 36.0;

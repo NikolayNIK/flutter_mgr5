@@ -85,6 +85,7 @@ class _MgrListState extends State<MgrList> {
         .removeListener(_dragToSelectUpdate);
   }
 
+  static const _checkboxWidth = 36.0;
   static const _filterHeight = 480.0;
 
   @override
@@ -650,12 +651,12 @@ class _MgrListState extends State<MgrList> {
               final totalColWidth = widget.model.coldata
                       .map((e) => e.width)
                       .reduce((value, element) => value + element) +
-                  rowHeight;
+                  _checkboxWidth;
               final needsBreaks = totalColWidth > availableWidth;
 
               final factor = needsBreaks
                   ? 1.0
-                  : (availableWidth - rowHeight) / (totalColWidth - rowHeight);
+                  : (availableWidth - _checkboxWidth) / (totalColWidth - _checkboxWidth);
               final coldata = List<_Col>.unmodifiable(widget.model.coldata
                   .map((col) => _Col(col: col, width: col.width * factor)));
 
@@ -673,7 +674,7 @@ class _MgrListState extends State<MgrList> {
                   final isRightZero = rightCount == 0;
                   if (leftCount + rightCount + 1 < coldata.length) {
                     if (isLeftZero && isRightZero) {
-                      leftWidth = rowHeight;
+                      leftWidth = _checkboxWidth;
                       rightWidth = 0;
                       break;
                     } else {
@@ -684,7 +685,7 @@ class _MgrListState extends State<MgrList> {
                                 0.0,
                                 (value, element) => value + element,
                               ) +
-                          rowHeight;
+                          _checkboxWidth;
 
                       rightWidth = coldata
                           .skip(coldata.length - rightCount)
@@ -777,7 +778,7 @@ class _MgrListState extends State<MgrList> {
                           child: Row(
                             children: [
                               SizedBox(
-                                width: rowHeight,
+                                width: _checkboxWidth,
                                 height: double.infinity,
                                 child: checkbox,
                               ),
@@ -906,7 +907,7 @@ class _MgrListState extends State<MgrList> {
                       child: Row(
                         children: [
                           SizedBox(
-                            width: rowHeight,
+                            width: _checkboxWidth,
                             height: rowHeight,
                             child: checkbox,
                           ),
@@ -1097,7 +1098,7 @@ class _MgrListState extends State<MgrList> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: SizedBox(
-                    width: rowHeight,
+                    width: _checkboxWidth,
                     height: double.infinity,
                     child: GestureDetector(
                       onVerticalDragDown: (details) {

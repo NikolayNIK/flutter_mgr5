@@ -47,6 +47,8 @@ class MgrList extends StatefulWidget {
 }
 
 class _MgrListState extends State<MgrList> {
+  final _colTotals = <String, String>{};
+
   double _baseRowHeightScale = 1.0;
   double? _baseVerticalScrollPositionPixels;
   double _baseLocalPointY = 0.0;
@@ -61,6 +63,9 @@ class _MgrListState extends State<MgrList> {
   void initState() {
     super.initState();
 
+    widget.controller.items.addListener(_resetTotals);
+    widget.controller.selection.addListener(_resetTotals);
+
     widget.controller.verticalTableScrollController
         .addListener(_dragToSelectUpdate);
   }
@@ -70,6 +75,11 @@ class _MgrListState extends State<MgrList> {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.items.removeListener(_resetTotals);
+      widget.controller.items.addListener(_resetTotals);
+      oldWidget.controller.selection.removeListener(_resetTotals);
+      widget.controller.selection.addListener(_resetTotals);
+
       oldWidget.controller.verticalTableScrollController
           .removeListener(_dragToSelectUpdate);
       widget.controller.verticalTableScrollController
@@ -83,6 +93,59 @@ class _MgrListState extends State<MgrList> {
 
     widget.controller.verticalTableScrollController
         .removeListener(_dragToSelectUpdate);
+  }
+
+  void _resetTotals() => _colTotals.clear();
+
+  String? _totalFor(MgrListCol col) {
+    if (col.total == null) {
+      return null;
+    }
+
+    final cached = _colTotals[col.name];
+    if (cached != null) {
+      return cached;
+    }
+
+    if (widget.controller.selection.isEmpty) {
+      return null;
+    }
+
+    final items = widget.controller.selection
+        .map((e) => widget.controller.items.findElemByKey(e))
+        .whereNotNull()
+        .map((e) => e[col.name])
+        .whereNotNull()
+        .map((e) => double.tryParse(e.replaceAll(' ', '')))
+        .whereNotNull();
+
+    if (items.isEmpty) {
+      return null;
+    }
+
+    final double total;
+    switch (col.total) {
+      case MgrListColTotal.sum:
+        total = items.fold(0.0, (a, b) => a + b);
+        break;
+      case MgrListColTotal.sumRound:
+        total = items.fold(0.0, (a, b) => a + b);
+        break;
+      case MgrListColTotal.average:
+        var count = 0;
+        var subtotal = 0.0;
+        for (final item in items) {
+          count++;
+          subtotal += item;
+        }
+
+        total = subtotal / count;
+        break;
+      case null:
+        return null;
+    }
+
+    return _colTotals[col.name] = total.toString();
   }
 
   static const _checkboxWidth = 36.0;
@@ -1351,24 +1414,51 @@ class _MgrListState extends State<MgrList> {
                     ? 'Всего $totalText'
                     : 'Найдено $totalText')
                 : 'Выделено ${widget.controller.selection.length} из $totalText';
-            return ValueAnimatedSwitcher(
-              value: text,
-              duration: const Duration(milliseconds: 200),
-              child: SizedBox(
-                height: rowHeight,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8.0,
-                    horizontal: 16.0,
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      text,
-                      textAlign: TextAlign.left,
+            return SizedBox(
+              height: rowHeight,
+              child: Stack(
+                children: [
+                  rowBuilder(SizedBox(), (col) {
+                    late final total = _totalFor(col.col);
+                    return ValueAnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      value: total,
+                      child: total == null
+                          ? SizedBox(
+                              width: double.infinity,
+                              height: double.infinity,
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  total,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  overflow: TextOverflow.fade,
+                                ),
+                              ),
+                            ),
+                    );
+                  }),
+                  ValueAnimatedSwitcher(
+                    value: text,
+                    duration: const Duration(milliseconds: 200),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          text,
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
             );
           },

@@ -941,8 +941,8 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
-  Widget _buildTableHead(double itemHeight, _RowBuilder rowBuilder) => SizedBox(
-        height: itemHeight,
+  Widget _buildTableHead(double rowHeight, _RowBuilder rowBuilder) => SizedBox(
+        height: rowHeight,
         child: Material(
           color: Colors.transparent,
           child: rowBuilder(
@@ -1034,12 +1034,12 @@ class _MgrListState extends State<MgrList> {
       );
 
   bool? _dragToSelectTargetState;
-  late double _dragToSelectItemHeight;
+  late double _dragToSelectRowHeight;
   late double _dragToSelectVerticalPosition;
   late int _dragToSelectLatestIndex;
 
-  Widget _buildTableBody(double itemHeight, _RowBuilder rowBuilder) {
-    _dragToSelectItemHeight = itemHeight;
+  Widget _buildTableBody(double rowHeight, _RowBuilder rowBuilder) {
+    _dragToSelectRowHeight = rowHeight;
     const dividerHeight = 1.0;
 
     late final placeholder = _buildTableItemPlaceholder(rowBuilder);
@@ -1062,7 +1062,7 @@ class _MgrListState extends State<MgrList> {
                   controller: _verticalScrollController,
                   addRepaintBoundaries: false,
                   itemCount: itemCount,
-                  itemExtent: itemHeight,
+                  itemExtent: rowHeight,
                   itemBuilder: (context, index) {
                     final elem = widget.controller.items[index];
                     final itemWidget = ValueAnimatedSwitcher(
@@ -1097,7 +1097,7 @@ class _MgrListState extends State<MgrList> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: SizedBox(
-                    width: itemHeight,
+                    width: rowHeight,
                     height: double.infinity,
                     child: GestureDetector(
                       onVerticalDragDown: (details) {
@@ -1110,7 +1110,7 @@ class _MgrListState extends State<MgrList> {
                           final index = _dragToSelectLatestIndex =
                               (position.pixels +
                                       _dragToSelectVerticalPosition) ~/
-                                  _dragToSelectItemHeight;
+                                  _dragToSelectRowHeight;
                           final item = widget.controller.items[index];
                           if (item != null) {
                             final key = item[widget.model.keyField];
@@ -1180,7 +1180,7 @@ class _MgrListState extends State<MgrList> {
           max(
               0,
               (position.pixels + _dragToSelectVerticalPosition) ~/
-                  _dragToSelectItemHeight));
+                  _dragToSelectRowHeight));
 
       final bool Function(int i) cmpClosure;
       final int Function(int i) incClosure;

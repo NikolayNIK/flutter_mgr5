@@ -811,10 +811,7 @@ class _MgrListState extends State<MgrList> {
                                 final col = middle[index];
                                 return SizedBox(
                                   width: col.width,
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: builder(col),
-                                  ),
+                                  child: builder(col),
                                 );
                               },
                               addRepaintBoundaries: false,
@@ -847,10 +844,7 @@ class _MgrListState extends State<MgrList> {
                               ...left.map((e) => SizedBox(
                                     width: e.width,
                                     height: double.infinity,
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: builder(e),
-                                    ),
+                                    child: builder(e),
                                   )),
                             ],
                           ),
@@ -910,10 +904,7 @@ class _MgrListState extends State<MgrList> {
                                 ...right.map((e) => SizedBox(
                                       width: e.width,
                                       height: double.infinity,
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: builder(e),
-                                      ),
+                                      child: builder(e),
                                     ))
                               ],
                             ),
@@ -1004,6 +995,20 @@ class _MgrListState extends State<MgrList> {
         ),
       );
 
+  EdgeInsets _cellPadding(MgrListCol col) {
+    switch (col.textAlign) {
+      case TextAlign.left:
+      case TextAlign.start:
+        return const EdgeInsets.only(left: 8.0);
+      case TextAlign.right:
+      case TextAlign.end:
+        return const EdgeInsets.only(right: 8.0);
+      case TextAlign.center:
+      case TextAlign.justify:
+        return const EdgeInsets.symmetric(horizontal: 8.0);
+    }
+  }
+
   Widget _buildTableHead(double rowHeight, _RowBuilder rowBuilder) => SizedBox(
         height: rowHeight,
         child: Material(
@@ -1038,6 +1043,7 @@ class _MgrListState extends State<MgrList> {
                 softWrap: false,
                 overflow: TextOverflow.fade,
                 style: Theme.of(context).textTheme.titleSmall,
+                textAlign: col.col.textAlign,
               );
 
               return Material(
@@ -1048,12 +1054,14 @@ class _MgrListState extends State<MgrList> {
                     radius: col.width / 2,
                     onTap: () {},
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
+                      padding: _cellPadding(col.col),
                       child: Align(
-                        alignment: Alignment.centerLeft,
+                        alignment: col.col.alignment,
                         child: col.col.sorted == null
                             ? text
                             : Row(
+                                mainAxisAlignment: col.col.mainAxisAlignment,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Flexible(child: text),
                                   col.col.sorted!.index == 1
@@ -1342,7 +1350,7 @@ class _MgrListState extends State<MgrList> {
                             }
                           }),
                 (col) => Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
+                  padding: _cellPadding(col.col),
                   child: Builder(
                     builder: (context) {
                       final text = elem[col.col.name];
@@ -1354,12 +1362,17 @@ class _MgrListState extends State<MgrList> {
                               softWrap: false,
                               overflow: TextOverflow.fade,
                               style: TextStyle(color: foregroundColor),
+                              textAlign: col.col.textAlign,
                             );
 
                       return col.col.props.isEmpty
-                          ? textWidget ?? SizedBox()
+                          ? Align(
+                              alignment: col.col.alignment,
+                              child: textWidget ?? SizedBox(),
+                            )
                           : OverflowBox(
                               child: Row(
+                                mainAxisAlignment: col.col.mainAxisAlignment,
                                 children: [
                                   for (final prop in col.col.props)
                                     if (prop.checkVisible(elem))
@@ -1425,14 +1438,15 @@ class _MgrListState extends State<MgrList> {
                               height: double.infinity,
                             )
                           : Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
+                              padding: _cellPadding(col.col),
                               child: Align(
-                                alignment: Alignment.centerLeft,
+                                alignment: col.col.alignment,
                                 child: Text(
                                   total,
                                   maxLines: 1,
                                   softWrap: false,
                                   overflow: TextOverflow.fade,
+                                  textAlign: col.col.textAlign,
                                 ),
                               ),
                             ),

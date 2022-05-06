@@ -133,6 +133,8 @@ class _MgrListState extends State<MgrList> {
                   child: Text(
                     widget.model.title,
                     style: Theme.of(context).textTheme.titleLarge,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
@@ -656,7 +658,8 @@ class _MgrListState extends State<MgrList> {
 
               final factor = needsBreaks
                   ? 1.0
-                  : (availableWidth - _checkboxWidth) / (totalColWidth - _checkboxWidth);
+                  : (availableWidth - _checkboxWidth) /
+                      (totalColWidth - _checkboxWidth);
               final coldata = List<_Col>.unmodifiable(widget.model.coldata
                   .map((col) => _Col(col: col, width: col.width * factor)));
 

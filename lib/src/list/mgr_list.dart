@@ -643,8 +643,8 @@ class _MgrListState extends State<MgrList> {
           valueListenable: widget.controller.rowHeightScale,
           builder: (context, rowScale, _) => LayoutBuilder(
             builder: (context, constraints) {
-              final rowHeight = rowScale * 56.0 +
-                  8.0 * Theme.of(context).visualDensity.vertical;
+              final rowHeight = rowScale * 48.0 +
+                  4.0 * Theme.of(context).visualDensity.vertical;
 
               final availableWidth = constraints.maxWidth - 16.0;
 

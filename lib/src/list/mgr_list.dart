@@ -164,7 +164,7 @@ class _MgrListState extends State<MgrList> {
                     child: Center(child: _buildToolbarSearch()),
                   ),
                 ),
-                if (filterToolbtn != null)
+                if (filterToolbtn != null && widget.model.filterMessage == null)
                   Padding(
                     padding: const EdgeInsets.only(right: 16.0),
                     child: IconButton(
@@ -186,7 +186,8 @@ class _MgrListState extends State<MgrList> {
                         child: _buildToolbarSearch(),
                       ),
                     ),
-                    if (filterToolbtn != null)
+                    if (filterToolbtn != null &&
+                        widget.model.filterMessage == null)
                       Padding(
                         padding: const EdgeInsets.only(right: 16.0),
                         child: IconButton(
@@ -473,7 +474,8 @@ class _MgrListState extends State<MgrList> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    if (widget.onFilterDisablePressed != null)
+                                    if (widget.onFilterDisablePressed != null &&
+                                        widget.model.filterMessage != null)
                                       SizedBox(
                                         width: 56.0,
                                         height: 56.0,

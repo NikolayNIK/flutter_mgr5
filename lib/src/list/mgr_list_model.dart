@@ -91,6 +91,9 @@ class MgrListCol {
   final MgrListColTotal? total;
   final List<MgrListColProp> props;
   final MgrListColSorted? sorted;
+  final TextAlign textAlign;
+  final Alignment alignment;
+  final MainAxisAlignment mainAxisAlignment;
 
   const MgrListCol({
     required this.name,
@@ -100,6 +103,9 @@ class MgrListCol {
     required this.width,
     required this.total,
     required this.props,
+    required this.textAlign,
+    required this.alignment,
+    required this.mainAxisAlignment,
   });
 
   factory MgrListCol.fromXmlElement(
@@ -112,6 +118,7 @@ class MgrListCol {
     final width = element.attribute('cf_width');
     final props = List<MgrListColProp>.unmodifiable(element.childElements
         .map((e) => MgrListColProp.fromXmlElement(e, messages)));
+    final textAlign = element.convertAttribute('align', converter: _parseAlign);
     return MgrListCol(
       name: name,
       label: label,
@@ -129,7 +136,40 @@ class MgrListCol {
           ? MgrListColTotal.sum
           : null,
       props: props,
+      textAlign: textAlign,
+      alignment: _alignmentFromText(textAlign),
+      mainAxisAlignment: _mainAxisAlignmentFromText(textAlign),
     );
+  }
+
+  static Alignment _alignmentFromText(TextAlign textAlign) {
+    switch (textAlign) {
+      case TextAlign.left:
+      case TextAlign.start:
+        return Alignment.centerLeft;
+      case TextAlign.right:
+      case TextAlign.end:
+        return Alignment.centerRight;
+      case TextAlign.center:
+        return Alignment.center;
+      case TextAlign.justify:
+        return Alignment.center;
+    }
+  }
+
+  static MainAxisAlignment _mainAxisAlignmentFromText(TextAlign textAlign) {
+    switch(textAlign) {
+      case TextAlign.left:
+      case TextAlign.start:
+        return MainAxisAlignment.start;
+      case TextAlign.right:
+      case TextAlign.end:
+        return MainAxisAlignment.end;
+      case TextAlign.center:
+        return MainAxisAlignment.center;
+      case TextAlign.justify:
+        return MainAxisAlignment.spaceBetween;
+    }
   }
 
   static double _calculateWidth(
@@ -158,6 +198,20 @@ class MgrListCol {
     }
 
     return 16.0 + 16.0 * (maxLength / 2.0).ceilToDouble();
+  }
+}
+
+TextAlign _parseAlign(String? value) {
+  switch (value) {
+    case null:
+    case 'left':
+      return TextAlign.start;
+    case 'center':
+      return TextAlign.center;
+    case 'right':
+      return TextAlign.end;
+    default:
+      throw MgrFormatException('unknown align: "$value"');
   }
 }
 

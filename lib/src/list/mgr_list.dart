@@ -116,7 +116,7 @@ class _MgrListState extends State<MgrList> {
         .whereNotNull();
 
     if (items.isEmpty) {
-      return null;
+      return _colTotals[col.name] = '';
     }
 
     final String total;
@@ -1419,7 +1419,7 @@ class _MgrListState extends State<MgrList> {
                     return ValueAnimatedSwitcher(
                       duration: const Duration(milliseconds: 200),
                       value: total,
-                      child: total == null
+                      child: total == null || total.isEmpty
                           ? SizedBox(
                               width: double.infinity,
                               height: double.infinity,

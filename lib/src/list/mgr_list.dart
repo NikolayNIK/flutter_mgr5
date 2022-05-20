@@ -1290,15 +1290,17 @@ class _MgrListState extends State<MgrList> {
               value: false,
               onChanged: null,
             ),
-            (col) => Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Container(
-                width: col.width - 8.0,
-                height:
-                    Theme.of(context).textTheme.bodyMedium?.fontSize ?? 16.0,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                  color: Colors.red,
+            (col) => Center(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Container(
+                  width: col.width - 8.0,
+                  height:
+                      Theme.of(context).textTheme.bodyMedium?.fontSize ?? 16.0,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                    color: Colors.red,
+                  ),
                 ),
               ),
             ),

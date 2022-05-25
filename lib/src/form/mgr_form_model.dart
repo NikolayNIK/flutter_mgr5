@@ -398,6 +398,11 @@ class MgrFormSetValuesOptions {
         return const MgrFormSetValuesOptions(isFinal: true);
       case 'blocking':
         return const MgrFormSetValuesOptions(isBlocking: true);
+      case 'finalblock':
+        return const MgrFormSetValuesOptions(
+          isFinal: true,
+          isBlocking: true,
+        );
       case 'skipfiles':
         return const MgrFormSetValuesOptions(isSkippingFiles: true);
       default:

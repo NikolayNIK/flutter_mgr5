@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_mgr5/src/client/mgr_client.dart';
+import 'package:flutter_mgr5/src/client/mgr_request.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
-import 'package:flutter_mgr5/src/mgr_client.dart';
 
 abstract class MgrFormPageCollapseHandler {
   factory MgrFormPageCollapseHandler({
@@ -36,14 +37,14 @@ class _MgrFormPageCollapseHandler implements MgrFormPageCollapseHandler {
   }
 
   void _notify(String name, MgrFormPageController controller) {
-    void listener() => mgrClient.requestXmlDocument(
+    void listener() => mgrClient.request(MgrRequest.func(
           'collapse',
           {
             'page': name,
             'collapse': controller.value ? 'off' : 'on',
             'action': formModel.func,
           },
-        );
+        ));
 
     _listeners.add(MapEntry(controller, listener));
     controller.addListener(listener);

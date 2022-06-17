@@ -1,9 +1,9 @@
+import 'package:flutter_mgr5/src/client/mgr_client.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_page_collapse_handler.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_setvalues_handler.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_validator_handler.dart';
-import 'package:flutter_mgr5/src/mgr_client.dart';
 import 'package:xml/xml.dart';
 
 class StandaloneMgrFormController extends MgrFormController {
@@ -11,17 +11,6 @@ class StandaloneMgrFormController extends MgrFormController {
   late final MgrFormSetvaluesHandler setvaluesHandler;
   late final MgrFormValidatorHandler validatorHandler;
   late final MgrFormPageCollapseHandler pageCollapseHandler;
-
-  factory StandaloneMgrFormController.fromXmlDocument(
-      MgrClient mgrClient, XmlDocument doc,
-      [MgrFormModel? model]) {
-    model ??= MgrFormModel.fromXmlDocument(doc);
-    final controller = StandaloneMgrFormController(
-      mgrClient: mgrClient,
-      model: model,
-    );
-    return controller;
-  }
 
   StandaloneMgrFormController({
     required MgrClient mgrClient,

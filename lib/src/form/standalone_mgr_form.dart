@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mgr5/extensions/map_extensions.dart';
+import 'package:flutter_mgr5/src/client/mgr_client.dart';
+import 'package:flutter_mgr5/src/client/mgr_request.dart';
+import 'package:flutter_mgr5/src/client/xml_mgr_client.dart';
 import 'package:flutter_mgr5/src/form/mgr_form.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/src/form/standalone_mgr_form_controller.dart';
-import 'package:flutter_mgr5/src/mgr_client.dart';
 import 'package:flutter_mgr5/src/mgr_exception.dart';
 import 'package:provider/provider.dart';
 import 'package:xml/xml.dart';
@@ -106,15 +108,16 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
       _controller = null;
 
       _initialLoadFuture = () async {
-        final doc = await widget.mgrClient.requestXmlDocument(widget.name, widget.params);
+        final model = await widget.mgrClient
+            .requestFormModel(MgrRequest.func(widget.name, widget.params));
         if (!isDisposed) {
           setState(() {
-            _controller = StandaloneMgrFormController.fromXmlDocument(
-                widget.mgrClient,
-                doc,
-                widget.modelAdjuster == null
-                    ? null
-                    : widget.modelAdjuster!(MgrFormModel.fromXmlDocument(doc)));
+            _controller = StandaloneMgrFormController(
+              mgrClient: widget.mgrClient,
+              model: widget.modelAdjuster == null
+                  ? model
+                  : widget.modelAdjuster!(model),
+            );
 
             isRefreshing = false;
           });
@@ -248,8 +251,13 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
     try {
       final XmlDocument response;
       try {
-        response =
-            await widget.mgrClient.requestXmlDocument(controller.model.func, params);
+        final mgrClient = widget.mgrClient;
+        if (mgrClient is XmlMgrClient) {
+          response = await mgrClient
+              .requestXmlDocument(MgrRequest.func(controller.model.func, params));
+        } else {
+          throw MgrException('unsupported', 'MgrClient', null, null); // TODO
+        }
       } on MgrException catch (e) {
         controller.exception.value = e;
         return;
@@ -263,9 +271,9 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
               // вызывает проблемы, т.к. виджеты вызывают removeListener у содержащихся
               // в контроллере [Listenable] после смены контроллера
               // _controller?.dispose(); // что может пойти не так?
-              _controller = StandaloneMgrFormController.fromXmlDocument(
-                context.read<MgrClient>(),
-                response,
+              _controller = StandaloneMgrFormController(
+                mgrClient: context.read<MgrClient>(),
+                model: MgrFormModel.fromXmlDocument(response),
               );
             });
 

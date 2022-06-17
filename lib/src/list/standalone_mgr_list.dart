@@ -4,6 +4,8 @@ import 'package:flutter_mgr5/extensions/iterator_extensions.dart';
 import 'package:flutter_mgr5/extensions/map_extensions.dart';
 import 'package:flutter_mgr5/mgr5.dart';
 import 'package:flutter_mgr5/mgr5_list.dart';
+import 'package:flutter_mgr5/src/client/mgr_client.dart';
+import 'package:flutter_mgr5/src/client/mgr_request.dart';
 
 class StandaloneMgrList extends StatefulWidget {
   final MgrClient mgrClient;
@@ -66,15 +68,15 @@ class _StandaloneMgrListState extends State<StandaloneMgrList> {
 
     _loadingFuture = () async {
       if (_filterParams != null && oldFilterFunc != null) {
-        await widget.mgrClient.requestXmlDocument(oldFilterFunc, _filterParams);
+        await widget.mgrClient.request(MgrRequest.func(oldFilterFunc, _filterParams));
         _filterParams = null;
       }
 
-      final doc =
-          await widget.mgrClient.requestXmlDocument(widget.func, widget.params);
+      final model =
+          await widget.mgrClient.requestListModel(MgrRequest.func(widget.func, widget.params));
 
       setState(() {
-        _model = MgrListModel.fromXmlDocument(doc);
+        _model = model;
         _controller = MgrListController(
           mgrClient: widget.mgrClient,
           func: widget.func,
@@ -84,11 +86,11 @@ class _StandaloneMgrListState extends State<StandaloneMgrList> {
 
       final filterFunc = _filterFunc;
       if (filterFunc != null) {
-        final filterDoc = await widget.mgrClient
-            .requestXmlDocument(filterFunc, widget.params);
+        final filterModel = await widget.mgrClient
+            .requestFormModel(MgrRequest.func(filterFunc, widget.params));
         setState(() {
-          final model = _filterModel = MgrFormModel.fromXmlDocument(filterDoc);
-          _filterController = MgrFormController(model);
+          _filterModel = filterModel;
+          _filterController = MgrFormController(filterModel);
         });
       }
     }();

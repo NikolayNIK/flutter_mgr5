@@ -1,8 +1,9 @@
 import 'package:flutter_mgr5/extensions/xml_extensions.dart';
+import 'package:flutter_mgr5/src/client/mgr_client.dart';
+import 'package:flutter_mgr5/src/client/mgr_request.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_handler.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
-import 'package:flutter_mgr5/src/mgr_client.dart';
 import 'package:flutter_mgr5/src/mgr_exception.dart';
 
 abstract class MgrFormValidatorHandler {
@@ -48,20 +49,22 @@ class _MgrFormValidatorHandler extends MgrFormHandler
         }
 
         final value = param.value;
-        _mgrClient.requestXmlDocument('check.${validatorOptions.func}', {
+        _mgrClient
+            .request(MgrRequest.func('check.${validatorOptions.func}', {
           'name': name,
           'funcname': formModel.func,
           if (value != null) 'value': value,
           if (convert != null) 'tconvert': convert,
           if (validatorOptions.args != null) 'args': validatorOptions.args!,
-        }).then((doc) {
+        }))
+            .then((doc) {
           if (_blockedValidators.contains(name)) {
             return;
           }
 
           // если значение изменилось с момента вызова валидатора, его результат игнорируется
           if (param.value == value) {
-            final element = doc.rootElement.child('value');
+            final element = null; // doc.rootElement.child('value'); TODO!
             if (element != null) {
               _blockedValidators.add(name);
               param.value = element.innerText;
@@ -69,7 +72,7 @@ class _MgrFormValidatorHandler extends MgrFormHandler
             }
           }
         }).catchError((error) => formController.exception.value = error,
-            test: (error) => error is MgrException);
+                test: (error) => error is MgrException);
       });
     }
   }

@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mgr5/extensions/map_extensions.dart';
 import 'package:flutter_mgr5/mgr5.dart';
+import 'package:flutter_mgr5/src/client/mgr_client.dart';
+import 'package:flutter_mgr5/src/client/mgr_request.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
 
 typedef MgrListElemKey = String;
@@ -135,13 +137,15 @@ class MgrListPage extends ValueListenable<List<MgrListElem>?>
     _isLoading = true;
 
     try {
-      final doc = await _controller.mgrClient.requestXmlDocument(
-        _controller.func,
-        (_controller.params ?? {}).copyWith(
-          map: {
-            'p_num': (index + 1).toString(),
-            'p_cnt': _controller.pages.pageSize.toString(),
-          },
+      final model = await _controller.mgrClient.requestListModel(
+        MgrRequest.func(
+          _controller.func,
+          (_controller.params ?? {}).copyWith(
+            map: {
+              'p_num': (index + 1).toString(),
+              'p_cnt': _controller.pages.pageSize.toString(),
+            },
+          ),
         ),
       );
 
@@ -149,7 +153,7 @@ class MgrListPage extends ValueListenable<List<MgrListElem>?>
         return;
       }
 
-      _controller.update(MgrListModel.fromXmlDocument(doc));
+      _controller.update(model);
     } finally {
       _isLoading = false;
     }

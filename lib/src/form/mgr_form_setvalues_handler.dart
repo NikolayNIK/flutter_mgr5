@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mgr5/extensions/map_extensions.dart';
+import 'package:flutter_mgr5/src/client/mgr_client.dart';
+import 'package:flutter_mgr5/src/client/mgr_request.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_handler.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
-import 'package:flutter_mgr5/src/mgr_client.dart';
 
 abstract class MgrFormSetvaluesHandler {
   factory MgrFormSetvaluesHandler({
@@ -120,10 +121,10 @@ class MgrFormSetValuesHandlerImpl extends MgrFormHandler
       }
 
       try {
-        final doc = await _mgrClient.requestXmlDocument(
+        final model = await _mgrClient.requestFormModel(MgrRequest.func(
           formModel.func,
           formController.stringParams.copyWith(map: {'sv_field': name}),
-        );
+        ));
 
         if (_finalSvFields.isNotEmpty) {
           return;
@@ -133,7 +134,7 @@ class MgrFormSetValuesHandlerImpl extends MgrFormHandler
           _finalSvFields.add(name);
         }
 
-        formController.update(MgrFormModel.fromXmlDocument(doc));
+        formController.update(model);
 
         if (isFinal) {
           _finalSvFields.remove(name);

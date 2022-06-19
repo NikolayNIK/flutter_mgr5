@@ -711,7 +711,7 @@ class _MgrListState extends State<MgrList> {
 
               final totalColWidth = widget.model.coldata
                       .map((e) => e.width)
-                      .reduce((value, element) => value + element) +
+                      .fold<double>(0.0, (value, element) => value + element) +
                   _checkboxWidth;
               final needsBreaks = totalColWidth > availableWidth;
 

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_mgr5/extensions/map_extensions.dart';
 import 'package:flutter_mgr5/src/client/auth_info.dart';
 
 @immutable
@@ -10,7 +11,9 @@ class MgrRequest {
   MgrRequest.func(
     String? func, [
     Map<String, String>? params,
-  ]) : params = Map.unmodifiable(params ?? {});
+  ]) : params = Map.unmodifiable(func == null
+            ? params ?? {}
+            : (params?.copyWith(map: {'func': func}) ?? {'func': func}));
 
   String? get func => params['func'];
 

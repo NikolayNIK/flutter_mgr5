@@ -29,7 +29,10 @@ abstract class RawXmlMgrClient implements XmlMgrClient, RawMgrClient {
 
   @override
   Future<XmlDocument> requestXmlDocument(MgrRequest request) async {
-    final bytes = await requestBytes(request);
+    final bytes = await requestBytes(request.copyWith(
+      authInfo: authInfo,
+      params: {'out': 'devel'},
+    ));
     try {
       return bytes.length > _offloadThresholdBytes
           ? await compute(_parseXmlDocument, bytes)
@@ -42,7 +45,11 @@ abstract class RawXmlMgrClient implements XmlMgrClient, RawMgrClient {
 
   @override
   Future<MgrFormModel> requestFormModel(MgrRequest request) async {
-    final bytes = await requestBytes(request);
+    final bytes =
+        await requestBytes(request.copyWith(
+          authInfo: authInfo,
+          params: {'out': 'devel'},
+        ));
     try {
       return bytes.length > _offloadThresholdBytes
           ? await compute(_parseXmlDocumentIntoFormModel, bytes)
@@ -55,7 +62,11 @@ abstract class RawXmlMgrClient implements XmlMgrClient, RawMgrClient {
 
   @override
   Future<MgrListModel> requestListModel(MgrRequest request) async {
-    final bytes = await requestBytes(request);
+    final bytes =
+        await requestBytes(request.copyWith(
+          authInfo: authInfo,
+          params: {'out': 'devel'},
+        ));
     try {
       return bytes.length > _offloadThresholdBytes
           ? await compute(_parseXmlDocumentIntoListModel, bytes)

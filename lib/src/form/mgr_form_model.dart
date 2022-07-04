@@ -41,7 +41,7 @@ class MgrFormModel extends MgrModel {
   final Map<String, MgrConditionalStateChecker> conditionalStateChecks;
   final Map<String, Slist> slists;
 
-  MgrFormModel({
+  const MgrFormModel({
     required String func,
     required this.title,
     required this.elid,

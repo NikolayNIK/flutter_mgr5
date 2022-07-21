@@ -199,7 +199,7 @@ class _MgrListState extends State<MgrList> {
               ),
               IconButton(
                   onPressed: () => widget.controller.items.clear(),
-                  icon: Icon(Icons.refresh)),
+                  icon: const Icon(Icons.refresh)),
             ],
           ),
         ),
@@ -232,7 +232,7 @@ class _MgrListState extends State<MgrList> {
                     child: IconButton(
                       onPressed: () =>
                           widget.controller.isFilterOpen.value ^= true,
-                      icon: Icon(Icons.filter_alt),
+                      icon: const Icon(Icons.filter_alt),
                     ),
                   ),
               ],
@@ -255,7 +255,7 @@ class _MgrListState extends State<MgrList> {
                         child: IconButton(
                           onPressed: () =>
                               widget.controller.isFilterOpen.value ^= true,
-                          icon: Icon(Icons.filter_alt),
+                          icon: const Icon(Icons.filter_alt),
                         ),
                       ),
                   ],
@@ -266,7 +266,7 @@ class _MgrListState extends State<MgrList> {
   }
 
   Widget _buildToolbarButtons() => widget.onToolbtnPressed == null
-      ? SizedBox()
+      ? const SizedBox()
       : Align(
           alignment: Alignment.centerLeft,
           child: SingleChildScrollView(
@@ -296,7 +296,7 @@ class _MgrListState extends State<MgrList> {
                                           .controller.items
                                           .findElemByKey(selectionList[i])));
                               if (state == MgrListToolbtnState.hidden) {
-                                return SizedBox();
+                                return const SizedBox();
                               } else {
                                 final enabled =
                                     state == MgrListToolbtnState.shown;
@@ -337,14 +337,14 @@ class _MgrListState extends State<MgrList> {
                                                               Navigator.pop(
                                                                   context,
                                                                   false),
-                                                          child: Text('ОТМЕНА'),
+                                                          child: const Text('ОТМЕНА'),
                                                         ),
                                                         TextButton(
                                                           onPressed: () =>
                                                               Navigator.pop(
                                                                   context,
                                                                   true),
-                                                          child: Text('OK'),
+                                                          child: const Text('OK'),
                                                         ),
                                                       ],
                                                     ),
@@ -405,7 +405,7 @@ class _MgrListState extends State<MgrList> {
                                                   style: (Theme.of(context)
                                                               .textTheme
                                                               .labelMedium ??
-                                                          TextStyle())
+                                                          const TextStyle())
                                                       .copyWith(
                                                           color: enabled
                                                               ? Theme.of(
@@ -451,7 +451,7 @@ class _MgrListState extends State<MgrList> {
         builder: (context, isFilterOpen, child) => widget.model.filterMessage ==
                     null &&
                 !isFilterOpen
-            ? SizedBox()
+            ? const SizedBox()
             : LayoutBuilder(
                 builder: (context, constraints) {
                   final isVertical = constraints.maxWidth <= 512;
@@ -473,9 +473,9 @@ class _MgrListState extends State<MgrList> {
                                     child: Container(
                                       width: 240.0,
                                       height: 48.0,
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         borderRadius: BorderRadius.all(
-                                          Radius.circular(8),
+                                          const Radius.circular(8),
                                         ),
                                         color: Colors.red,
                                       ),
@@ -498,16 +498,16 @@ class _MgrListState extends State<MgrList> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
+                        const Padding(
+                          padding: EdgeInsets.symmetric(
                             vertical: 16.0,
                           ),
-                          child: Icon(Icons.filter_alt),
+                          child: const Icon(Icons.filter_alt),
                         ),
                         Expanded(
                           child: isFilterOpen
                               ? isVertical
-                                  ? SizedBox()
+                                  ? const SizedBox()
                                   : form
                               : Padding(
                                   padding: const EdgeInsets.all(16.0),
@@ -544,7 +544,7 @@ class _MgrListState extends State<MgrList> {
                                         child: IconButton(
                                           onPressed:
                                               widget.onFilterDisablePressed,
-                                          icon: Icon(Icons.filter_alt_off),
+                                          icon: const Icon(Icons.filter_alt_off),
                                         ),
                                       ),
                                     SizedBox(
@@ -571,7 +571,7 @@ class _MgrListState extends State<MgrList> {
                                       width: double.infinity,
                                       child: OutlinedButton(
                                         onPressed: widget.onFilterSubmitPressed,
-                                        child: Text('НАЙТИ'),
+                                        child: const Text('НАЙТИ'),
                                       ),
                                     ),
                                   ),
@@ -586,7 +586,7 @@ class _MgrListState extends State<MgrList> {
                                         onPressed: () => widget
                                             .filterController!.params
                                             .clear(),
-                                        child: Text('ОЧИСТИТЬ'),
+                                        child: const Text('ОЧИСТИТЬ'),
                                       ),
                                     ),
                                   ),
@@ -626,14 +626,14 @@ class _MgrListState extends State<MgrList> {
                                 child: OutlinedButton(
                                   onPressed: () =>
                                       widget.filterController!.params.clear(),
-                                  child: Text('ОЧИСТИТЬ'),
+                                  child: const Text('ОЧИСТИТЬ'),
                                 ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: OutlinedButton(
                                   onPressed: widget.onFilterSubmitPressed,
-                                  child: Text('НАЙТИ'),
+                                  child: const Text('НАЙТИ'),
                                 ),
                               ),
                             ],
@@ -929,7 +929,7 @@ class _MgrListState extends State<MgrList> {
                         builder: (context) => Column(
                           children: [
                             _buildTableHead(rowHeight, rowBuilder),
-                            Divider(
+                            const Divider(
                               height: 2,
                               thickness: 2,
                               indent: 16.0,
@@ -942,7 +942,7 @@ class _MgrListState extends State<MgrList> {
                                 child: _buildTableBody(rowHeight, rowBuilder),
                               ),
                             ),
-                            Divider(
+                            const Divider(
                               height: 2,
                               thickness: 2,
                               indent: 16.0,
@@ -975,13 +975,13 @@ class _MgrListState extends State<MgrList> {
                 return Column(
                   children: [
                     _buildTableHead(rowHeight, rowBuilder),
-                    Divider(
+                    const Divider(
                       height: 2,
                       thickness: 2,
                       indent: 16.0,
                     ),
                     Expanded(child: _buildTableBody(rowHeight, rowBuilder)),
-                    Divider(
+                    const Divider(
                       height: 2,
                       thickness: 2,
                       indent: 16.0,
@@ -1286,7 +1286,7 @@ class _MgrListState extends State<MgrList> {
           baseColor: Theme.of(context).splashColor,
           highlightColor: Theme.of(context).splashColor.withOpacity(0),
           child: rowBuilder(
-            Checkbox(
+            const Checkbox(
               value: false,
               onChanged: null,
             ),
@@ -1297,8 +1297,8 @@ class _MgrListState extends State<MgrList> {
                   width: col.width - 8.0,
                   height:
                       Theme.of(context).textTheme.bodyMedium?.fontSize ?? 16.0,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  decoration: const BoxDecoration(
+                    borderRadius: const BorderRadius.all(const Radius.circular(8)),
                     color: Colors.red,
                   ),
                 ),
@@ -1370,7 +1370,7 @@ class _MgrListState extends State<MgrList> {
                       return col.col.props.isEmpty
                           ? Align(
                               alignment: col.col.alignment,
-                              child: textWidget ?? SizedBox(),
+                              child: textWidget ?? const SizedBox(),
                             )
                           : OverflowBox(
                               child: Row(
@@ -1429,13 +1429,13 @@ class _MgrListState extends State<MgrList> {
               height: rowHeight,
               child: Stack(
                 children: [
-                  rowBuilder(SizedBox(), (col) {
+                  rowBuilder(const SizedBox(), (col) {
                     late final total = _totalFor(col.col);
                     return ValueAnimatedSwitcher(
                       duration: const Duration(milliseconds: 200),
                       value: total,
                       child: total == null || total.isEmpty
-                          ? SizedBox(
+                          ? const SizedBox(
                               width: double.infinity,
                               height: double.infinity,
                             )
@@ -1658,7 +1658,7 @@ class _MgrListFilterForm extends StatelessWidget {
 
             MgrFormState state;
             return controlWidth < 0 || labelWidth < 0
-                ? SizedBox()
+                ? const SizedBox()
                 : Wrap(
                     runAlignment: WrapAlignment.spaceEvenly,
                     children: [

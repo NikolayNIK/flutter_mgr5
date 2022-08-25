@@ -914,44 +914,53 @@ class _MgrListState extends State<MgrList> {
                   );
                 }
 
-                return Scrollbar(
-                  isAlwaysShown: true,
-                  controller: _horizontalScrollController,
-                  child: Scrollable(
+                return Transform.translate(
+                  offset: Offset(leftWidth, -rowHeight),
+                  transformHitTests: false,
+                  child: Scrollbar(
+                    isAlwaysShown: true,
                     controller: _horizontalScrollController,
-                    axisDirection: AxisDirection.right,
-                    viewportBuilder: (context, position) {
-                      _RowBuilder rowBuilder = (checkbox, toWidget) =>
-                          offsetRowBuilder(position, checkbox, toWidget);
+                    child: Transform.translate(
+                      offset: Offset(-leftWidth, rowHeight),
+                      transformHitTests: false,
+                      child: Scrollable(
+                        controller: _horizontalScrollController,
+                        axisDirection: AxisDirection.right,
+                        viewportBuilder: (context, position) {
+                          _RowBuilder rowBuilder = (checkbox, toWidget) =>
+                              offsetRowBuilder(position, checkbox, toWidget);
 
-                      return ListenableBuilder(
-                        listenable: _horizontalScrollController,
-                        builder: (context) => Column(
-                          children: [
-                            _buildTableHead(rowHeight, rowBuilder),
-                            const Divider(
-                              height: 2,
-                              thickness: 2,
-                              indent: 16.0,
+                          return ListenableBuilder(
+                            listenable: _horizontalScrollController,
+                            builder: (context) => Column(
+                              children: [
+                                _buildTableHead(rowHeight, rowBuilder),
+                                const Divider(
+                                  height: 2,
+                                  thickness: 2,
+                                  indent: 16.0,
+                                ),
+                                Expanded(
+                                  child: NotificationListener<
+                                      OverscrollNotification>(
+                                    // Suppress OverscrollNotification events that escape from the inner scrollable
+                                    onNotification: (notification) => true,
+                                    child:
+                                        _buildTableBody(rowHeight, rowBuilder),
+                                  ),
+                                ),
+                                const Divider(
+                                  height: 2,
+                                  thickness: 2,
+                                  indent: 16.0,
+                                ),
+                                _buildTableFooter(rowHeight, rowBuilder),
+                              ],
                             ),
-                            Expanded(
-                              child:
-                                  NotificationListener<OverscrollNotification>(
-                                // Suppress OverscrollNotification events that escape from the inner scrollable
-                                onNotification: (notification) => true,
-                                child: _buildTableBody(rowHeight, rowBuilder),
-                              ),
-                            ),
-                            const Divider(
-                              height: 2,
-                              thickness: 2,
-                              indent: 16.0,
-                            ),
-                            _buildTableFooter(rowHeight, rowBuilder),
-                          ],
-                        ),
-                      );
-                    },
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 );
               } else {

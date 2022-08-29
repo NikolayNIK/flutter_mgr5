@@ -19,6 +19,7 @@ import 'package:flutter_mgr5/src/form/components/mgr_form_ticket.dart';
 import 'package:flutter_mgr5/src/form/components/mgr_form_tree.dart';
 import 'package:flutter_mgr5/src/form/mgr_exception_holder.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
+import 'package:flutter_mgr5/src/form/slist.dart';
 import 'package:flutter_mgr5/src/mgr_format.dart';
 import 'package:flutter_mgr5/src/mgr_messages.dart';
 import 'package:flutter_mgr5/src/mgr_model.dart';
@@ -38,8 +39,9 @@ class MgrFormModel extends MgrModel {
   final List<MgrFormPageModel> pages;
   final List<MgrFormButtonModel> buttons;
   final Map<String, MgrConditionalStateChecker> conditionalStateChecks;
+  final Map<String, Slist> slists;
 
-  MgrFormModel({
+  const MgrFormModel({
     required String func,
     required this.title,
     required this.elid,
@@ -47,6 +49,7 @@ class MgrFormModel extends MgrModel {
     required this.pages,
     required this.buttons,
     required this.conditionalStateChecks,
+    required this.slists,
   }) : super(func);
 
   factory MgrFormModel.fromXmlDocument(XmlDocument doc,
@@ -89,6 +92,18 @@ class MgrFormModel extends MgrModel {
       pages: _parsePages(messages, conditionalHideConsumer, form),
       buttons: _parseButtons(messages, form),
       conditionalStateChecks: Map.unmodifiable(conditionalStateChecks),
+      slists: {
+        for (final slist in rootElement.findElements('slist'))
+          slist.requireAttribute('name'): List.unmodifiable(
+            slist.childElements.map(
+              (item) => SlistEntry(
+                item.attribute('key'),
+                item.innerText,
+                item.attribute('depend'),
+              ),
+            ),
+          ),
+      },
     );
   }
 
@@ -105,6 +120,28 @@ class MgrFormModel extends MgrModel {
 
     return null;
   }
+
+  MgrFormModel copyWith({
+    String? func,
+    String? title,
+    String? elid,
+    String? plid,
+    List<MgrFormPageModel>? pages,
+    List<MgrFormButtonModel>? buttons,
+    Map<String, MgrConditionalStateChecker>? conditionalStateChecks,
+    Map<String, Slist>? slists,
+  }) =>
+      MgrFormModel(
+        func: func ?? this.func,
+        title: title ?? this.title,
+        elid: elid ?? this.elid,
+        plid: plid ?? this.plid,
+        pages: pages ?? this.pages,
+        buttons: buttons ?? this.buttons,
+        conditionalStateChecks:
+            conditionalStateChecks ?? this.conditionalStateChecks,
+        slists: slists ?? this.slists,
+      );
 
   static List<MgrFormPageModel> _parsePages(
       MgrMessages messages,
@@ -361,6 +398,11 @@ class MgrFormSetValuesOptions {
         return const MgrFormSetValuesOptions(isFinal: true);
       case 'blocking':
         return const MgrFormSetValuesOptions(isBlocking: true);
+      case 'finalblock':
+        return const MgrFormSetValuesOptions(
+          isFinal: true,
+          isBlocking: true,
+        );
       case 'skipfiles':
         return const MgrFormSetValuesOptions(isSkippingFiles: true);
       default:

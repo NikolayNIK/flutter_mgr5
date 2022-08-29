@@ -5,12 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mgr5/extensions/datetime_extensions.dart';
 import 'package:flutter_mgr5/extensions/iterator_extensions.dart';
-import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:flutter_mgr5/src/form/components/mgr_form_select.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/src/form/slist.dart';
 import 'package:flutter_mgr5/src/mgr_exception.dart';
-import 'package:xml/xml.dart';
 
 abstract class MgrFormControllerStringParamMap implements Map<String, String> {
   @override
@@ -31,7 +29,7 @@ abstract class MgrFormSlistMap implements Map<String, ValueNotifier<Slist>> {
   @override
   ValueNotifier<Slist> operator [](covariant Object key);
 
-  void _update({XmlDocument? doc, MgrFormModel? model});
+  void set(MgrFormModel model);
 
   void _notifyChanged();
 }
@@ -109,7 +107,7 @@ class _MgrFormControllerParamMap extends MapBase<String, MgrFormControllerParam>
     final name = key.toString();
     return _map.putIfAbsent(
         name,
-        () => MgrFormControllerParam()
+        () => MgrFormControllerParam(name, _controller)
           ..addListener(() => _controller._notifyChanged(name)));
   }
 
@@ -120,10 +118,7 @@ class _MgrFormControllerParamMap extends MapBase<String, MgrFormControllerParam>
   }
 
   @override
-  void clear() {
-    _map.forEach((key, value) => value.dispose());
-    _map.clear();
-  }
+  void clear() => _map.values.forEach((element) => element.value = null);
 
   @override
   MgrFormControllerParam? remove(Object? key) => _map.remove(key)?..dispose();
@@ -185,8 +180,6 @@ class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
     const [SlistEntry(null, '-- не указано --', null)],
   ); // TODO localize
 
-  bool _isInitialized = false;
-
   _MgrFormSlistMap(this.controller);
 
   @override
@@ -236,47 +229,37 @@ class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
   }
 
   @override
-  void _update({XmlDocument? doc, MgrFormModel? model}) {
+  void set(MgrFormModel model) {
     bool isChanged = false;
-    if (doc != null) {
-      for (final slist in doc.rootElement.findElements('slist')) {
-        isChanged = true;
-        _original
-            .putIfAbsent(slist.requireAttribute('name'),
-                () => ValueNotifier(_emptySlist))
-            .value = [
-          for (final item in slist.childElements)
-            if (item.name.local == 'val')
-              SlistEntry(item.attribute('key'), item.innerText,
-                  item.attribute('depend')),
-        ];
-      }
+    for (final slist in model.slists.entries) {
+      isChanged = true;
+      _original.putIfAbsent(slist.key, () => ValueNotifier(_emptySlist)).value =
+          slist.value;
     }
 
-    if (model != null) {
-      for (final control in model.pages
-          .expand((element) => element.fields)
-          .expand((element) => element.controls)
-          .whereType<SelectFormFieldControlModel>()) {
-        final depend = control.depend;
-        if (depend == null) {
-          if (_dependencies.remove(control.name) != null) {
-            isChanged = true;
-          }
-        } else {
-          if (_dependencies[control.name] != depend) {
-            _dependencies[control.name] = depend;
-            isChanged = true;
-          }
+    for (final control in model.pages
+        .expand((element) => element.fields)
+        .expand((element) => element.controls)
+        .whereType<SelectFormFieldControlModel>()) {
+      final depend = control.depend;
+      if (depend == null) {
+        /*
+         // на setvalues depend почему-то обрезается,
+         // поэтому зависимости не удаляем
+        if (_dependencies.remove(control.name) != null) {
+          isChanged = true;
+        }*/
+      } else {
+        if (_dependencies[control.name] != depend) {
+          _dependencies[control.name] = depend;
+          isChanged = true;
         }
       }
     }
 
     if (isChanged) {
-      controller._notifyChanged(null);
+      _notifyChanged();
     }
-
-    _isInitialized = true;
   }
 
   @override
@@ -293,18 +276,6 @@ class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
       _filtered
           .putIfAbsent(dependency.key, () => ValueNotifier(filteredSlist))
           .value = filteredSlist;
-    }
-
-    if (_isInitialized) {
-      // пройтись по всем slist'ам, поменять значения, если те не входят в slist
-      // может быть затратным
-      for (final entry in entries) {
-        if (!entry.value.value
-            .map((e) => e.key)
-            .contains(controller.stringParams[entry.key])) {
-          controller.stringParams[entry.key] = entry.value.value.first.key;
-        }
-      }
     }
   }
 }
@@ -357,13 +328,13 @@ class MgrFormController implements Listenable {
       _MgrFormControllerStringParamMap(this);
   late final MgrFormSlistMap slists = _MgrFormSlistMap(this);
   final MgrFormPagesController pages = _MgrFormPageController();
+  late final ScrollController scrollController = ScrollController();
 
   final Set<VoidCallback> _listeners = {};
   final ValueNotifier<MgrException?> exception = ValueNotifier(null);
 
   MgrFormController(MgrFormModel model) {
-    params.set(model);
-    slists._update(model: model);
+    update(model);
 
     for (final control in model.pages
         .expand((page) => page.fields)
@@ -378,8 +349,9 @@ class MgrFormController implements Listenable {
         .forEach((name) => pages[name].collapse());
   }
 
-  void update({required XmlDocument doc}) {
-    slists._update(doc: doc);
+  void update(MgrFormModel model) {
+    slists.set(model);
+    params.set(model);
   }
 
   @override
@@ -392,6 +364,7 @@ class MgrFormController implements Listenable {
     params.clear();
     slists.clear();
     _listeners.clear();
+    scrollController.dispose();
   }
 
   void _notifyChanged(String? name) {
@@ -406,9 +379,14 @@ class MgrFormController implements Listenable {
 }
 
 class MgrFormControllerParam implements ValueListenable<String?> {
+  final String name;
+
   late final FocusNode focusNode = FocusNode();
   final Set<VoidCallback> _listeners = {};
+  final MgrFormController _formController;
   _MgrFormControlController? _controller;
+
+  MgrFormControllerParam(this.name, this._formController);
 
   @override
   String? get value => _controller?.value;
@@ -425,8 +403,8 @@ class MgrFormControllerParam implements ValueListenable<String?> {
   MgrCheckBoxController get checkBoxController =>
       _getController(() => MgrCheckBoxController(this));
 
-  MgrSelectController get selectController =>
-      _getController(() => MgrSelectController(this));
+  MgrSingleSelectController get singleSelectController => _getController(
+      () => MgrSingleSelectController(this, _formController.slists[name]));
 
   MgrDatetimeController get datetimeController =>
       _getController(() => MgrDatetimeController(this));
@@ -548,31 +526,46 @@ class MgrCheckBoxController extends _MgrFormControlController {
   void dispose() => container.dispose();
 }
 
-class MgrSelectController extends _MgrFormControlController {
-  final MgrFormControllerParam param;
-  final ValueNotifier<String?> container;
+class MgrSingleSelectController extends _MgrFormControlController {
+  final MgrFormControllerParam _param;
+  final ValueNotifier<String?> _container;
+  final ValueListenable<Slist> _slist;
 
-  MgrSelectController(this.param, [String? initialValue])
-      : container = ValueNotifier(initialValue ?? '');
+  MgrSingleSelectController(this._param, this._slist, [String? initialValue])
+      : _container = ValueNotifier(null) {
+    value = initialValue;
 
-  @override
-  FocusNode get focusNode => param.focusNode;
-
-  @override
-  String? get value => container.value;
-
-  @override
-  set value(String? value) => container.value = value;
+    // вызов сеттера для проверки наличия значения в измененном slist'е
+    _slist.addListener(() => value = value);
+  }
 
   @override
-  void addListener(VoidCallback listener) => container.addListener(listener);
+  FocusNode get focusNode => _param.focusNode;
+
+  @override
+  String? get value => _container.value;
+
+  @override
+  set value(String? value) {
+    for (final entry in _slist.value) {
+      if (entry.key == value) {
+        _container.value = entry.key;
+        return;
+      }
+    }
+
+    _container.value = _slist.value.first.key;
+  }
+
+  @override
+  void addListener(VoidCallback listener) => _container.addListener(listener);
 
   @override
   void removeListener(VoidCallback listener) =>
-      container.removeListener(listener);
+      _container.removeListener(listener);
 
   @override
-  void dispose() => container.dispose();
+  void dispose() => _container.dispose();
 }
 
 class MgrDatetimeController extends _MgrFormControlController {

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mgr5/listenable_builder.dart';
 import 'package:flutter_mgr5/src/form/components/mgr_form_error_card.dart';
@@ -52,17 +54,9 @@ class MgrForm extends StatefulWidget {
 }
 
 class _MgrFormState extends State<MgrForm> {
-  late ScrollController _scrollController;
-
   MgrFormController get controller => widget.controller;
 
   MgrFormModel get model => widget.model;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-  }
 
   @override
   Widget build(BuildContext context) => Stack(
@@ -129,7 +123,7 @@ class _MgrFormState extends State<MgrForm> {
           Flexible(
             child: FocusTraversalGroup(
               child: ListView(
-                controller: _scrollController,
+                controller: controller.scrollController,
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 children: [
@@ -161,6 +155,7 @@ class _MgrFormState extends State<MgrForm> {
               indent: 16.0,
             ),
             Material(
+              color: Colors.transparent,
               child: Padding(
                 padding:
                     const EdgeInsets.only(left: 16.0, top: 16.0, right: 16.0),
@@ -192,12 +187,11 @@ class _MgrFormState extends State<MgrForm> {
       );
 
   Widget _buildTitle(BuildContext context) => Material(
+        color: Colors.transparent,
         child: Padding(
-          padding: const EdgeInsets.only(
-            left: 16.0,
-            top: 16.0,
-            right: 16.0,
-            bottom: 16.0,
+          padding: EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: max(8.0, 8.0 + 4.0 * Theme.of(context).visualDensity.vertical),
           ),
           child: Row(
             children: [
@@ -283,10 +277,4 @@ class _MgrFormState extends State<MgrForm> {
         fieldControlsWidth: widget.fieldControlsWidth,
         forceReadOnly: widget.forceReadOnly,
       );
-
-  @override
-  void dispose() {
-    super.dispose();
-    _scrollController.dispose();
-  }
 }

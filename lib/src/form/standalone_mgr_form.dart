@@ -7,7 +7,6 @@ import 'package:flutter_mgr5/src/form/mgr_form.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/src/form/standalone_mgr_form_controller.dart';
 import 'package:flutter_mgr5/src/mgr_exception.dart';
-import 'package:provider/provider.dart';
 import 'package:xml/xml.dart';
 
 typedef StandaloneMgrFormButtonPressedListener = bool? Function(
@@ -272,7 +271,7 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
               // в контроллере [Listenable] после смены контроллера
               // _controller?.dispose(); // что может пойти не так?
               _controller = StandaloneMgrFormController(
-                mgrClient: context.read<MgrClient>(),
+                mgrClient: widget.mgrClient,
                 model: MgrFormModel.fromXmlDocument(response),
               );
             });

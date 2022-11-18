@@ -234,7 +234,6 @@ MgrFormButtonType _mgrFormButtonTypeFromString(String type) {
 @immutable
 class MgrFormButtonModel {
   final String name;
-  final String? confirmMessage;
   final MgrFormButtonType type;
   final String label;
   final String? func;
@@ -250,7 +249,6 @@ class MgrFormButtonModel {
     required this.keepform,
     required this.blocking,
     required this.disabled,
-    required this.confirmMessage,
   });
 
   factory MgrFormButtonModel.fromXmlElement(XmlElement element,
@@ -279,18 +277,16 @@ class MgrFormButtonModel {
 
     final name = element.requireAttribute('name');
     return MgrFormButtonModel(
-        name: name,
-        type: element.requireConvertAttribute('type',
-            converter: _mgrFormButtonTypeFromString),
-        label: messages['msg_$name'] ?? '',
-        func: element.attribute('func'),
-        color: color,
-        keepform: element.boolAttribute('keepform'),
-        blocking: element.boolAttribute('blocking'),
-        disabled: element.boolAttribute('disabled'),
-        confirmMessage: element.boolAttribute('confirm')
-            ? messages['confirm_$name']
-            : null);
+      name: name,
+      type: element.requireConvertAttribute('type',
+          converter: _mgrFormButtonTypeFromString),
+      label: messages['msg_$name'] ?? '',
+      func: element.attribute('func'),
+      color: color,
+      keepform: element.boolAttribute('keepform'),
+      blocking: element.boolAttribute('blocking'),
+      disabled: element.boolAttribute('disabled'),
+    );
   }
 }
 

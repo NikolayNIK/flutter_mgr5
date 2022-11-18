@@ -1,4 +1,6 @@
 export 'package:flutter_mgr5/src/client/http_mgr_client.dart';
+export 'package:flutter_mgr5/src/client/mgr_client.dart';
+export 'package:flutter_mgr5/src/client/xml_mgr_client.dart';
 export 'package:flutter_mgr5/src/client/login_password_auth_info.dart';
 export 'package:flutter_mgr5/src/client/mgr_request.dart';
 export 'package:flutter_mgr5/src/mgr_exception.dart';

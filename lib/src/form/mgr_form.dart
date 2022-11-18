@@ -188,25 +188,28 @@ class _MgrFormState extends State<MgrForm> {
 
   Widget _buildTitle(BuildContext context) => Material(
         color: Colors.transparent,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 16.0,
-            vertical: max(8.0, 8.0 + 4.0 * Theme.of(context).visualDensity.vertical),
-          ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 56),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    widget.model.title,
-                    style: Theme.of(context).textTheme.titleLarge,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      widget.model.title,
+                      style: Theme.of(context).textTheme.titleLarge,
+                      maxLines: 1,
+                    ),
                   ),
                 ),
               ),
               if (widget.onRefreshPressed != null)
                 IconButton(
                   onPressed: widget.onRefreshPressed!,
+                  padding: const EdgeInsets.all(16),
                   icon: const Icon(Icons.refresh),
                 ),
             ],

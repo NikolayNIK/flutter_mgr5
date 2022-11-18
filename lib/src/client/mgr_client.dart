@@ -31,7 +31,8 @@ abstract class MgrClientMixin implements MgrClient {
   bool _isInvalidated = false;
 
   @override
-  bool get isValid => !isInvalidated && (authInfo?.isValid ?? false);
+  bool get isValid => // web can authenticate thru cookies
+      !isInvalidated && (kIsWeb || (authInfo?.isValid ?? false));
 
   @override
   @protected

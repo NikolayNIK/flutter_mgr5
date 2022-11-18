@@ -221,29 +221,7 @@ class _MgrFormState extends State<MgrForm> {
   Widget _buildButton(final MgrFormButtonModel button) {
     final onPressed = widget.onPressed == null || widget.forceReadOnly
         ? null
-        : () => widget.onPressed == null
-            ? null
-            : button.confirmMessage == null
-                ? widget.onPressed!(button)
-                : showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      content: Text(button.confirmMessage!),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            widget.onPressed!(button);
-                          },
-                          child: const Text('OK'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('ОТМЕНА'),
-                        ),
-                      ],
-                    ),
-                  );
+        : () => widget.onPressed == null ? null : widget.onPressed!(button);
 
     return button.color == null
         ? OutlinedButton(

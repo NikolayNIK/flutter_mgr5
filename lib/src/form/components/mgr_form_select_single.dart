@@ -255,8 +255,9 @@ class _DropdownPageState extends State<_DropdownPage> {
                       ((searchEnabled ? 1 : 0) + entries.length) *
                           widget.itemHeight));
 
-              if (rect.height < widget.itemHeight * 5.5) {
-                final offsetY = widget.itemHeight * 5.5 - rect.height;
+              if (rect.height < widget.itemHeight * min(entries.length, 5.5)) {
+                final offsetY =
+                    widget.itemHeight * min(entries.length, 5.5) - rect.height;
                 rect = Rect.fromLTRB(
                   rect.left,
                   max(16.0, rect.top - offsetY),

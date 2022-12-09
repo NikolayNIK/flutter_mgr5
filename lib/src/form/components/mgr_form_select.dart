@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mgr5/extensions/xml_extensions.dart';
+import 'package:flutter_mgr5/src/form/components/mgr_form_select_single.dart';
 import 'package:flutter_mgr5/src/form/mgr_exception_holder.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
@@ -68,26 +69,18 @@ class MgrFormSelect extends StatelessWidget {
       builder: (context, slist, _) {
         switch (model.type) {
           case MgrFormSelectType.select:
-            final items = List<DropdownMenuItem<String>>.unmodifiable(
-                slist.map((e) => DropdownMenuItem<String>(
-                    value: e.key,
-                    child: Text(
-                      e.label,
-                      maxLines: 1,
-                      softWrap: false,
-                      overflow: TextOverflow.ellipsis,
-                    ))));
-
-            return ValueListenableBuilder<String?>(
-              valueListenable: controller,
-              builder: (context, value, child) => DropdownButton<String>(
-                items: items,
-                focusNode: controller.focusNode,
-                isExpanded: true,
-                value: value,
-                onChanged:
-                    isReadOnly ? null : (value) => controller.value = value,
+            return MgrFormSelectSingle(
+              controller: controller,
+              focusNode: controller.focusNode,
+              itemHeight: 48.0,
+              itemBuilder: (context, entry) => Text(
+                entry.label,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
               ),
+              onChanged:
+                  isReadOnly ? null : (entry) => controller.value = entry.key,
             );
           case MgrFormSelectType.radio:
             return ValueListenableBuilder<String?>(

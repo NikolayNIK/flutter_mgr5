@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -177,7 +178,7 @@ class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
   final Map<String, ValueNotifier<Slist>> _original = {}, _filtered = {};
   final Map<String, String> _dependencies = {}; // dependant => dependency
   final Slist _emptySlist = List.unmodifiable(
-    const [SlistEntry(null, '-- не указано --', null)],
+    [SlistEntry(null, '-- не указано --', null)],
   ); // TODO localize
 
   _MgrFormSlistMap(this.controller);
@@ -530,31 +531,60 @@ class MgrSingleSelectController extends _MgrFormControlController {
   final MgrFormControllerParam _param;
   final ValueNotifier<String?> _container;
   final ValueListenable<Slist> _slist;
+  late int _valueIndex;
+  int? _longestLabelLength;
 
   MgrSingleSelectController(this._param, this._slist, [String? initialValue])
       : _container = ValueNotifier(null) {
     value = initialValue;
 
     // вызов сеттера для проверки наличия значения в измененном slist'е
-    _slist.addListener(() => value = value);
+    _slist.addListener(() {
+      value = value;
+      _longestLabelLength = null;
+    });
   }
 
   @override
   FocusNode get focusNode => _param.focusNode;
+
+  ValueListenable<Slist> get slist => _slist;
 
   @override
   String? get value => _container.value;
 
   @override
   set value(String? value) {
-    for (final entry in _slist.value) {
+    final slist = _slist.value;
+    for (var i = 0; i < slist.length; i++) {
+      final entry = slist[i];
       if (entry.key == value) {
         _container.value = entry.key;
+        _valueIndex = i;
         return;
       }
     }
 
     _container.value = _slist.value.first.key;
+    _valueIndex = 0;
+  }
+
+  int get valueIndex => _valueIndex;
+
+  set valueIndex(int index) {
+    _container.value = _slist.value[index].key;
+    _valueIndex = index;
+  }
+
+  int get longestLabelLength {
+    if (_longestLabelLength != null) {
+      return _longestLabelLength!;
+    }
+
+    return _longestLabelLength = _slist.value.fold<int>(
+      0,
+      (previousValue, element) => max(previousValue, element.label.length),
+    );
   }
 
   @override

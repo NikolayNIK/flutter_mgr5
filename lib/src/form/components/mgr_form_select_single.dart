@@ -259,11 +259,13 @@ class _DropdownPageState extends State<_DropdownPage> {
                           widget.itemHeight));
 
               if (rect.height < widget.itemHeight * min(entries.length, 5.5)) {
-                final offsetY =
-                    widget.itemHeight * min(entries.length, 5.5) - rect.height;
                 rect = Rect.fromLTRB(
                   rect.left,
-                  max(16.0, rect.top - offsetY),
+                  max(
+                      16.0,
+                      rect.top -
+                          widget.itemHeight * min(entries.length, 5.5) +
+                          rect.height),
                   rect.right,
                   rect.bottom,
                 );

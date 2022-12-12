@@ -288,6 +288,8 @@ class _DropdownPageState extends State<_DropdownPage> {
                           rect.height,
                       widget.controller.valueIndex * widget.itemHeight));
 
+              final buttonRectWidth = widget.buttonRect.width + 48.0;
+
               return AnimatedBuilder(
                 animation: widget.animation,
                 builder: (context, child) {
@@ -300,7 +302,9 @@ class _DropdownPageState extends State<_DropdownPage> {
                         Positioned(
                           left: rect.left,
                           top: rect.top,
-                          width: rect.width,
+                          width: buttonRectWidth +
+                              (rect.width - buttonRectWidth) *
+                                  animationTransformed,
                           height: widget.itemHeight +
                               (rect.height - widget.itemHeight) *
                                   animationTransformed,
@@ -310,7 +314,7 @@ class _DropdownPageState extends State<_DropdownPage> {
                             shadowColor: Colors.black,
                             clipBehavior: Clip.hardEdge,
                             child: OverflowBox(
-                              alignment: Alignment.topCenter,
+                              alignment: Alignment.topLeft,
                               minWidth: rect.width,
                               maxWidth: rect.width,
                               minHeight: rect.height,

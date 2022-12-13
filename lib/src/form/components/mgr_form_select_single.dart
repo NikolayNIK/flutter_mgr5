@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_mgr5/listenable_builder.dart';
 import 'package:flutter_mgr5/mgr5.dart';
+import 'package:flutter_mgr5/src/animated_rect_reveal.dart';
 import 'package:flutter_mgr5/src/form/slist.dart';
 
 typedef MgrFormSelectSingleItemBuilder = Widget Function(
@@ -311,61 +311,35 @@ class _DropdownPageState extends State<_DropdownPage> {
                           rect.height,
                       widget.controller.valueIndex * widget.itemHeight));
 
-              final buttonRectWidth = widget.buttonRect.width + leftMarkerWidth;
-
-              return AnimatedBuilder(
-                animation: widget.animation,
-                builder: (context, child) {
-                  final animationTransformed =
-                      Curves.fastOutSlowIn.transform(widget.animation.value);
-                  return Opacity(
-                    opacity: animationTransformed,
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          left: rect.left,
-                          top: rect.top,
-                          width: buttonRectWidth +
-                              (rect.width - buttonRectWidth) *
-                                  animationTransformed,
-                          height: widget.itemHeight +
-                              (rect.height - widget.itemHeight) *
-                                  animationTransformed,
-                          child: Material(
-                            elevation: 8.0,
-                            type: MaterialType.card,
-                            shadowColor: Colors.black,
-                            clipBehavior: Clip.hardEdge,
-                            child: OverflowBox(
-                              alignment: Alignment.topLeft,
-                              minWidth: rect.width,
-                              maxWidth: rect.width,
-                              minHeight: rect.height,
-                              maxHeight: rect.height,
-                              child: Column(
-                                children: [
-                                  if (searchEnabled) _buildSearch(context),
-                                  Flexible(
-                                    child: Material(
-                                      child: ListView.builder(
-                                        controller: scrollController,
-                                        shrinkWrap: true,
-                                        itemExtent: widget.itemHeight,
-                                        itemCount: entries.length,
-                                        itemBuilder: (context, index) =>
-                                            _buildItem(context, entries[index]),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+              return AnimatedRectReveal(
+                animation: widget.animation
+                    .drive(CurveTween(curve: Curves.fastOutSlowIn)),
+                originBox: widget.buttonRect,
+                destinationBox: rect,
+                containerBuilder: (context, child) => Material(
+                  elevation: 8.0,
+                  type: MaterialType.card,
+                  shadowColor: Colors.black,
+                  clipBehavior: Clip.hardEdge,
+                  child: child,
+                ),
+                child: Column(
+                  children: [
+                    if (searchEnabled) _buildSearch(context),
+                    Flexible(
+                      child: Material(
+                        child: ListView.builder(
+                          controller: scrollController,
+                          shrinkWrap: true,
+                          itemExtent: widget.itemHeight,
+                          itemCount: entries.length,
+                          itemBuilder: (context, index) =>
+                              _buildItem(context, entries[index]),
                         ),
-                      ],
+                      ),
                     ),
-                  );
-                },
+                  ],
+                ),
               );
             },
           ),

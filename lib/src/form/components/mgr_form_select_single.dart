@@ -270,7 +270,7 @@ class _DropdownPageState extends State<_DropdownPage> {
                           16.0 -
                           widget.buttonRect.left +
                           leftMarkerWidth,
-                      max(widget.buttonRect.width + leftMarkerWidth,
+                      max(widget.buttonRect.width + 2 * leftMarkerWidth,
                           widget.controller.longestLabelLength * 11.0)),
                   min(
                       constraints.maxHeight - 16.0 - widget.buttonRect.top,
@@ -290,13 +290,13 @@ class _DropdownPageState extends State<_DropdownPage> {
                 );
               }
 
-              if (rect.width < widget.buttonRect.width + leftMarkerWidth) {
+              if (rect.width < widget.buttonRect.width + 2 * leftMarkerWidth) {
                 rect = Rect.fromLTRB(
                   max(
                       16.0,
                       rect.left -
                           widget.buttonRect.width -
-                          leftMarkerWidth +
+                          2 * leftMarkerWidth +
                           rect.width),
                   rect.top,
                   rect.right,

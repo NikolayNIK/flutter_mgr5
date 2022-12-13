@@ -205,6 +205,8 @@ class _DropdownPageState extends State<_DropdownPage> {
   ScrollController? scrollController;
   late List<SlistEntry> entries;
 
+  Offset? _contentOffset;
+
   @override
   void initState() {
     super.initState();
@@ -308,12 +310,17 @@ class _DropdownPageState extends State<_DropdownPage> {
                 );
               }
 
-              scrollController ??= ScrollController(
-                  initialScrollOffset: min(
-                      (searchEnabled ? searchFieldHeight : 0) +
-                          entries.length * widget.itemHeight -
-                          rect.height,
-                      widget.controller.valueIndex * widget.itemHeight));
+              final initialScrollOffset = min(
+                  (searchEnabled ? searchFieldHeight : 0) +
+                      entries.length * widget.itemHeight -
+                      rect.height,
+                  widget.controller.valueIndex * widget.itemHeight);
+              scrollController ??=
+                  ScrollController(initialScrollOffset: initialScrollOffset);
+              _contentOffset ??= _contentOffsetFor(
+                widget.controller.valueIndex,
+                initialScrollOffset,
+              );
 
               return AnimatedRectReveal(
                 animation: widget.animation
@@ -327,6 +334,7 @@ class _DropdownPageState extends State<_DropdownPage> {
                   clipBehavior: Clip.hardEdge,
                   child: child,
                 ),
+                contentOffset: _contentOffset ?? Offset.zero,
                 child: Column(
                   children: [
                     if (searchEnabled) _buildSearch(context),
@@ -338,7 +346,7 @@ class _DropdownPageState extends State<_DropdownPage> {
                           itemExtent: widget.itemHeight,
                           itemCount: entries.length,
                           itemBuilder: (context, index) =>
-                              _buildItem(context, entries[index]),
+                              _buildItem(context, index, entries[index]),
                         ),
                       ),
                     ),
@@ -386,18 +394,18 @@ class _DropdownPageState extends State<_DropdownPage> {
                   ? TextInputAction.send
                   : TextInputAction.none,
               onSubmitted: (value) {
-                if (entries.length == 1) _onTap(context, entries.single);
+                if (entries.length == 1) _onTap(context, 0, entries.single);
               },
             ),
           ],
         ),
       );
 
-  Widget _buildItem(BuildContext context, SlistEntry entry) {
+  Widget _buildItem(BuildContext context, int index, SlistEntry entry) {
     final selected = entry.key == widget.controller.value;
 
     Widget result = InkWell(
-      onTap: () => _onTap(context, entry),
+      onTap: () => _onTap(context, index, entry),
       child: Row(
         children: [
           SizedBox(
@@ -407,7 +415,7 @@ class _DropdownPageState extends State<_DropdownPage> {
               child: Radio<bool>(
                 value: selected,
                 groupValue: true,
-                onChanged: (value) => _onTap(context, entry),
+                onChanged: (value) => _onTap(context, index, entry),
               ),
             ),
           ),
@@ -431,6 +439,12 @@ class _DropdownPageState extends State<_DropdownPage> {
     );
   }
 
-  void _onTap(BuildContext context, SlistEntry entry) =>
-      Navigator.pop(context, entry);
+  Offset _contentOffsetFor(int index, double scrollOffset) =>
+      Offset(0, scrollOffset - index * widget.itemHeight);
+
+  void _onTap(BuildContext context, int index, SlistEntry entry) {
+    setState(() => _contentOffset =
+        _contentOffsetFor(index, scrollController?.offset ?? 0));
+    Navigator.pop(context, entry);
+  }
 }

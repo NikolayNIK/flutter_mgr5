@@ -8,12 +8,14 @@ class AnimatedRectReveal extends StatelessWidget {
   final TransitionBuilder containerBuilder;
   final Rect originBox, destinationBox;
   final Animation<double> animation;
+  final Offset contentOffset;
 
   const AnimatedRectReveal({
     super.key,
     required this.animation,
     required this.originBox,
     required this.destinationBox,
+    this.contentOffset = Offset.zero,
     this.containerBuilder = _clipContainerBuilder,
     required this.child,
   });
@@ -50,10 +52,8 @@ class AnimatedRectReveal extends StatelessWidget {
                     maxHeight: destinationBox.height,
                     alignment: Alignment.topLeft,
                     child: Transform.translate(
-                      offset: Offset(
-                        leftDiff * valueInverted,
-                        topDiff * valueInverted,
-                      ),
+                      offset: (contentOffset + Offset(leftDiff, topDiff)) *
+                          valueInverted,
                       child: RepaintBoundary(
                         child: child,
                       ),

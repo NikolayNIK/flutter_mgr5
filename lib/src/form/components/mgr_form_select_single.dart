@@ -61,6 +61,7 @@ class _MgrFormSelectSingleState extends State<MgrFormSelectSingle> {
                             context,
                             widget.controller.slist
                                 .value[widget.controller.valueIndex],
+                            false,
                           ),
                         ),
                       ),
@@ -93,13 +94,16 @@ class _MgrFormSelectSingleState extends State<MgrFormSelectSingle> {
         ),
       );
 
-  Widget _buildItem(BuildContext context, SlistEntry entry) {
+  Widget _buildItem(BuildContext context, SlistEntry entry, bool selected) {
     final textStyle = Theme.of(context).textTheme.subtitle1!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: DefaultTextStyle(
           style: enabled
-              ? textStyle
+              ? selected
+                  ? textStyle.copyWith(
+                      color: Theme.of(context).colorScheme.onSecondaryContainer)
+                  : textStyle
               : textStyle.copyWith(color: Theme.of(context).disabledColor),
           child: Builder(
               builder: (context) => widget.itemBuilder(context, entry))),
@@ -130,7 +134,11 @@ class _DropdownRoute extends PopupRoute<SlistEntry> {
   final Rect buttonRect;
   final double itemHeight;
   final MgrSingleSelectController _controller;
-  final MgrFormSelectSingleItemBuilder itemBuilder;
+  final Widget Function(
+    BuildContext context,
+    SlistEntry entry,
+    bool selected,
+  ) itemBuilder;
 
   _DropdownRoute({
     required this.buttonRect,
@@ -171,7 +179,11 @@ class _DropdownPage extends StatefulWidget {
   final Rect buttonRect;
   final double itemHeight;
   final MgrSingleSelectController controller;
-  final MgrFormSelectSingleItemBuilder itemBuilder;
+  final Widget Function(
+    BuildContext context,
+    SlistEntry entry,
+    bool selected,
+  ) itemBuilder;
 
   const _DropdownPage({
     required this.animation,
@@ -412,7 +424,7 @@ class _DropdownPageState extends State<_DropdownPage> {
             ),
           ),
           Expanded(
-            child: widget.itemBuilder(context, entry),
+            child: widget.itemBuilder(context, entry, selected),
           ),
         ],
       ),
@@ -420,7 +432,7 @@ class _DropdownPageState extends State<_DropdownPage> {
 
     if (selected) {
       result = ColoredBox(
-        color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(.5),
+        color: Theme.of(context).colorScheme.secondaryContainer,
         child: result,
       );
     }

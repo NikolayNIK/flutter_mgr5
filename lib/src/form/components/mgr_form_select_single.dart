@@ -247,6 +247,12 @@ class _DropdownPageState extends State<_DropdownPage> {
 
   bool get searchEnabled => widget.controller.slist.value.length > 4;
 
+  double get leftMarkerWidth =>
+      56.0 + 4.0 * Theme.of(context).visualDensity.horizontal;
+
+  double get searchFieldHeight =>
+      56.0 + 4.0 * Theme.of(context).visualDensity.horizontal;
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
         listenable: widget.controller,
@@ -256,19 +262,20 @@ class _DropdownPageState extends State<_DropdownPage> {
             builder: (context, constraints) {
               // TODO улучшить расчет максимальной ширины элемента);
               var rect = Rect.fromLTWH(
-                  widget.buttonRect.left - 48.0,
-                  widget.buttonRect.top,
+                  widget.buttonRect.left - leftMarkerWidth,
+                  widget.buttonRect.top -
+                      (searchEnabled ? searchFieldHeight : 0),
                   min(
                       constraints.maxWidth -
                           16.0 -
                           widget.buttonRect.left +
-                          48.0,
-                      max(widget.buttonRect.width + 48.0,
+                          leftMarkerWidth,
+                      max(widget.buttonRect.width + leftMarkerWidth,
                           widget.controller.longestLabelLength * 11.0)),
                   min(
                       constraints.maxHeight - 16.0 - widget.buttonRect.top,
-                      ((searchEnabled ? 1 : 0) + entries.length) *
-                          widget.itemHeight));
+                      entries.length * widget.itemHeight +
+                          (searchEnabled ? searchFieldHeight : 0)));
 
               if (rect.height < widget.itemHeight * min(entries.length, 5.5)) {
                 rect = Rect.fromLTRB(
@@ -283,10 +290,14 @@ class _DropdownPageState extends State<_DropdownPage> {
                 );
               }
 
-              if (rect.width < widget.buttonRect.width + 48.0) {
+              if (rect.width < widget.buttonRect.width + leftMarkerWidth) {
                 rect = Rect.fromLTRB(
-                  max(16.0,
-                      rect.left - widget.buttonRect.width - 48.0 + rect.width),
+                  max(
+                      16.0,
+                      rect.left -
+                          widget.buttonRect.width -
+                          leftMarkerWidth +
+                          rect.width),
                   rect.top,
                   rect.right,
                   rect.bottom,
@@ -295,12 +306,12 @@ class _DropdownPageState extends State<_DropdownPage> {
 
               scrollController ??= ScrollController(
                   initialScrollOffset: min(
-                      ((searchEnabled ? 1 : 0) + entries.length) *
-                              widget.itemHeight -
+                      (searchEnabled ? searchFieldHeight : 0) +
+                          entries.length * widget.itemHeight -
                           rect.height,
                       widget.controller.valueIndex * widget.itemHeight));
 
-              final buttonRectWidth = widget.buttonRect.width + 48.0;
+              final buttonRectWidth = widget.buttonRect.width + leftMarkerWidth;
 
               return AnimatedBuilder(
                 animation: widget.animation,
@@ -333,11 +344,7 @@ class _DropdownPageState extends State<_DropdownPage> {
                               maxHeight: rect.height,
                               child: Column(
                                 children: [
-                                  if (searchEnabled)
-                                    SizedBox(
-                                      height: widget.itemHeight,
-                                      child: _buildSearch(context),
-                                    ),
+                                  if (searchEnabled) _buildSearch(context),
                                   Flexible(
                                     child: Material(
                                       child: ListView.builder(
@@ -365,44 +372,47 @@ class _DropdownPageState extends State<_DropdownPage> {
         ),
       );
 
-  Widget _buildSearch(BuildContext context) => Stack(
-        children: [
-          const SizedBox(
-            width: 48.0,
-            child: Center(
-              child: Icon(Icons.search_rounded),
-            ),
-          ),
-          Positioned(
-            top: 0,
-            right: 0,
-            bottom: 0,
-            width: 48.0,
-            child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: entries.length != 1
-                    ? null
-                    : const Center(
-                        child: Icon(Icons.keyboard_arrow_right_rounded))),
-          ),
-          TextField(
-            focusNode: focusSearch,
-            controller: searchController,
-            maxLines: 1,
-            decoration: const InputDecoration(
-              contentPadding: EdgeInsets.only(
-                left: 48.0 + 8.0,
-                right: 8.0,
+  Widget _buildSearch(BuildContext context) => SizedBox(
+        height: searchFieldHeight,
+        child: Stack(
+          children: [
+            SizedBox(
+              width: leftMarkerWidth,
+              child: const Center(
+                child: Icon(Icons.search_rounded),
               ),
             ),
-            textInputAction: entries.length == 1
-                ? TextInputAction.send
-                : TextInputAction.none,
-            onSubmitted: (value) {
-              if (entries.length == 1) _onTap(context, entries.single);
-            },
-          ),
-        ],
+            Positioned(
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: leftMarkerWidth,
+              child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: entries.length != 1
+                      ? null
+                      : const Center(
+                          child: Icon(Icons.keyboard_arrow_right_rounded))),
+            ),
+            TextField(
+              focusNode: focusSearch,
+              controller: searchController,
+              maxLines: 1,
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.only(
+                  left: leftMarkerWidth + 8.0,
+                  right: 8.0,
+                ),
+              ),
+              textInputAction: entries.length == 1
+                  ? TextInputAction.send
+                  : TextInputAction.none,
+              onSubmitted: (value) {
+                if (entries.length == 1) _onTap(context, entries.single);
+              },
+            ),
+          ],
+        ),
       );
 
   Widget _buildItem(BuildContext context, SlistEntry entry) {
@@ -413,8 +423,8 @@ class _DropdownPageState extends State<_DropdownPage> {
       child: Row(
         children: [
           SizedBox(
-            width: 48.0,
-            height: 48.0,
+            width: leftMarkerWidth,
+            height: widget.itemHeight,
             child: Center(
               child: Radio<bool>(
                 value: selected,

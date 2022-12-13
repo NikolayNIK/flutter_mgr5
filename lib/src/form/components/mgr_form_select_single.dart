@@ -198,6 +198,8 @@ class _DropdownPage extends StatefulWidget {
 }
 
 class _DropdownPageState extends State<_DropdownPage> {
+  static const _windowMargin = EdgeInsets.all(16.0);
+
   final searchController = TextEditingController();
   final focusSearch = FocusNode();
   ScrollController? scrollController;
@@ -267,13 +269,15 @@ class _DropdownPageState extends State<_DropdownPage> {
                       (searchEnabled ? searchFieldHeight : 0),
                   min(
                       constraints.maxWidth -
-                          16.0 -
+                          _windowMargin.right -
                           widget.buttonRect.left +
                           leftMarkerWidth,
                       max(widget.buttonRect.width + 2 * leftMarkerWidth,
                           widget.controller.longestLabelLength * 11.0)),
                   min(
-                      constraints.maxHeight - 16.0 - widget.buttonRect.top,
+                      constraints.maxHeight -
+                          _windowMargin.bottom -
+                          widget.buttonRect.top,
                       entries.length * widget.itemHeight +
                           (searchEnabled ? searchFieldHeight : 0)));
 
@@ -281,7 +285,7 @@ class _DropdownPageState extends State<_DropdownPage> {
                 rect = Rect.fromLTRB(
                   rect.left,
                   max(
-                      16.0,
+                      _windowMargin.top,
                       rect.top -
                           widget.itemHeight * min(entries.length, 5.5) +
                           rect.height),
@@ -293,7 +297,7 @@ class _DropdownPageState extends State<_DropdownPage> {
               if (rect.width < widget.buttonRect.width + 2 * leftMarkerWidth) {
                 rect = Rect.fromLTRB(
                   max(
-                      16.0,
+                      _windowMargin.left,
                       rect.left -
                           widget.buttonRect.width -
                           2 * leftMarkerWidth +

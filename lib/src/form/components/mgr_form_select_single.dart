@@ -279,7 +279,8 @@ class _DropdownPageState extends State<_DropdownPage> {
                   min(
                       constraints.maxHeight -
                           _windowMargin.bottom -
-                          widget.buttonRect.top,
+                          widget.buttonRect.top +
+                          (searchEnabled ? searchFieldHeight : 0),
                       entries.length * widget.itemHeight +
                           (searchEnabled ? searchFieldHeight : 0)));
 

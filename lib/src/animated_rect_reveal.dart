@@ -3,8 +3,23 @@ import 'package:flutter/widgets.dart';
 Widget _clipContainerBuilder(BuildContext context, Widget? child) =>
     ClipRect(child: child);
 
+typedef AnimatedRectRevealWidgetBuilder = Widget Function(
+  BuildContext context,
+  Offset offset,
+  Widget? child,
+);
+
+Widget _buildSimpleBody(BuildContext context, Offset offset, Widget? child) =>
+    Transform.translate(
+      offset: offset,
+      child: RepaintBoundary(
+        child: child,
+      ),
+    );
+
 class AnimatedRectReveal extends StatelessWidget {
-  final Widget child;
+  final AnimatedRectRevealWidgetBuilder builder;
+  final Widget? child;
   final TransitionBuilder containerBuilder;
   final Rect originBox, destinationBox;
   final Animation<double> animation;
@@ -17,7 +32,18 @@ class AnimatedRectReveal extends StatelessWidget {
     required this.destinationBox,
     this.contentOffset = Offset.zero,
     this.containerBuilder = _clipContainerBuilder,
-    required this.child,
+    required Widget this.child,
+  }) : builder = _buildSimpleBody;
+
+  const AnimatedRectReveal.builder({
+    super.key,
+    required this.animation,
+    required this.originBox,
+    required this.destinationBox,
+    required this.builder,
+    this.contentOffset = Offset.zero,
+    this.containerBuilder = _clipContainerBuilder,
+    this.child,
   });
 
   @override
@@ -52,10 +78,11 @@ class AnimatedRectReveal extends StatelessWidget {
                     maxHeight: destinationBox.height,
                     alignment: Alignment.topLeft,
                     child: Transform.translate(
-                      offset: (contentOffset + Offset(leftDiff, topDiff)) *
-                          valueInverted,
-                      child: RepaintBoundary(
-                        child: child,
+                      offset: Offset(leftDiff, topDiff) * valueInverted,
+                      child: builder(
+                        context,
+                        contentOffset * valueInverted,
+                        child,
                       ),
                     ),
                   ),

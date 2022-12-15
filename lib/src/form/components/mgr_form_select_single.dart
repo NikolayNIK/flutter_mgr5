@@ -284,32 +284,49 @@ class _DropdownPageState extends State<_DropdownPage> {
                       entries.length * widget.itemHeight +
                           (searchEnabled ? searchFieldHeight : 0)));
 
+              final double windowContentOffsetY;
               if (rect.height < widget.itemHeight * min(entries.length, 5.5)) {
+                final newTop = max(
+                    _windowMargin.top,
+                    rect.top -
+                        widget.itemHeight * min(entries.length, 5.5) +
+                        rect.height);
+
+                windowContentOffsetY = rect.top - newTop;
+
                 rect = Rect.fromLTRB(
                   rect.left,
-                  max(
-                      _windowMargin.top,
-                      rect.top -
-                          widget.itemHeight * min(entries.length, 5.5) +
-                          rect.height),
+                  newTop,
                   rect.right,
                   rect.bottom,
                 );
+              } else {
+                windowContentOffsetY = 0;
               }
 
+              final double windowContentOffsetX;
               if (rect.width < widget.buttonRect.width + 2 * leftMarkerWidth) {
+                final newLeft = max(
+                    _windowMargin.left,
+                    rect.left -
+                        widget.buttonRect.width -
+                        2 * leftMarkerWidth +
+                        rect.width);
+
+                windowContentOffsetX = rect.left - newLeft;
+
                 rect = Rect.fromLTRB(
-                  max(
-                      _windowMargin.left,
-                      rect.left -
-                          widget.buttonRect.width -
-                          2 * leftMarkerWidth +
-                          rect.width),
+                  newLeft,
                   rect.top,
                   rect.right,
                   rect.bottom,
                 );
+              } else {
+                windowContentOffsetX = 0;
               }
+
+              final windowContentOffset =
+                  Offset(windowContentOffsetX, windowContentOffsetY);
 
               final initialScrollOffset = min(
                   (searchEnabled ? searchFieldHeight : 0) +
@@ -335,7 +352,8 @@ class _DropdownPageState extends State<_DropdownPage> {
                   clipBehavior: Clip.hardEdge,
                   child: child,
                 ),
-                contentOffset: _contentOffset ?? Offset.zero,
+                contentOffset:
+                    windowContentOffset + (_contentOffset ?? Offset.zero),
                 child: Column(
                   children: [
                     if (searchEnabled) _buildSearch(context),

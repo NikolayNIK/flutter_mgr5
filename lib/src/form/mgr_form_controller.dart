@@ -322,7 +322,7 @@ class _MgrFormPageController extends MgrFormPagesController {
   void dispose() => _callbacks.clear();
 }
 
-class MgrFormController implements Listenable {
+class MgrFormController with ChangeNotifier implements Listenable {
   late final MgrFormControllerParamMap params =
       _MgrFormControllerParamMap(this);
   late final MgrFormControllerStringParamMap stringParams =
@@ -331,7 +331,6 @@ class MgrFormController implements Listenable {
   final MgrFormPagesController pages = _MgrFormPageController();
   late final ScrollController scrollController = ScrollController();
 
-  final Set<VoidCallback> _listeners = {};
   final ValueNotifier<MgrException?> exception = ValueNotifier(null);
 
   MgrFormController(MgrFormModel model) {
@@ -356,15 +355,11 @@ class MgrFormController implements Listenable {
   }
 
   @override
-  void addListener(VoidCallback listener) => _listeners.add(listener);
-
-  @override
-  void removeListener(VoidCallback listener) => _listeners.remove(listener);
-
   void dispose() {
+    super.dispose();
+
     params.clear();
     slists.clear();
-    _listeners.clear();
     scrollController.dispose();
   }
 
@@ -373,17 +368,16 @@ class MgrFormController implements Listenable {
 
     exception.value = null;
 
-    for (final listener in _listeners) {
-      listener();
-    }
+    notifyListeners();
   }
 }
 
-class MgrFormControllerParam implements ValueListenable<String?> {
+class MgrFormControllerParam
+    with ChangeNotifier
+    implements ValueListenable<String?> {
   final String name;
 
   late final FocusNode focusNode = FocusNode();
-  final Set<VoidCallback> _listeners = {};
   final MgrFormController _formController;
   _MgrFormControlController? _controller;
 
@@ -419,23 +413,9 @@ class MgrFormControllerParam implements ValueListenable<String?> {
     currentController?.dispose();
     final newController = creator();
     newController.value = value;
-    newController.addListener(_onChanged);
+    newController.addListener(notifyListeners);
     _controller = newController;
     return newController;
-  }
-
-  @override
-  void addListener(VoidCallback listener) => _listeners.add(listener);
-
-  @override
-  void removeListener(VoidCallback listener) => _listeners.remove(listener);
-
-  void dispose() => _listeners.clear();
-
-  void _onChanged() {
-    for (final listener in _listeners) {
-      listener();
-    }
   }
 }
 

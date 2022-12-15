@@ -335,7 +335,7 @@ class _DropdownPageState extends State<_DropdownPage> {
             initialScrollOffset,
           );
 
-          return AnimatedRectReveal(
+          return AnimatedRectReveal.builder(
             animation:
                 widget.animation.drive(CurveTween(curve: Curves.fastOutSlowIn)),
             originBox: widget.buttonRect,
@@ -349,25 +349,37 @@ class _DropdownPageState extends State<_DropdownPage> {
             ),
             contentOffset:
                 windowContentOffset + (_contentOffset ?? Offset.zero),
-            child: Column(
+            builder: (context, offset, child) => Column(
               children: [
-                if (searchEnabled) _buildSearch(context),
+                if (searchEnabled)
+                  RepaintBoundary(
+                    child: _buildSearch(context),
+                  ),
                 Flexible(
-                  child: Material(
-                    child: ListenableBuilder(
-                      listenable: widget.controller,
-                      builder: (context) => ListView.builder(
-                        controller: scrollController,
-                        shrinkWrap: true,
-                        itemExtent: widget.itemHeight,
-                        itemCount: entries.length,
-                        itemBuilder: (context, index) =>
-                            _buildItem(context, index, entries[index]),
+                  child: ClipRect(
+                    child: Transform.translate(
+                      offset: offset,
+                      child: RepaintBoundary(
+                        child: child,
                       ),
                     ),
                   ),
                 ),
               ],
+            ),
+            child: Material(
+              child: ListenableBuilder(
+                listenable: widget.controller,
+                builder: (context) => ListView.builder(
+                  controller: scrollController,
+                  shrinkWrap: true,
+                  clipBehavior: Clip.none,
+                  itemExtent: widget.itemHeight,
+                  itemCount: entries.length,
+                  itemBuilder: (context, index) =>
+                      _buildItem(context, index, entries[index]),
+                ),
+              ),
             ),
           );
         },

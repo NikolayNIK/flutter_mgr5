@@ -258,123 +258,119 @@ class _DropdownPageState extends State<_DropdownPage> {
       56.0 + 4.0 * Theme.of(context).visualDensity.horizontal;
 
   @override
-  Widget build(BuildContext context) => ListenableBuilder(
-        listenable: widget.controller,
-        builder: (context) => ListenableBuilder(
-          listenable: widget.controller.slist,
-          builder: (context) => LayoutBuilder(
-            builder: (context, constraints) {
-              // TODO улучшить расчет максимальной ширины элемента);
-              var rect = Rect.fromLTWH(
-                  widget.buttonRect.left - leftMarkerWidth,
-                  widget.buttonRect.top -
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          // TODO улучшить расчет максимальной ширины элемента);
+          var rect = Rect.fromLTWH(
+              widget.buttonRect.left - leftMarkerWidth,
+              widget.buttonRect.top - (searchEnabled ? searchFieldHeight : 0),
+              min(
+                  constraints.maxWidth -
+                      _windowMargin.right -
+                      widget.buttonRect.left +
+                      leftMarkerWidth,
+                  max(widget.buttonRect.width + 2 * leftMarkerWidth,
+                      widget.controller.longestLabelLength * 11.0)),
+              min(
+                  constraints.maxHeight -
+                      _windowMargin.bottom -
+                      widget.buttonRect.top +
                       (searchEnabled ? searchFieldHeight : 0),
-                  min(
-                      constraints.maxWidth -
-                          _windowMargin.right -
-                          widget.buttonRect.left +
-                          leftMarkerWidth,
-                      max(widget.buttonRect.width + 2 * leftMarkerWidth,
-                          widget.controller.longestLabelLength * 11.0)),
-                  min(
-                      constraints.maxHeight -
-                          _windowMargin.bottom -
-                          widget.buttonRect.top +
-                          (searchEnabled ? searchFieldHeight : 0),
-                      entries.length * widget.itemHeight +
-                          (searchEnabled ? searchFieldHeight : 0)));
+                  entries.length * widget.itemHeight +
+                      (searchEnabled ? searchFieldHeight : 0)));
 
-              final double windowContentOffsetY;
-              if (rect.height < widget.itemHeight * min(entries.length, 5.5)) {
-                final newTop = max(
-                    _windowMargin.top,
-                    rect.top -
-                        widget.itemHeight * min(entries.length, 5.5) +
-                        rect.height);
+          final double windowContentOffsetY;
+          if (rect.height < widget.itemHeight * min(entries.length, 5.5)) {
+            final newTop = max(
+                _windowMargin.top,
+                rect.top -
+                    widget.itemHeight * min(entries.length, 5.5) +
+                    rect.height);
 
-                windowContentOffsetY = rect.top - newTop;
+            windowContentOffsetY = rect.top - newTop;
 
-                rect = Rect.fromLTRB(
-                  rect.left,
-                  newTop,
-                  rect.right,
-                  rect.bottom,
-                );
-              } else {
-                windowContentOffsetY = 0;
-              }
+            rect = Rect.fromLTRB(
+              rect.left,
+              newTop,
+              rect.right,
+              rect.bottom,
+            );
+          } else {
+            windowContentOffsetY = 0;
+          }
 
-              final double windowContentOffsetX;
-              if (rect.width < widget.buttonRect.width + 2 * leftMarkerWidth) {
-                final newLeft = max(
-                    _windowMargin.left,
-                    rect.left -
-                        widget.buttonRect.width -
-                        2 * leftMarkerWidth +
-                        rect.width);
+          final double windowContentOffsetX;
+          if (rect.width < widget.buttonRect.width + 2 * leftMarkerWidth) {
+            final newLeft = max(
+                _windowMargin.left,
+                rect.left -
+                    widget.buttonRect.width -
+                    2 * leftMarkerWidth +
+                    rect.width);
 
-                windowContentOffsetX = rect.left - newLeft;
+            windowContentOffsetX = rect.left - newLeft;
 
-                rect = Rect.fromLTRB(
-                  newLeft,
-                  rect.top,
-                  rect.right,
-                  rect.bottom,
-                );
-              } else {
-                windowContentOffsetX = 0;
-              }
+            rect = Rect.fromLTRB(
+              newLeft,
+              rect.top,
+              rect.right,
+              rect.bottom,
+            );
+          } else {
+            windowContentOffsetX = 0;
+          }
 
-              final windowContentOffset =
-                  Offset(windowContentOffsetX, windowContentOffsetY);
+          final windowContentOffset =
+              Offset(windowContentOffsetX, windowContentOffsetY);
 
-              final initialScrollOffset = min(
-                  (searchEnabled ? searchFieldHeight : 0) +
-                      entries.length * widget.itemHeight -
-                      rect.height,
-                  widget.controller.valueIndex * widget.itemHeight);
-              scrollController ??=
-                  ScrollController(initialScrollOffset: initialScrollOffset);
-              _contentOffset ??= _contentOffsetFor(
-                widget.controller.valueIndex,
-                initialScrollOffset,
-              );
+          final initialScrollOffset = min(
+              (searchEnabled ? searchFieldHeight : 0) +
+                  entries.length * widget.itemHeight -
+                  rect.height,
+              widget.controller.valueIndex * widget.itemHeight);
+          scrollController ??=
+              ScrollController(initialScrollOffset: initialScrollOffset);
+          _contentOffset ??= _contentOffsetFor(
+            widget.controller.valueIndex,
+            initialScrollOffset,
+          );
 
-              return AnimatedRectReveal(
-                animation: widget.animation
-                    .drive(CurveTween(curve: Curves.fastOutSlowIn)),
-                originBox: widget.buttonRect,
-                destinationBox: rect,
-                containerBuilder: (context, child) => Material(
-                  elevation: 8.0,
-                  type: MaterialType.card,
-                  shadowColor: Colors.black,
-                  clipBehavior: Clip.hardEdge,
-                  child: child,
-                ),
-                contentOffset:
-                    windowContentOffset + (_contentOffset ?? Offset.zero),
-                child: Column(
-                  children: [
-                    if (searchEnabled) _buildSearch(context),
-                    Flexible(
-                      child: Material(
-                        child: ListView.builder(
-                          controller: scrollController,
-                          shrinkWrap: true,
-                          itemExtent: widget.itemHeight,
-                          itemCount: entries.length,
-                          itemBuilder: (context, index) =>
-                              _buildItem(context, index, entries[index]),
-                        ),
+          return AnimatedRectReveal(
+            animation:
+                widget.animation.drive(CurveTween(curve: Curves.fastOutSlowIn)),
+            originBox: widget.buttonRect,
+            destinationBox: rect,
+            containerBuilder: (context, child) => Material(
+              elevation: 8.0,
+              type: MaterialType.card,
+              shadowColor: Colors.black,
+              clipBehavior: Clip.hardEdge,
+              child: child,
+            ),
+            contentOffset:
+                windowContentOffset + (_contentOffset ?? Offset.zero),
+            child: Column(
+              children: [
+                if (searchEnabled) _buildSearch(context),
+                Flexible(
+                  child: Material(
+                    child: ListenableBuilder(
+                      listenable: widget.controller,
+                      builder: (context) => ListView.builder(
+                        controller: scrollController,
+                        shrinkWrap: true,
+                        itemExtent: widget.itemHeight,
+                        itemCount: entries.length,
+                        itemBuilder: (context, index) =>
+                            _buildItem(context, index, entries[index]),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              );
-            },
-          ),
-        ),
+              ],
+            ),
+          );
+        },
       );
 
   Widget _buildSearch(BuildContext context) => SizedBox(

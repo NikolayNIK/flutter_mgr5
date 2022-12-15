@@ -370,14 +370,18 @@ class _DropdownPageState extends State<_DropdownPage> {
             child: Material(
               child: ListenableBuilder(
                 listenable: widget.controller,
-                builder: (context) => ListView.builder(
+                builder: (context) => Scrollbar(
                   controller: scrollController,
-                  shrinkWrap: true,
-                  clipBehavior: Clip.none,
-                  itemExtent: widget.itemHeight,
-                  itemCount: entries.length,
-                  itemBuilder: (context, index) =>
-                      _buildItem(context, index, entries[index]),
+                  thumbVisibility: true,
+                  child: ListView.builder(
+                    controller: scrollController,
+                    shrinkWrap: true,
+                    clipBehavior: Clip.none,
+                    itemExtent: widget.itemHeight,
+                    itemCount: entries.length,
+                    itemBuilder: (context, index) =>
+                        _buildItem(context, index, entries[index]),
+                  ),
                 ),
               ),
             ),

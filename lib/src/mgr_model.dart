@@ -5,6 +5,7 @@ import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
 import 'package:xml/xml.dart';
 
+/// Type of MgrModel.
 enum MgrModelType {
   form,
   list,
@@ -24,6 +25,8 @@ MgrModelType _typeFromString(String type) {
   }
 }
 
+/// Immutable model of a frameworks entity containing all the information
+/// needed to display form, list or report.
 @immutable
 abstract class MgrModel {
   final String func;

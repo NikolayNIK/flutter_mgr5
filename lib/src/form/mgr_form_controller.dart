@@ -11,13 +11,20 @@ import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/src/form/slist.dart';
 import 'package:flutter_mgr5/src/mgr_exception.dart';
 
+/// Represents all parameters of the form as a string to string Map.
+/// Doesn't hold any data by itself. Uses a corresponding controllers
+/// MgrFormControllerParamMap to retrieve and set values.
 abstract class MgrFormControllerStringParamMap implements Map<String, String> {
   @override
   void operator []=(String key, String? value);
 }
 
+/// Container holding all the values of the forms fields.
 abstract class MgrFormControllerParamMap
     implements Map<String, MgrFormControllerParam> {
+  /// Retrieve a representation of a forms parameter with a given name.
+  /// It is guaranteed that returning object never gets switched out
+  /// making it safe to add listeners to track parameters changes.
   @override
   MgrFormControllerParam operator [](covariant Object key);
 
@@ -26,7 +33,11 @@ abstract class MgrFormControllerParamMap
   bool check(MgrFormModel model);
 }
 
+/// Container holding all the items used in a select control element.
 abstract class MgrFormSlistMap implements Map<String, ValueNotifier<Slist>> {
+  /// Retrieve a holder for the slist with a given name.
+  /// It is guaranteed that returning object never gets switched out
+  /// making it safe to add listeners to track slist changes.
   @override
   ValueNotifier<Slist> operator [](covariant Object key);
 
@@ -40,7 +51,11 @@ typedef MgrFormPagesControllerCallback = void Function(
   MgrFormPageController controller,
 );
 
+/// Container holding all the state of a forms pages.
 abstract class MgrFormPagesController {
+  /// Retrieve a controller for the page with a given name.
+  /// It is guaranteed that returning object never gets switched out
+  /// making it safe to add listeners to track slist changes.
   MgrFormPageController operator [](String? name);
 
   void addCallback(MgrFormPagesControllerCallback callback);
@@ -50,6 +65,7 @@ abstract class MgrFormPagesController {
   void dispose();
 }
 
+/// Container holding all the state of a forms page.
 class MgrFormPageController extends ValueNotifier<bool> {
   MgrFormPageController(bool isExtended) : super(isExtended);
 
@@ -60,6 +76,8 @@ class MgrFormPageController extends ValueNotifier<bool> {
   void toggle() => value = !value;
 }
 
+/// MgrFormControllerStringParamMap implementation.
+/// Either needs get moved outta here or get merged into the super.
 class _MgrFormControllerStringParamMap extends MapBase<String, String>
     implements MgrFormControllerStringParamMap {
   final MgrFormController _controller;
@@ -90,6 +108,8 @@ class _MgrFormControllerStringParamMap extends MapBase<String, String>
   String? remove(Object? key) => _controller.params.remove(key)?.value;
 }
 
+/// MgrFormControllerParamMap implementation.
+/// Either needs get moved outta here or get merged into the super.
 class _MgrFormControllerParamMap extends MapBase<String, MgrFormControllerParam>
     implements MgrFormControllerParamMap {
   final MgrFormController _controller;
@@ -172,6 +192,8 @@ class _MgrFormControllerParamMap extends MapBase<String, MgrFormControllerParam>
   }
 }
 
+/// MgrFormSlistMap implementation.
+/// Either needs get moved outta here or get merged into the super.
 class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
     implements MgrFormSlistMap {
   final MgrFormController controller;
@@ -281,6 +303,8 @@ class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
   }
 }
 
+/// MgrFormPagesController implementation.
+/// Either needs get moved outta here or get merged into the super.
 class _MgrFormPageController extends MgrFormPagesController {
   final _map = <String, MgrFormPageController>{};
   final _callbacks = <MgrFormPagesControllerCallback>{};
@@ -322,15 +346,26 @@ class _MgrFormPageController extends MgrFormPagesController {
   void dispose() => _callbacks.clear();
 }
 
+/// Controller for a framework form holding all the mutable state required.
 class MgrFormController with ChangeNotifier implements Listenable {
+  /// Holds all the values of the forms fields.
   late final MgrFormControllerParamMap params =
       _MgrFormControllerParamMap(this);
+
+  /// String to string dictionary representation of params.
   late final MgrFormControllerStringParamMap stringParams =
       _MgrFormControllerStringParamMap(this);
+
+  /// Holds all the item lists for "select" control elements.
   late final MgrFormSlistMap slists = _MgrFormSlistMap(this);
+
+  /// Holds all the state of forms pages.
   final MgrFormPagesController pages = _MgrFormPageController();
+
+  /// Holds scrolling state of the form.
   late final ScrollController scrollController = ScrollController();
 
+  /// Holds latest exception to be displayed to a user.
   final ValueNotifier<MgrException?> exception = ValueNotifier(null);
 
   MgrFormController(MgrFormModel model) {
@@ -372,35 +407,51 @@ class MgrFormController with ChangeNotifier implements Listenable {
   }
 }
 
+/// Represents a single value of the form.
+/// Actual value is stored in a specific controller that gets converted to
+/// a required type as needed keeping the original value if new controller
+/// permits it.
 class MgrFormControllerParam
     with ChangeNotifier
     implements ValueListenable<String?> {
+  /// Field name.
   final String name;
 
+  /// FocusNode for the control widget.
   late final FocusNode focusNode = FocusNode();
   final MgrFormController _formController;
   _MgrFormControlController? _controller;
 
   MgrFormControllerParam(this.name, this._formController);
 
+  /// Retrieves parameter value from the underlying controller.
   @override
   String? get value => _controller?.value;
 
+  /// Set the value of an underlying controller.
   set value(String? value) {
     _controller ??=
         _getController(() => _ValueMgrFormControlElementController(this));
     _controller!.value = value;
   }
 
+  /// Retrieves underlying controller as MgrTextInputController
+  /// converting it if needed.
   MgrTextInputController get textInputController =>
       _getController(() => MgrTextInputController(this));
 
+  /// Retrieves underlying controller as MgrCheckBoxController
+  /// converting it if needed.
   MgrCheckBoxController get checkBoxController =>
       _getController(() => MgrCheckBoxController(this));
 
+  /// Retrieves underlying controller as MgrSingleSelectController
+  /// converting it if needed.
   MgrSingleSelectController get singleSelectController => _getController(
       () => MgrSingleSelectController(this, _formController.slists[name]));
 
+  /// Retrieves underlying controller as MgrDatetimeController
+  /// converting it if needed.
   MgrDatetimeController get datetimeController =>
       _getController(() => MgrDatetimeController(this));
 
@@ -419,17 +470,23 @@ class MgrFormControllerParam
   }
 }
 
+/// Represents an underlying controller of a forms parameter.
 abstract class _MgrFormControlController implements ValueListenable<String?> {
+  @Deprecated('Use MgrFormControllerParam.focusNode instead')
   FocusNode get focusNode; // можно было бы и убрать
 
+  /// Retrieve a value of the controller converted to string representation.
   @override
   String? get value;
 
+  /// Set a value of the controller or reset if it's not permitted.
   set value(String? value);
 
   void dispose();
 }
 
+/// Controller meant to hold a string value assigned when a control-specific
+/// controller type is unknown.
 class _ValueMgrFormControlElementController extends ValueNotifier<String?>
     with _MgrFormControlController {
   final MgrFormControllerParam param;
@@ -441,6 +498,7 @@ class _ValueMgrFormControlElementController extends ValueNotifier<String?>
   FocusNode get focusNode => param.focusNode;
 }
 
+/// Controller for a text input control element.
 class MgrTextInputController extends _MgrFormControlController {
   final MgrFormControllerParam param;
   final ValueNotifier<String> _container = ValueNotifier('');
@@ -480,6 +538,9 @@ class MgrTextInputController extends _MgrFormControlController {
   }
 }
 
+/// Controller for a checkbox control element.
+/// Holds binary state (true/false) converting to a string value as 'on' or 'off'
+/// as required by the API.
 class MgrCheckBoxController extends _MgrFormControlController {
   final MgrFormControllerParam param;
   final ValueNotifier<bool> container;
@@ -507,6 +568,8 @@ class MgrCheckBoxController extends _MgrFormControlController {
   void dispose() => container.dispose();
 }
 
+/// Controller for a single selection control element.
+/// Holds a key of a selected item from a corresponding slist.
 class MgrSingleSelectController extends _MgrFormControlController {
   final MgrFormControllerParam _param;
   final ValueNotifier<String?> _container;
@@ -578,6 +641,7 @@ class MgrSingleSelectController extends _MgrFormControlController {
   void dispose() => _container.dispose();
 }
 
+/// Controller for a datetime control element.
 class MgrDatetimeController extends _MgrFormControlController {
   final MgrFormControllerParam _param;
   final _container = ValueNotifier<String?>(null);

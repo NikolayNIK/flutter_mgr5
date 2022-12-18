@@ -6,6 +6,8 @@ import 'package:flutter_mgr5/src/form/mgr_form_handler.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/src/mgr_exception.dart';
 
+/// Class that handles server-side validation functionality for a particular
+/// MgrFormController.
 abstract class MgrFormValidatorHandler {
   factory MgrFormValidatorHandler({
     required MgrClient mgrClient,

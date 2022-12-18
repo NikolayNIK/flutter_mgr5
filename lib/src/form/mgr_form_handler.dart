@@ -3,6 +3,8 @@ import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
 
 typedef MgrFormHandlerCallback = void Function(MgrFormControllerParam param);
 
+/// Helper class meant to aid in subscribing to a particular set of specific
+/// parameters unsubscribing on dispose.
 class MgrFormHandler {
   final MgrFormController formController;
   final List<MapEntry<MgrFormControllerParam, VoidCallback>> _callbacks = [];

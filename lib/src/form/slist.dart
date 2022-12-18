@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 
+/// Type for the list of items used in a select control element.
 typedef Slist = List<SlistEntry>;
 
+/// Immutable item used in a select control element.
 @immutable
 class SlistEntry {
   final String? key, depend;

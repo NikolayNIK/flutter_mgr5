@@ -18,6 +18,8 @@ typedef StandaloneMgrFormSubmitCallback = Future<bool?>? Function(
 typedef StandaloneMgrFormModelAdjuster = MgrFormModel Function(
     MgrFormModel model);
 
+/// Widget that handles downloading and building MgrForm used primarily for
+/// embedding purposes. APIs are subject to change.
 class StandaloneMgrForm extends StatelessWidget {
   final MgrClient mgrClient;
   final String func;

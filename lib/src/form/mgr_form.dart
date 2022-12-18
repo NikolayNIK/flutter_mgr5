@@ -22,6 +22,7 @@ const minimumFormWidth = 384.0;
 
 typedef MgrFormButtonPressedListener = void Function(MgrFormButtonModel button);
 
+/// Widget displaying a form built from MgrFormModel.
 class MgrForm extends StatefulWidget {
   final MgrFormModel model;
   final MgrFormController controller;

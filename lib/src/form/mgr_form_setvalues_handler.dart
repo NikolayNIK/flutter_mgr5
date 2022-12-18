@@ -8,6 +8,8 @@ import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_handler.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
 
+/// Class that handles "setvalues" API for a particular MgrFormController
+/// that introduces dynamic changes to the forms content.
 abstract class MgrFormSetvaluesHandler {
   factory MgrFormSetvaluesHandler({
     required MgrClient mgrClient,

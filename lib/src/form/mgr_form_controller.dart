@@ -28,6 +28,11 @@ abstract class MgrFormControllerParamMap
   @override
   MgrFormControllerParam operator [](covariant Object key);
 
+  @override
+  void operator []=(String key, MgrFormControllerParam value) =>
+      throw AssertionError(
+          'Setting a forms parameter representation object is not allowed');
+
   void set(MgrFormModel model);
 
   bool check(MgrFormModel model);
@@ -111,7 +116,7 @@ class _MgrFormControllerStringParamMap extends MapBase<String, String>
 /// MgrFormControllerParamMap implementation.
 /// Either needs get moved outta here or get merged into the super.
 class _MgrFormControllerParamMap extends MapBase<String, MgrFormControllerParam>
-    implements MgrFormControllerParamMap {
+    with MgrFormControllerParamMap {
   final MgrFormController _controller;
   final Map<String, MgrFormControllerParam> _map = {};
 
@@ -130,12 +135,6 @@ class _MgrFormControllerParamMap extends MapBase<String, MgrFormControllerParam>
         name,
         () => MgrFormControllerParam(name, _controller)
           ..addListener(() => _controller._notifyChanged(name)));
-  }
-
-  @override
-  void operator []=(String key, MgrFormControllerParam value) {
-    _map[key]?.dispose();
-    _map[key] = value;
   }
 
   @override

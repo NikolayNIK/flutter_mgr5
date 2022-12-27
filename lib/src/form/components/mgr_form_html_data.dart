@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html/flutter_html.dart' deferred as deferred_html
+    show Html;
 import 'package:flutter_mgr5/extensions/xml_extensions.dart';
 import 'package:flutter_mgr5/src/form/mgr_exception_holder.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
@@ -34,7 +36,7 @@ class HtmlDataFormFieldControlModel extends FormFieldControlModel {
       );
 }
 
-class MgrFormHtmlData extends StatelessWidget {
+class MgrFormHtmlData extends StatefulWidget {
   final MgrFormController controller;
   final HtmlDataFormFieldControlModel model;
 
@@ -43,21 +45,35 @@ class MgrFormHtmlData extends StatelessWidget {
       : super(key: key);
 
   @override
+  State<MgrFormHtmlData> createState() => _MgrFormHtmlDataState();
+}
+
+class _MgrFormHtmlDataState extends State<MgrFormHtmlData> {
+  final future = deferred_html.loadLibrary();
+
+  @override
   Widget build(BuildContext context) {
-    final data = controller.stringParams[model.name];
+    final data = widget.controller.stringParams[widget.model.name];
     if (data == null) {
       return const SizedBox();
     }
 
-    final height = model.chheight != null
-        ? double.tryParse(controller.stringParams[model.chheight!] ?? 'kostil')
-        : model.height;
-    final content = Html(
-      data: data,
-      shrinkWrap: true,
+    final height = widget.model.chheight != null
+        ? double.tryParse(
+            widget.controller.stringParams[widget.model.chheight!] ?? 'kostil')
+        : widget.model.height;
+    final content = FutureBuilder<void>(
+      future: future,
+      builder: (context, snapshot) =>
+          snapshot.connectionState == ConnectionState.done
+              ? deferred_html.Html(
+                  data: data,
+                  shrinkWrap: true,
+                )
+              : const Center(child: CircularProgressIndicator()),
     );
 
-    return model.height == null
+    return widget.model.height == null
         ? content
         : SizedBox(
             height: height,

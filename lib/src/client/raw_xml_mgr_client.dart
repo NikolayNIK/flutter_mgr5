@@ -7,6 +7,7 @@ import 'package:flutter_mgr5/mgr5_list.dart';
 import 'package:flutter_mgr5/src/client/mgr_request.dart';
 import 'package:flutter_mgr5/src/client/raw_mgr_client.dart';
 import 'package:flutter_mgr5/src/client/xml_mgr_client.dart';
+import 'package:flutter_mgr5/src/mgr_model.dart';
 import 'package:xml/xml.dart';
 
 const _offloadThresholdBytes = 4096;
@@ -17,11 +18,8 @@ XmlDocument _parseXmlDocument(Uint8List buffer) {
   return doc;
 }
 
-MgrFormModel _parseXmlDocumentIntoFormModel(Uint8List buffer) =>
-    MgrFormModel.fromXmlDocument(_parseXmlDocument(buffer));
-
-MgrListModel _parseXmlDocumentIntoListModel(Uint8List buffer) =>
-    MgrListModel.fromXmlDocument(_parseXmlDocument(buffer));
+Future<MgrModel> _parseXmlDocumentIntoModel(Uint8List buffer) =>
+    MgrModel.fromXmlDocument(_parseXmlDocument(buffer));
 
 abstract class RawXmlMgrClient implements XmlMgrClient, RawMgrClient {
   @override
@@ -44,33 +42,15 @@ abstract class RawXmlMgrClient implements XmlMgrClient, RawMgrClient {
   }
 
   @override
-  Future<MgrFormModel> requestFormModel(MgrRequest request) async {
-    final bytes =
-        await requestBytes(request.copyWith(
-          authInfo: authInfo,
-          params: {'out': 'devel'},
-        ));
+  Future<MgrModel> requestModel(MgrRequest request) async {
+    final bytes = await requestBytes(request.copyWith(
+      authInfo: authInfo,
+      params: {'out': 'devel'},
+    ));
     try {
       return bytes.length > _offloadThresholdBytes
-          ? await compute(_parseXmlDocumentIntoFormModel, bytes)
-          : _parseXmlDocumentIntoFormModel(bytes);
-    } on MgrException catch (e) {
-      invalidateIfNeeded(e);
-      rethrow;
-    }
-  }
-
-  @override
-  Future<MgrListModel> requestListModel(MgrRequest request) async {
-    final bytes =
-        await requestBytes(request.copyWith(
-          authInfo: authInfo,
-          params: {'out': 'devel'},
-        ));
-    try {
-      return bytes.length > _offloadThresholdBytes
-          ? await compute(_parseXmlDocumentIntoListModel, bytes)
-          : _parseXmlDocumentIntoListModel(bytes);
+          ? await compute(_parseXmlDocumentIntoModel, bytes)
+          : await _parseXmlDocumentIntoModel(bytes);
     } on MgrException catch (e) {
       invalidateIfNeeded(e);
       rethrow;

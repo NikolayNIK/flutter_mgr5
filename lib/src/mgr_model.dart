@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mgr5/extensions/xml_extensions.dart';
-import 'package:flutter_mgr5/mgr5.dart';
-import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
-import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
+import 'package:flutter_mgr5/src/form/mgr_form_model.dart'
+    deferred as deferred_form show MgrFormModel;
+import 'package:flutter_mgr5/src/list/mgr_list_model.dart'
+    deferred as deferred_list show MgrListModel;
+import 'package:flutter_mgr5/src/mgr_format.dart';
 import 'package:xml/xml.dart';
 
 /// Type of MgrModel.
@@ -33,16 +35,23 @@ abstract class MgrModel {
 
   const MgrModel(this.func);
 
-  factory MgrModel.fromXmlDocument(XmlDocument doc) =>
+  static Future<MgrModel> fromXmlDocument(XmlDocument doc) =>
       MgrModel.fromXmlElement(doc.rootElement);
 
-  factory MgrModel.fromXmlElement(XmlElement element) {
-    switch (
-        element.child('metadata')?.requireConvertAttribute('type', converter: _typeFromString)) {
+  static Future<MgrModel> fromXmlElement(XmlElement element) {
+    switch (element
+        .child('metadata')
+        ?.requireConvertAttribute('type', converter: _typeFromString)) {
       case MgrModelType.form:
-        return MgrFormModel.fromXmlElement(element);
+        return () async {
+          await deferred_form.loadLibrary();
+          return deferred_form.MgrFormModel.fromXmlElement(element);
+        }();
       case MgrModelType.list:
-        return MgrListModel.fromXmlElement(element);
+        return () async {
+          await deferred_list.loadLibrary();
+          return deferred_list.MgrListModel.fromXmlElement(element);
+        }();
       case MgrModelType.report:
         throw UnimplementedError('report is not implemented yet');
       default:

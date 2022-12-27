@@ -123,10 +123,10 @@ class MgrFormSetValuesHandlerImpl extends MgrFormHandler
       }
 
       try {
-        final model = await _mgrClient.requestFormModel(MgrRequest.func(
+        final model = await _mgrClient.requestModel(MgrRequest.func(
           formModel.func,
           formController.stringParams.copyWith(map: {'sv_field': name}),
-        ));
+        )) as MgrFormModel;
 
         if (_finalSvFields.isNotEmpty) {
           return;

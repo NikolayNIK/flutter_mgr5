@@ -110,7 +110,8 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
 
       _initialLoadFuture = () async {
         final model = await widget.mgrClient
-            .requestFormModel(MgrRequest.func(widget.name, widget.params));
+                .requestModel(MgrRequest.func(widget.name, widget.params))
+            as MgrFormModel;
         if (!isDisposed) {
           setState(() {
             _controller = StandaloneMgrFormController(
@@ -254,8 +255,8 @@ class _StandaloneMgrFormState extends State<_StandaloneMgrFormImpl> {
       try {
         final mgrClient = widget.mgrClient;
         if (mgrClient is XmlMgrClient) {
-          response = await mgrClient
-              .requestXmlDocument(MgrRequest.func(controller.model.func, params));
+          response = await mgrClient.requestXmlDocument(
+              MgrRequest.func(controller.model.func, params));
         } else {
           throw MgrException('unsupported', 'MgrClient', null, null); // TODO
         }

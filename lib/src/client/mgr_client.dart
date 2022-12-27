@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_mgr5/mgr5_form.dart';
+import 'package:flutter_mgr5/mgr5_core.dart';
 import 'package:flutter_mgr5/src/client/auth_info.dart';
-import 'package:flutter_mgr5/src/client/mgr_request.dart';
-import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
+import 'package:flutter_mgr5/src/mgr_model.dart';
 
 abstract class MgrClient implements Listenable, ChangeNotifier {
   AuthInfo? get authInfo;
@@ -16,9 +15,7 @@ abstract class MgrClient implements Listenable, ChangeNotifier {
 
   Future<void> request(MgrRequest request);
 
-  Future<MgrFormModel> requestFormModel(MgrRequest request);
-
-  Future<MgrListModel> requestListModel(MgrRequest request);
+  Future<MgrModel> requestModel(MgrRequest request);
 
   @protected
   void invalidate();

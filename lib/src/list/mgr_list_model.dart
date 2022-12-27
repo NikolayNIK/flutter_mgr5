@@ -1,9 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_mgr5/extensions/iterator_extensions.dart';
 import 'package:flutter_mgr5/extensions/xml_extensions.dart';
-import 'package:flutter_mgr5/mgr5.dart';
+import 'package:flutter_mgr5/src/mgr_format.dart';
 import 'package:flutter_mgr5/src/mgr_messages.dart';
 import 'package:flutter_mgr5/src/mgr_model.dart';
 import 'package:xml/xml.dart';
@@ -158,7 +156,7 @@ class MgrListCol {
   }
 
   static MainAxisAlignment _mainAxisAlignmentFromText(TextAlign textAlign) {
-    switch(textAlign) {
+    switch (textAlign) {
       case TextAlign.left:
       case TextAlign.start:
         return MainAxisAlignment.start;

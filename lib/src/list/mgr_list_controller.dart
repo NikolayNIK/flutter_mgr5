@@ -137,7 +137,7 @@ class MgrListPage extends ValueListenable<List<MgrListElem>?>
     _isLoading = true;
 
     try {
-      final model = await _controller.mgrClient.requestListModel(
+      final model = await _controller.mgrClient.requestModel(
         MgrRequest.func(
           _controller.func,
           (_controller.params ?? {}).copyWith(
@@ -147,7 +147,7 @@ class MgrListPage extends ValueListenable<List<MgrListElem>?>
             },
           ),
         ),
-      );
+      ) as MgrListModel;
 
       if (_isDisposed) {
         return;

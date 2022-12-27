@@ -68,12 +68,14 @@ class _StandaloneMgrListState extends State<StandaloneMgrList> {
 
     _loadingFuture = () async {
       if (_filterParams != null && oldFilterFunc != null) {
-        await widget.mgrClient.request(MgrRequest.func(oldFilterFunc, _filterParams));
+        await widget.mgrClient
+            .request(MgrRequest.func(oldFilterFunc, _filterParams));
         _filterParams = null;
       }
 
-      final model =
-          await widget.mgrClient.requestListModel(MgrRequest.func(widget.func, widget.params));
+      final model = await widget.mgrClient
+              .requestModel(MgrRequest.func(widget.func, widget.params))
+          as MgrListModel;
 
       setState(() {
         _model = model;
@@ -87,7 +89,8 @@ class _StandaloneMgrListState extends State<StandaloneMgrList> {
       final filterFunc = _filterFunc;
       if (filterFunc != null) {
         final filterModel = await widget.mgrClient
-            .requestFormModel(MgrRequest.func(filterFunc, widget.params));
+                .requestModel(MgrRequest.func(filterFunc, widget.params))
+            as MgrFormModel;
         setState(() {
           _filterModel = filterModel;
           _filterController = MgrFormController(filterModel);

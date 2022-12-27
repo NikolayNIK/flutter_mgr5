@@ -4,6 +4,7 @@ import 'package:flutter_mgr5/mgr5_form.dart';
 import 'package:flutter_mgr5/src/client/mgr_client.dart';
 import 'package:flutter_mgr5/src/client/mgr_request.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
+import 'package:flutter_mgr5/src/mgr_model.dart';
 import 'package:xml/xml.dart';
 
 abstract class XmlMgrClient implements MgrClient {
@@ -13,12 +14,8 @@ abstract class XmlMgrClient implements MgrClient {
   Future<void> request(MgrRequest request) => requestXmlDocument(request);
 
   @override
-  Future<MgrFormModel> requestFormModel(MgrRequest request) async =>
-      MgrFormModel.fromXmlDocument(await requestXmlDocument(request));
-
-  @override
-  Future<MgrListModel> requestListModel(MgrRequest request) async =>
-      MgrListModel.fromXmlDocument(await requestXmlDocument(request));
+  Future<MgrModel> requestModel(MgrRequest request) async =>
+      MgrModel.fromXmlDocument(await requestXmlDocument(request));
 
   static void checkError(XmlDocument doc) {
     final error = doc.rootElement.child('error');

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mgr5/src/mgr_exception.dart';
 
+@Deprecated('this is not the way')
 abstract class MgrExceptionHolder {
   factory MgrExceptionHolder([MgrException? exception]) =>
       _RootMgrExceptionHolder(exception);

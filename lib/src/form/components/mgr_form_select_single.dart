@@ -111,6 +111,8 @@ class _MgrFormSelectSingleState extends State<MgrFormSelectSingle> {
   }
 
   void _onTap() {
+    widget.focusNode?.requestFocus();
+
     final navigator = Navigator.of(context);
     final renderBox = context.findRenderObject() as RenderBox;
     final rect = renderBox.localToGlobal(Offset.zero,

@@ -4,9 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mgr5/extensions/map_extensions.dart';
 import 'package:flutter_mgr5/mgr5.dart';
-import 'package:flutter_mgr5/src/client/mgr_client.dart';
-import 'package:flutter_mgr5/src/client/mgr_request.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
+import 'package:material_table_view/material_table_view.dart';
 
 typedef MgrListElemKey = String;
 
@@ -17,8 +16,7 @@ class MgrListController {
   late final MgrListItems items = _MgrListItems(this);
   late final TextEditingController searchTextEditingController =
       _createSearchController();
-  late final verticalTableScrollController = ScrollController();
-  late final horizontalTableScrollController = ScrollController();
+  late final tableViewController = TableViewController();
   late final isFilterOpen = ValueNotifier(false);
 
   final String func;

@@ -15,6 +15,9 @@ abstract class MgrFormPageCollapseHandler {
           formController: formController,
           formModel: formModel);
 
+  factory MgrFormPageCollapseHandler.disabled() =>
+      const _DisabledMgrFormPageCollapseHandler();
+
   set mgrClient(MgrClient mgrClient);
 
   void dispose();
@@ -56,4 +59,15 @@ class _MgrFormPageCollapseHandler implements MgrFormPageCollapseHandler {
       element.key.removeListener(element.value);
     }
   }
+}
+
+class _DisabledMgrFormPageCollapseHandler
+    implements MgrFormPageCollapseHandler {
+  const _DisabledMgrFormPageCollapseHandler();
+  
+  @override
+  set mgrClient(MgrClient mgrClient) {}
+
+  @override
+  void dispose() {}
 }

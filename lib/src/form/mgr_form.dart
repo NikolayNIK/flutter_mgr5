@@ -1,14 +1,14 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_mgr5/listenable_builder.dart';
 import 'package:flutter_mgr5/src/form/components/mgr_form_error_card.dart';
-import 'package:flutter_mgr5/src/form/components/mgr_form_page.dart';
 import 'package:flutter_mgr5/src/form/mgr_exception_holder.dart';
+import 'package:flutter_mgr5/src/form/mgr_form_body.dart';
+import 'package:flutter_mgr5/src/form/mgr_form_buttons.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_field_hint_mode.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_setvalues_handler.dart';
+import 'package:flutter_mgr5/src/form/mgr_form_title.dart';
 import 'package:flutter_mgr5/src/mgr_exception.dart';
 
 const _defaultFieldLabelWidth = 128.0;
@@ -114,7 +114,10 @@ class _MgrFormState extends State<MgrForm> {
       Column(
         children: [
           if (widget.showTitle) ...[
-            _buildTitle(context),
+            MgrFormTitle.fromModel(
+              model: model,
+              onRefreshPressed: widget.onRefreshPressed,
+            ),
             const Divider(
               height: _dividerWidth,
               thickness: _dividerWidth,
@@ -123,28 +126,23 @@ class _MgrFormState extends State<MgrForm> {
           ],
           Flexible(
             child: FocusTraversalGroup(
-              child: ListView(
+              child: CustomScrollView(
                 controller: controller.scrollController,
                 shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                children: [
-                  for (final page in widget.model.pages)
-                    if (page.name == null ||
-                        widget.model.getStateChecker(page.name!)(
-                                    widget.controller.stringParams) !=
-                                MgrFormState.gone &&
-                            !page.isHidden)
-                      widget.fieldMaxWidth == null
-                          ? _buildPage(page, exceptionHolder, hintMode)
-                          : Align(
-                              alignment: Alignment.centerLeft,
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                    maxWidth: widget.fieldMaxWidth!),
-                                child:
-                                    _buildPage(page, exceptionHolder, hintMode),
-                              ),
-                            ),
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    sliver: SliverMgrFormBody(
+                      model: model,
+                      controller: controller,
+                      fieldMaxWidth: widget.fieldMaxWidth,
+                      hintMode: hintMode,
+                      fieldLabelWidth: _defaultFieldLabelWidth,
+                      fieldControlsWidth: _defaultFieldControlsWidth,
+                      forceReadOnly: widget.forceReadOnly,
+                      exceptionHolder: exceptionHolder,
+                    ),
+                  )
                 ],
               ),
             ),
@@ -155,25 +153,10 @@ class _MgrFormState extends State<MgrForm> {
               thickness: _dividerWidth,
               indent: 16.0,
             ),
-            Material(
-              color: Colors.transparent,
-              child: Padding(
-                padding:
-                    const EdgeInsets.only(left: 16.0, top: 16.0, right: 16.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Wrap(
-                    alignment: WrapAlignment.start,
-                    crossAxisAlignment: WrapCrossAlignment.start,
-                    spacing: 16.0,
-                    runSpacing: 8.0,
-                    children: [
-                      for (final button in widget.model.buttons)
-                        _buildButton(button),
-                    ],
-                  ),
-                ),
-              ),
+            MgrFormButtons(
+              model: model,
+              onPressed: widget.onPressed,
+              forceReadOnly: widget.forceReadOnly,
             ),
             Builder(
               builder: (context) {
@@ -187,76 +170,7 @@ class _MgrFormState extends State<MgrForm> {
         ],
       );
 
-  Widget _buildTitle(BuildContext context) => Material(
-        color: Colors.transparent,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 56),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      widget.model.title,
-                      style: Theme.of(context).textTheme.titleLarge,
-                      maxLines: 1,
-                    ),
-                  ),
-                ),
-              ),
-              if (widget.onRefreshPressed != null)
-                IconButton(
-                  onPressed: widget.onRefreshPressed!,
-                  padding: const EdgeInsets.all(16),
-                  icon: const Icon(Icons.refresh),
-                ),
-            ],
-          ),
-        ),
-      );
-
   Widget _buildError(final MgrException exception) => Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: MgrFormErrorCard(exception: exception));
-
-  Widget _buildButton(final MgrFormButtonModel button) {
-    final onPressed = widget.onPressed == null || widget.forceReadOnly
-        ? null
-        : () => widget.onPressed == null ? null : widget.onPressed!(button);
-
-    return button.color == null
-        ? OutlinedButton(
-            onPressed: onPressed,
-            child: Text(button.label),
-          )
-        : Theme(
-            data: ThemeData.from(
-                colorScheme: button.color!.computeLuminance() > .5
-                    ? ColorScheme.dark(primary: button.color!)
-                    : ColorScheme.light(primary: button.color!)),
-            child: ElevatedButton(
-              onPressed: onPressed,
-              child: Text(button.label),
-            ),
-          );
-  }
-
-  Widget _buildPage(
-    final MgrFormPageModel page,
-    final MgrExceptionHolder exceptionHolder,
-    final MgrFormFieldHintMode hintMode,
-  ) =>
-      MgrFormPage(
-        formController: widget.controller,
-        formModel: widget.model,
-        page: page,
-        exceptionHolder: exceptionHolder,
-        hintMode: hintMode,
-        fieldLabelWidth: widget.fieldLabelWidth,
-        fieldControlsWidth: widget.fieldControlsWidth,
-        forceReadOnly: widget.forceReadOnly,
-      );
 }

@@ -100,10 +100,14 @@ class _MgrFormSelectSingleState extends State<MgrFormSelectSingle> {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: DefaultTextStyle(
           style: enabled
-              ? selected
-                  ? textStyle.copyWith(
-                      color: Theme.of(context).colorScheme.onSecondaryContainer)
-                  : textStyle
+              ? entry.textColor != null
+                  ? textStyle.copyWith(color: entry.textColor)
+                  : selected
+                      ? textStyle.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSecondaryContainer)
+                      : textStyle
               : textStyle.copyWith(color: Theme.of(context).disabledColor),
           child: Builder(
               builder: (context) => widget.itemBuilder(context, entry))),

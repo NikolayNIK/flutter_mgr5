@@ -13,6 +13,12 @@ class SliverMgrFormBody extends StatelessWidget {
   final double fieldLabelWidth;
   final double fieldControlsWidth;
   final bool forceReadOnly;
+
+  /// Заставить все поля отображаться полноэкранными.
+  ///
+  /// Обычно используется при нехватке горизонтального пространства
+  /// для отображения названия и элемента управления на одной строке.
+  final bool forceFullWidth;
   final MgrExceptionHolder exceptionHolder;
 
   const SliverMgrFormBody({
@@ -25,6 +31,7 @@ class SliverMgrFormBody extends StatelessWidget {
     required this.fieldControlsWidth,
     required this.forceReadOnly,
     required this.exceptionHolder,
+    required this.forceFullWidth,
   });
 
   @override
@@ -47,10 +54,10 @@ class SliverMgrFormBody extends StatelessWidget {
       ]));
 
   Widget _buildPage(
-      final MgrFormPageModel page,
-      final MgrExceptionHolder exceptionHolder,
-      final MgrFormFieldHintMode hintMode,
-      ) =>
+    final MgrFormPageModel page,
+    final MgrExceptionHolder exceptionHolder,
+    final MgrFormFieldHintMode hintMode,
+  ) =>
       MgrFormPage(
         formController: controller,
         formModel: model,
@@ -60,5 +67,6 @@ class SliverMgrFormBody extends StatelessWidget {
         fieldLabelWidth: fieldLabelWidth,
         fieldControlsWidth: fieldControlsWidth,
         forceReadOnly: forceReadOnly,
+        forceFullWidth: forceFullWidth,
       );
 }

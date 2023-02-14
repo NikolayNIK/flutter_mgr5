@@ -79,6 +79,8 @@ class _MgrFormState extends State<MgrForm> {
                                 _minimumHintTextWidth
                             ? MgrFormFieldHintMode.inline
                             : MgrFormFieldHintMode.floating),
+                    constraints.maxWidth <
+                        widget.fieldLabelWidth + widget.fieldControlsWidth,
                   ),
                 ),
               ),
@@ -110,6 +112,7 @@ class _MgrFormState extends State<MgrForm> {
     BuildContext context,
     MgrExceptionHolder exceptionHolder,
     MgrFormFieldHintMode hintMode,
+    bool forceFullWidth,
   ) =>
       Column(
         children: [
@@ -141,6 +144,7 @@ class _MgrFormState extends State<MgrForm> {
                       fieldControlsWidth: _defaultFieldControlsWidth,
                       forceReadOnly: widget.forceReadOnly,
                       exceptionHolder: exceptionHolder,
+                      forceFullWidth: forceFullWidth,
                     ),
                   )
                 ],

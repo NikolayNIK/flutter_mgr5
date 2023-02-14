@@ -14,7 +14,7 @@ class MgrFormPage extends StatelessWidget {
   final MgrExceptionHolder exceptionHolder;
   final MgrFormFieldHintMode hintMode;
   final double fieldLabelWidth, fieldControlsWidth;
-  final bool forceReadOnly;
+  final bool forceReadOnly, forceFullWidth;
 
   const MgrFormPage({
     Key? key,
@@ -26,6 +26,7 @@ class MgrFormPage extends StatelessWidget {
     required this.fieldLabelWidth,
     required this.fieldControlsWidth,
     required this.forceReadOnly,
+    required this.forceFullWidth,
   }) : super(key: key);
 
   @override
@@ -45,6 +46,7 @@ class MgrFormPage extends StatelessWidget {
             labelWidth: fieldLabelWidth,
             controlsWidth: fieldControlsWidth,
             forceReadOnly: forceReadOnly || state == MgrFormState.readOnly,
+            forceFullWidth: forceFullWidth,
           ),
     ];
 

@@ -1343,6 +1343,7 @@ class _MgrListFilterForm extends StatelessWidget {
                               controlsWidth: controlWidth,
                               forceReadOnly: forceReadOnly ||
                                   state == MgrFormState.readOnly,
+                              forceFullWidth: false,
                             ),
                           ),
                     ],

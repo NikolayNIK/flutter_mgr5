@@ -12,7 +12,7 @@ class MgrFormField extends StatelessWidget {
   final MgrExceptionHolder? exceptionHolder;
   final MgrFormFieldHintMode hintMode;
   final double labelWidth, controlsWidth;
-  final bool forceReadOnly;
+  final bool forceReadOnly, forceFullWidth;
 
   const MgrFormField({
     Key? key,
@@ -23,6 +23,7 @@ class MgrFormField extends StatelessWidget {
     required this.labelWidth,
     required this.controlsWidth,
     this.forceReadOnly = false,
+    required this.forceFullWidth,
   }) : super(key: key);
 
   @override
@@ -51,12 +52,14 @@ class MgrFormField extends StatelessWidget {
     return widget;
   }
 
+  bool get isFullWidth => forceFullWidth || model.isFullWidth;
+
   Widget _wrap(Widget widget) =>
-      model.isFullWidth ? Expanded(child: widget) : Flexible(child: widget);
+      isFullWidth ? Expanded(child: widget) : Flexible(child: widget);
 
   Widget _wrapHints(Widget widget) {
     final hintMode =
-        model.isFullWidth && this.hintMode == MgrFormFieldHintMode.inline
+        isFullWidth && this.hintMode == MgrFormFieldHintMode.inline
             ? MgrFormFieldHintMode.floating
             : this.hintMode;
 
@@ -157,7 +160,7 @@ class MgrFormField extends StatelessWidget {
       ],
     );
 
-    if (!model.isFullWidth) {
+    if (!isFullWidth) {
       controls = SizedBox(
         width: controlsWidth,
         child: controls,
@@ -204,7 +207,7 @@ class MgrFormField extends StatelessWidget {
 
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 56.0),
-      child: model.isFullWidth
+      child: isFullWidth
           ? Column(children: [
               const SizedBox(
                 height: 16.0,

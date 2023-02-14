@@ -283,11 +283,14 @@ class _DropdownPageState extends State<_DropdownPage> {
                         (searchEnabled ? searchFieldHeight : 0)));
 
             final double windowContentOffsetY;
-            if (rect.height < widget.itemHeight * min(entries.length, 5.5)) {
+            if (rect.height <
+                widget.itemHeight * min(entries.length, 5.5) +
+                    (searchEnabled ? searchFieldHeight : 0)) {
               final newTop = max(
                   _windowMargin.top,
                   rect.top -
-                      widget.itemHeight * min(entries.length, 5.5) +
+                      widget.itemHeight * min(entries.length, 5.5) -
+                      (searchEnabled ? searchFieldHeight : 0) +
                       rect.height);
 
               windowContentOffsetY = rect.top - newTop;

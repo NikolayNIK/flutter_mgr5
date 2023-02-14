@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mgr5/src/form/components/mgr_form_field.dart';
 import 'package:flutter_mgr5/src/form/mgr_exception_holder.dart';
@@ -37,7 +39,7 @@ class MgrFormPage extends StatelessWidget {
         if ((state = formModel.getStateChecker(field.name)(
                     formController.stringParams)) !=
                 MgrFormState.gone &&
-            !field.isHidden)
+            !field.isHidden) ...[
           MgrFormField(
             controller: formController,
             model: field,
@@ -48,11 +50,18 @@ class MgrFormPage extends StatelessWidget {
             forceReadOnly: forceReadOnly || state == MgrFormState.readOnly,
             forceFullWidth: forceFullWidth,
           ),
+          SizedBox(
+            height: max(.0, 8 + 4 * Theme.of(context).visualDensity.vertical),
+          )
+        ]
     ];
 
     if (children.isEmpty) {
       return const SizedBox();
     }
+
+    // remove the last spacer
+    children.removeLast();
 
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,

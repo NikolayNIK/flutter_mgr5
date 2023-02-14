@@ -199,7 +199,12 @@ class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
   final Map<String, ValueNotifier<Slist>> _original = {}, _filtered = {};
   final Map<String, String> _dependencies = {}; // dependant => dependency
   final Slist _emptySlist = List.unmodifiable(
-    [SlistEntry(null, '-- не указано --', null)],
+    [
+      SlistEntry(
+        key: null,
+        label: '-- не указано --', // TODO
+      )
+    ],
   ); // TODO localize
 
   _MgrFormSlistMap(this.controller);

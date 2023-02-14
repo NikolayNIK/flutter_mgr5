@@ -97,9 +97,23 @@ class MgrFormModel extends MgrModel {
           slist.requireAttribute('name'): List.unmodifiable(
             slist.childElements.map(
               (item) => SlistEntry(
-                item.attribute('key'),
-                item.innerText,
-                item.attribute('depend'),
+                key: item.attribute('key'),
+                label: item.innerText,
+                depend: item.attribute('depend'),
+                textColor: item.convertAttribute('color', converter: (value) {
+                  switch (value) {
+                    case 'red':
+                      return Colors.red;
+                    case 'green':
+                      return Colors.green;
+                    case 'blue':
+                      return Colors.blue;
+                    case 'yellow':
+                      return Colors.yellow;
+                    case 'cyan':
+                      return Colors.cyan;
+                  }
+                },)
               ),
             ),
           ),

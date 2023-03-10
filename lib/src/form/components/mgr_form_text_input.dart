@@ -113,6 +113,8 @@ class MgrFormTextInput extends StatelessWidget {
                         param.value = value.toStringDate();
                       }
                     });
+
+                    controller.focusNode.requestFocus();
                   },
                   icon: const Icon(Icons.calendar_today),
                 ),

@@ -11,7 +11,9 @@ import 'package:flutter_mgr5/src/list/mgr_list_controller.dart';
 import 'package:flutter_mgr5/src/list/mgr_list_model.dart';
 import 'package:flutter_mgr5/src/optional_tooltip.dart';
 import 'package:flutter_mgr5/value_animated_switcher.dart';
+import 'package:material_table_view/default_animated_switcher_transition_builder.dart';
 import 'package:material_table_view/material_table_view.dart';
+import 'package:material_table_view/shimmer_placeholder_shade.dart';
 import 'package:shimmer/shimmer.dart';
 
 typedef MgrListColumnPressedCallback = void Function(MgrListCol col);
@@ -676,201 +678,216 @@ class _MgrListState extends State<MgrList> {
   /// TODO
   static const _BREAK_DIVIDER_REVEAL_OFFSET = 8.0;
 
-  Widget _buildTable() => GestureDetector(
-        onScaleStart: (details) {
-          _baseRowHeightScale = widget.controller.rowHeightScale.value;
-          _baseVerticalScrollPositionPixels =
-              _verticalScrollController.position.hasPixels
-                  ? _verticalScrollController.position.pixels
-                  : null;
-          _baseLocalPointY = details.localFocalPoint.dy;
-        },
-        onScaleUpdate: (details) {
-          if (details.verticalScale == 1.0) {
-            return;
-          }
+  static const shimmerBaseColor = Color(0x20808080);
+  static const shimmerHighlightColor = Color(0x40FFFFFF);
 
-          final value = _baseRowHeightScale * details.verticalScale;
-          final clampedValue =
-              widget.controller.rowHeightScale.value = max(.5, min(1.0, value));
-          final baseOffset = _baseVerticalScrollPositionPixels;
-          if (baseOffset != null) {
-            _verticalScrollController.position.jumpTo(
-              ((baseOffset + _baseLocalPointY) * details.verticalScale -
-                      details.localFocalPoint.dy) *
-                  (clampedValue / value),
-            );
-          }
-        },
-        child: ValueListenableBuilder<double>(
-          valueListenable: widget.controller.rowHeightScale,
-          builder: (context, rowScale, _) => LayoutBuilder(
-            builder: (context, constraints) {
-              final rowHeight = rowScale * 48.0 +
-                  4.0 * Theme.of(context).visualDensity.vertical;
-              _dragToSelectRowHeight = rowHeight;
+  Widget _buildTable() => ShimmerPlaceholderShadeProvider(
+        loopDuration: const Duration(seconds: 2),
+        colors: const [
+          shimmerBaseColor,
+          shimmerHighlightColor,
+          shimmerBaseColor,
+          shimmerHighlightColor,
+          shimmerBaseColor
+        ],
+        stops: const [.0, .45, .5, .95, 1],
+        builder: (context, placeholderShade) => GestureDetector(
+          onScaleStart: (details) {
+            _baseRowHeightScale = widget.controller.rowHeightScale.value;
+            _baseVerticalScrollPositionPixels =
+                _verticalScrollController.position.hasPixels
+                    ? _verticalScrollController.position.pixels
+                    : null;
+            _baseLocalPointY = details.localFocalPoint.dy;
+          },
+          onScaleUpdate: (details) {
+            if (details.verticalScale == 1.0) {
+              return;
+            }
 
-              final availableWidth = constraints.maxWidth - 16.0;
+            final value = _baseRowHeightScale * details.verticalScale;
+            final clampedValue = widget.controller.rowHeightScale.value =
+                max(.5, min(1.0, value));
+            final baseOffset = _baseVerticalScrollPositionPixels;
+            if (baseOffset != null) {
+              _verticalScrollController.position.jumpTo(
+                ((baseOffset + _baseLocalPointY) * details.verticalScale -
+                        details.localFocalPoint.dy) *
+                    (clampedValue / value),
+              );
+            }
+          },
+          child: ValueListenableBuilder<double>(
+            valueListenable: widget.controller.rowHeightScale,
+            builder: (context, rowScale, _) => LayoutBuilder(
+              builder: (context, constraints) {
+                final rowHeight = rowScale * 48.0 +
+                    4.0 * Theme.of(context).visualDensity.vertical;
+                _dragToSelectRowHeight = rowHeight;
 
-              final totalColWidth = widget.model.coldata
-                      .map((e) => e.width)
-                      .fold<double>(0.0, (value, element) => value + element) +
-                  _checkboxWidth;
-              final needsBreaks = totalColWidth > availableWidth;
+                final availableWidth = constraints.maxWidth - 16.0;
 
-              final widthFactor = needsBreaks
-                  ? 1.0
-                  : (availableWidth - _checkboxWidth) /
-                      (totalColWidth - _checkboxWidth);
+                final totalColWidth = widget.model.coldata
+                        .map((e) => e.width)
+                        .fold<double>(
+                            0.0, (value, element) => value + element) +
+                    _checkboxWidth;
+                final needsBreaks = totalColWidth > availableWidth;
 
-              final minWidth =
-                  max(_MIN_WIDTH, _MIN_WIDTH_RATIO * availableWidth);
+                final widthFactor = needsBreaks
+                    ? 1.0
+                    : (availableWidth - _checkboxWidth) /
+                        (totalColWidth - _checkboxWidth);
 
-              final bgColor = Theme.of(context).colorScheme.surface;
-              final dividerColor = Theme.of(context).dividerColor;
+                final minWidth =
+                    max(_MIN_WIDTH, _MIN_WIDTH_RATIO * availableWidth);
 
-              final coldata = widget.model.coldata;
+                final bgColor = Theme.of(context).colorScheme.surface;
+                final dividerColor = Theme.of(context).dividerColor;
 
-              return ListenableBuilder(
-                listenable: widget.controller.selection,
-                builder: (context) => ListenableBuilder(
-                  listenable: widget.controller.items,
-                  builder: (context) => TableView.builder(
-                    controller: widget.controller.tableViewController,
-                    rowCount: widget.controller.items.length,
-                    rowHeight: rowHeight,
-                    minScrollableWidth: minWidth,
-                    columns: [
-                      TableColumn(
-                        width: _checkboxWidth,
-                        freezePriority: coldata.length,
-                      ),
-                      for (var i = 0; i < coldata.length; i++)
+                final coldata = widget.model.coldata;
+
+                return ListenableBuilder(
+                  listenable: widget.controller.selection,
+                  builder: (context) => ListenableBuilder(
+                    listenable: widget.controller.items,
+                    builder: (context) => TableView.builder(
+                      controller: widget.controller.tableViewController,
+                      rowCount: widget.controller.items.length,
+                      rowHeight: rowHeight,
+                      minScrollableWidth: minWidth,
+                      columns: [
                         TableColumn(
-                          width: widthFactor * coldata[i].width,
-                          freezePriority: [0, 1, coldata.length - 1].contains(i)
-                              ? coldata.length - i
-                              : 0,
+                          width: _checkboxWidth,
+                          freezePriority: coldata.length,
                         ),
-                    ],
-                    bodyContainerBuilder: (context, body) => Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        body,
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: SizedBox(
-                              width: _checkboxWidth,
-                              height: double.infinity,
-                              child: GestureDetector(
-                                onVerticalDragDown: (details) {
-                                  _dragToSelectVerticalPosition =
-                                      details.localPosition.dy;
+                        for (var i = 0; i < coldata.length; i++)
+                          TableColumn(
+                            width: widthFactor * coldata[i].width,
+                            freezePriority:
+                                [0, 1, coldata.length - 1].contains(i)
+                                    ? coldata.length - i
+                                    : 0,
+                          ),
+                      ],
+                      bodyContainerBuilder: (context, body) => Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          body,
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: SizedBox(
+                                width: _checkboxWidth,
+                                height: double.infinity,
+                                child: GestureDetector(
+                                  onVerticalDragDown: (details) {
+                                    _dragToSelectVerticalPosition =
+                                        details.localPosition.dy;
 
-                                  final position = widget
-                                      .controller
-                                      .tableViewController
-                                      .verticalScrollController
-                                      .position;
-                                  if (position.hasPixels) {
-                                    final index = _dragToSelectLatestIndex =
-                                        (position.pixels +
-                                                _dragToSelectVerticalPosition) ~/
-                                            _dragToSelectRowHeight;
-                                    final item = widget.controller.items[index];
-                                    if (item != null) {
-                                      final key = item[widget.model.keyField];
-                                      if (key != null) {
-                                        _dragToSelectTargetState = !widget
-                                            .controller.selection
-                                            .contains(key);
+                                    final position = widget
+                                        .controller
+                                        .tableViewController
+                                        .verticalScrollController
+                                        .position;
+                                    if (position.hasPixels) {
+                                      final index = _dragToSelectLatestIndex =
+                                          (position.pixels +
+                                                  _dragToSelectVerticalPosition) ~/
+                                              _dragToSelectRowHeight;
+                                      final item =
+                                          widget.controller.items[index];
+                                      if (item != null) {
+                                        final key = item[widget.model.keyField];
+                                        if (key != null) {
+                                          _dragToSelectTargetState = !widget
+                                              .controller.selection
+                                              .contains(key);
+                                        }
                                       }
                                     }
-                                  }
-                                },
-                                onVerticalDragCancel: () {
-                                  _dragToSelectTargetState = null;
-                                },
-                                onVerticalDragStart: (details) {
-                                  _dragToSelectVerticalPosition =
-                                      details.localPosition.dy;
-                                  _dragToSelectUpdate();
-                                },
-                                onVerticalDragUpdate: (details) {
-                                  _dragToSelectVerticalPosition =
-                                      details.localPosition.dy;
-                                  _dragToSelectUpdate();
-                                },
-                                onVerticalDragEnd: (details) {
-                                  _dragToSelectTargetState = null;
-                                },
+                                  },
+                                  onVerticalDragCancel: () {
+                                    _dragToSelectTargetState = null;
+                                  },
+                                  onVerticalDragStart: (details) {
+                                    _dragToSelectVerticalPosition =
+                                        details.localPosition.dy;
+                                    _dragToSelectUpdate();
+                                  },
+                                  onVerticalDragUpdate: (details) {
+                                    _dragToSelectVerticalPosition =
+                                        details.localPosition.dy;
+                                    _dragToSelectUpdate();
+                                  },
+                                  onVerticalDragEnd: (details) {
+                                    _dragToSelectTargetState = null;
+                                  },
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: widget.controller.items.isEmpty
-                              ? Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Text(
-                                      widget.controller.searchPattern == null
-                                          ? 'Список пуст'
-                                          : 'Не найдено похожих элементов',
-                                      textAlign: TextAlign.center,
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: widget.controller.items.isEmpty
+                                ? Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Text(
+                                        widget.controller.searchPattern == null
+                                            ? 'Список пуст'
+                                            : 'Не найдено похожих элементов',
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ),
+                                  )
+                                : const SizedBox(
+                                    width: double.infinity,
+                                    height: double.infinity,
                                   ),
-                                )
-                              : const SizedBox(
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                ),
-                        ),
-                      ],
-                    ),
-                    rowBuilder: (context, row, contentBuilder) {
-                      final elem = widget.controller.items[row];
-                      if (elem == null) {
-                        return null;
-                      }
-                      final key = widget.model.keyField == null
-                          ? null
-                          : elem[widget.model.keyField];
-                      final isSelected = key == null
-                          ? false
-                          : widget.controller.selection.contains(key);
-                      final foregroundColor = isSelected
-                          ? Theme.of(context).colorScheme.onPrimaryContainer
-                          : null;
-                      return AnimatedContainer(
-                        key: ValueKey<MgrListElemKey?>(key),
-                        duration: const Duration(milliseconds: 200),
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.primaryContainer
-                            : Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withOpacity(0),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: key == null
-                                ? null
-                                : () {
-                                    if (widget.controller.selection.length ==
-                                            1 &&
-                                        widget.controller.selection
-                                            .contains(key)) {
-                                      return;
-                                    }
+                          ),
+                        ],
+                      ),
+                      rowBuilder: (context, row, contentBuilder) {
+                        final elem = widget.controller.items[row];
+                        if (elem == null) {
+                          return null;
+                        }
+                        final key = widget.model.keyField == null
+                            ? null
+                            : elem[widget.model.keyField];
+                        final isSelected = key == null
+                            ? false
+                            : widget.controller.selection.contains(key);
+                        final foregroundColor = isSelected
+                            ? Theme.of(context).colorScheme.onPrimaryContainer
+                            : null;
+                        return AnimatedContainer(
+                          key: ValueKey<MgrListElemKey?>(key),
+                          duration: const Duration(milliseconds: 200),
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withOpacity(0),
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: InkWell(
+                              onTap: key == null
+                                  ? null
+                                  : () {
+                                      if (widget.controller.selection.length ==
+                                              1 &&
+                                          widget.controller.selection
+                                              .contains(key)) {
+                                        return;
+                                      }
 
-                                    widget.controller.selection.clear();
-                                    widget.controller.selection.add(key);
-                                  },
-                            child: RepaintBoundary(
+                                      widget.controller.selection.clear();
+                                      widget.controller.selection.add(key);
+                                    },
                               child: SizedBox(
                                 width: double.infinity,
                                 height: double.infinity,
@@ -955,237 +972,236 @@ class _MgrListState extends State<MgrList> {
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                    placeholderBuilder: (context, row, contentBuilder) =>
-                        contentBuilder(
-                      context,
-                      (context, column) {
-                        if (column == 0) {
-                          return const Checkbox(
-                            value: false,
-                            onChanged: null,
-                          );
-                        }
-
-                        final col = coldata[column - 1];
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Container(
-                              width: col.width - 8.0,
-                              height: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.fontSize ??
-                                  16.0,
-                              decoration: const BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(8)),
-                                color: Color(0x80808080),
-                              ),
-                            ),
-                          ),
                         );
                       },
-                    ),
-                    placeholderContainerBuilder: (placeholderContainer) =>
-                        Shimmer.fromColors(
-                      baseColor: Theme.of(context).splashColor,
-                      highlightColor:
-                          Theme.of(context).splashColor.withOpacity(0),
-                      child: placeholderContainer,
-                    ),
-                    headerBuilder: (context, contentBuilder) => Material(
-                      color: Colors.transparent,
-                      child: contentBuilder(
+                      placeholderBuilder: (context, contentBuilder) =>
+                          contentBuilder(
                         context,
                         (context, column) {
                           if (column == 0) {
-                            return ListenableBuilder(
-                              listenable: widget.controller.selection,
-                              builder: (context) => Tooltip(
-                                message: widget.controller.selection.isNotEmpty
-                                    ? 'Снять выделение'
-                                    : 'Выделить все',
-                                child: Checkbox(
-                                    value: widget
-                                            .controller.selection.isNotEmpty
-                                        ? (widget.controller.selection.length ==
-                                                widget.controller.items.length
-                                            ? true
-                                            : null)
-                                        : false,
-                                    tristate: true,
-                                    onChanged: (value) => value ?? false
-                                        ? widget.controller.selection.addAll(
-                                            widget
-                                                .controller.items
-                                                .map((e) =>
-                                                    e?[widget.model.keyField])
-                                                .whereNotNull())
-                                        : widget.controller.selection.clear()),
-                              ),
+                            return const Checkbox(
+                              value: false,
+                              onChanged: null,
                             );
                           }
 
-                          final col = widget.model.coldata[column - 1];
-                          final text = Text(
-                            col.label ?? '',
-                            maxLines: 1,
-                            softWrap: false,
-                            overflow: TextOverflow.fade,
-                            style: Theme.of(context).textTheme.titleSmall,
-                            textAlign: col.textAlign,
-                          );
-
-                          return Material(
-                            color: Colors.transparent,
-                            child: OptionalTooltip(
-                              message: col.hint,
-                              child: InkResponse(
-                                radius: col.width / 2,
-                                onTap: () {},
-                                child: Padding(
-                                  padding: _cellPadding(col),
-                                  child: Align(
-                                    alignment: col.alignment,
-                                    child: col.sorted == null
-                                        ? text
-                                        : Row(
-                                            mainAxisAlignment:
-                                                col.mainAxisAlignment,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Flexible(child: text),
-                                              col.sorted!.index == 1
-                                                  ? Icon(col.sorted!.ascending
-                                                      ? Icons.arrow_drop_up
-                                                      : Icons.arrow_drop_down)
-                                                  : Stack(
-                                                      alignment:
-                                                          Alignment.center,
-                                                      children: [
-                                                        Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                      .only(
-                                                                  top: 8.0),
-                                                          child: Icon(col
-                                                                  .sorted!
-                                                                  .ascending
-                                                              ? Icons
-                                                                  .arrow_drop_up
-                                                              : Icons
-                                                                  .arrow_drop_down),
-                                                        ),
-                                                        Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                      .only(
-                                                                  bottom: 8.0),
-                                                          child: Text(
-                                                            col.sorted!.index
-                                                                .toString(),
-                                                            style: Theme.of(
-                                                                    context)
-                                                                .textTheme
-                                                                .labelSmall,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                            ],
-                                          ),
-                                  ),
+                          final col = coldata[column - 1];
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Container(
+                                width: col.width - 8.0,
+                                height: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.fontSize ??
+                                    16.0,
+                                decoration: const BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(8)),
+                                  color: Color(0x80808080),
                                 ),
                               ),
                             ),
                           );
                         },
                       ),
-                    ),
-                    footerBuilder: (context, contentBuilder) =>
-                        ListenableBuilder(
-                      listenable: widget.controller.selection,
-                      builder: (context) => ListenableBuilder(
-                        listenable: widget.controller.items,
-                        builder: (context) {
-                          final itemCount = widget.controller.items.length;
-                          final loadedItemCount =
-                              widget.controller.items.loadedItemCount;
-                          final totalText =
-                              widget.controller.searchPattern == null ||
-                                      itemCount == loadedItemCount
-                                  ? '$itemCount'
-                                  : '$loadedItemCount–$itemCount';
-                          final text = widget.controller.selection.isEmpty
-                              ? (widget.controller.searchPattern == null
-                                  ? 'Всего $totalText'
-                                  : 'Найдено $totalText')
-                              : 'Выделено ${widget.controller.selection.length} из $totalText';
-                          return SizedBox(
-                            height: rowHeight,
-                            child: Stack(
-                              children: [
-                                contentBuilder(context, (context, column) {
-                                  if (column == 0) {
-                                    return const SizedBox();
-                                  }
+                      headerBuilder: (context, contentBuilder) => Material(
+                        type: MaterialType.transparency,
+                        child: contentBuilder(
+                          context,
+                          (context, column) {
+                            if (column == 0) {
+                              return ListenableBuilder(
+                                listenable: widget.controller.selection,
+                                builder: (context) => Tooltip(
+                                  message:
+                                      widget.controller.selection.isNotEmpty
+                                          ? 'Снять выделение'
+                                          : 'Выделить все',
+                                  child: Checkbox(
+                                      value: widget
+                                              .controller.selection.isNotEmpty
+                                          ? (widget.controller.selection
+                                                      .length ==
+                                                  widget.controller.items.length
+                                              ? true
+                                              : null)
+                                          : false,
+                                      tristate: true,
+                                      onChanged: (value) => value ?? false
+                                          ? widget.controller.selection.addAll(
+                                              widget.controller.items
+                                                  .map((e) =>
+                                                      e?[widget.model.keyField])
+                                                  .whereNotNull())
+                                          : widget.controller.selection
+                                              .clear()),
+                                ),
+                              );
+                            }
 
-                                  final col = coldata[column - 1];
-                                  late final total = _totalFor(col);
-                                  return ValueAnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 200),
-                                    value: total,
-                                    child: total == null || total.isEmpty
-                                        ? const SizedBox(
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                          )
-                                        : Padding(
-                                            padding: _cellPadding(col),
-                                            child: Align(
-                                              alignment: col.alignment,
-                                              child: Text(
-                                                total,
-                                                maxLines: 1,
-                                                softWrap: false,
-                                                overflow: TextOverflow.fade,
-                                                textAlign: col.textAlign,
-                                              ),
-                                            ),
-                                          ),
-                                  );
-                                }),
-                                ValueAnimatedSwitcher(
-                                  value: text,
-                                  duration: const Duration(milliseconds: 200),
+                            final col = widget.model.coldata[column - 1];
+                            final text = Text(
+                              col.label ?? '',
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.fade,
+                              style: Theme.of(context).textTheme.titleSmall,
+                              textAlign: col.textAlign,
+                            );
+
+                            return Material(
+                              type: MaterialType.transparency,
+                              child: OptionalTooltip(
+                                message: col.hint,
+                                child: InkResponse(
+                                  radius: col.width / 2,
+                                  onTap: () {},
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0,
-                                    ),
+                                    padding: _cellPadding(col),
                                     child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        text,
-                                        textAlign: TextAlign.left,
-                                      ),
+                                      alignment: col.alignment,
+                                      child: col.sorted == null
+                                          ? text
+                                          : Row(
+                                              mainAxisAlignment:
+                                                  col.mainAxisAlignment,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Flexible(child: text),
+                                                col.sorted!.index == 1
+                                                    ? Icon(col.sorted!.ascending
+                                                        ? Icons.arrow_drop_up
+                                                        : Icons.arrow_drop_down)
+                                                    : Stack(
+                                                        alignment:
+                                                            Alignment.center,
+                                                        children: [
+                                                          Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    top: 8.0),
+                                                            child: Icon(col
+                                                                    .sorted!
+                                                                    .ascending
+                                                                ? Icons
+                                                                    .arrow_drop_up
+                                                                : Icons
+                                                                    .arrow_drop_down),
+                                                          ),
+                                                          Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    bottom:
+                                                                        8.0),
+                                                            child: Text(
+                                                              col.sorted!.index
+                                                                  .toString(),
+                                                              style: Theme.of(
+                                                                      context)
+                                                                  .textTheme
+                                                                  .labelSmall,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                              ],
+                                            ),
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          );
-                        },
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      footerBuilder: (context, contentBuilder) =>
+                          ListenableBuilder(
+                        listenable: widget.controller.selection,
+                        builder: (context) => ListenableBuilder(
+                          listenable: widget.controller.items,
+                          builder: (context) {
+                            final itemCount = widget.controller.items.length;
+                            final loadedItemCount =
+                                widget.controller.items.loadedItemCount;
+                            final totalText =
+                                widget.controller.searchPattern == null ||
+                                        itemCount == loadedItemCount
+                                    ? '$itemCount'
+                                    : '$loadedItemCount–$itemCount';
+                            final text = widget.controller.selection.isEmpty
+                                ? (widget.controller.searchPattern == null
+                                    ? 'Всего $totalText'
+                                    : 'Найдено $totalText')
+                                : 'Выделено ${widget.controller.selection.length} из $totalText';
+                            return SizedBox(
+                              height: rowHeight,
+                              child: Stack(
+                                children: [
+                                  contentBuilder(context, (context, column) {
+                                    if (column == 0) {
+                                      return const SizedBox();
+                                    }
+
+                                    final col = coldata[column - 1];
+                                    late final total = _totalFor(col);
+                                    return ValueAnimatedSwitcher(
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      value: total,
+                                      child: total == null || total.isEmpty
+                                          ? const SizedBox(
+                                              width: double.infinity,
+                                              height: double.infinity,
+                                            )
+                                          : Padding(
+                                              padding: _cellPadding(col),
+                                              child: Align(
+                                                alignment: col.alignment,
+                                                child: Text(
+                                                  total,
+                                                  maxLines: 1,
+                                                  softWrap: false,
+                                                  overflow: TextOverflow.fade,
+                                                  textAlign: col.textAlign,
+                                                ),
+                                              ),
+                                            ),
+                                    );
+                                  }),
+                                  ValueAnimatedSwitcher(
+                                    value: text,
+                                    transitionBuilder:
+                                        tableRowDefaultAnimatedSwitcherTransitionBuilder,
+                                    duration: const Duration(milliseconds: 200),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0,
+                                      ),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          text,
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       );

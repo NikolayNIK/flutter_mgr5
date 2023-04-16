@@ -755,6 +755,7 @@ class _MgrListState extends State<MgrList> {
                       controller: widget.controller.tableViewController,
                       rowCount: widget.controller.items.length,
                       rowHeight: rowHeight,
+                      placeholderShade: placeholderShade,
                       minScrollableWidth: minWidth,
                       columns: [
                         TableColumn(

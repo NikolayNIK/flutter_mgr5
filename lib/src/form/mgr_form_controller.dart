@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mgr5/extensions/datetime_extensions.dart';
 import 'package:flutter_mgr5/extensions/iterator_extensions.dart';
+import 'package:flutter_mgr5/listenable_set.dart';
 import 'package:flutter_mgr5/src/form/components/mgr_form_select.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
 import 'package:flutter_mgr5/src/form/slist.dart';
@@ -454,6 +455,9 @@ class MgrFormControllerParam
   MgrSingleSelectController get singleSelectController => _getController(
       () => MgrSingleSelectController(this, _formController.slists[name]));
 
+  MgrMultiSelectController get multiSelectController => _getController(
+      () => MgrMultiSelectController(this, _formController.slists[name]));
+
   /// Retrieves underlying controller as MgrDatetimeController
   /// converting it if needed.
   MgrDatetimeController get datetimeController =>
@@ -643,6 +647,65 @@ class MgrSingleSelectController extends _MgrFormControlController {
 
   @override
   void dispose() => _container.dispose();
+}
+
+class MgrMultiSelectController extends _MgrFormControlController {
+  final MgrFormControllerParam _param;
+  final ValueListenable<Slist> _slist;
+  final _selection = ListenableSet<SlistEntry>();
+
+  int? _longestLabelLength;
+
+  MgrMultiSelectController(this._param, this._slist, [String? initialValue]) {
+    value = initialValue;
+
+    // вызов сеттера для проверки наличия значения в измененном slist'е
+    _slist.addListener(() {
+      _longestLabelLength = null;
+      value = value;
+    });
+  }
+
+  Set<SlistEntry> get selection => _selection;
+
+  int get longestLabelLength {
+    if (_longestLabelLength != null) {
+      return _longestLabelLength!;
+    }
+
+    return _longestLabelLength = _slist.value.fold<int>(
+      0,
+      (previousValue, element) => max(previousValue, element.label.length),
+    );
+  }
+
+  @override
+  String? get value => _selection.join(', ');
+
+  @override
+  set value(String? value) {
+    _selection.clear();
+    if (value != null) {
+      _selection.addAll(value
+          .split(', ')
+          .map((key) => _slist.value.firstWhere((entry) => entry.key == key)));
+    }
+  }
+
+  @override
+  FocusNode get focusNode => _param.focusNode;
+
+  ValueListenable<Slist> get slist => _slist;
+
+  @override
+  void dispose() => _selection.dispose();
+
+  @override
+  void addListener(VoidCallback listener) => _selection.addListener(listener);
+
+  @override
+  void removeListener(VoidCallback listener) =>
+      _selection.removeListener(listener);
 }
 
 /// Controller for a datetime control element.

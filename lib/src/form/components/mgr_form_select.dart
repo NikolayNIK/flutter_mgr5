@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mgr5/extensions/xml_extensions.dart';
+import 'package:flutter_mgr5/src/form/components/mgr_form_select_multiple.dart';
 import 'package:flutter_mgr5/src/form/components/mgr_form_select_single.dart';
 import 'package:flutter_mgr5/src/form/mgr_exception_holder.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
@@ -9,6 +10,7 @@ import 'package:xml/xml.dart';
 
 enum MgrFormSelectType {
   select,
+  multiple,
   radio,
 }
 
@@ -16,6 +18,8 @@ MgrFormSelectType _typeFromString(String? type) {
   switch (type) {
     case 'radio':
       return MgrFormSelectType.radio;
+    case 'multiple':
+      return MgrFormSelectType.multiple;
     default: // TODO
       return MgrFormSelectType.select;
   }
@@ -62,13 +66,13 @@ class MgrFormSelect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isReadOnly = forceReadOnly || model.isReadonly;
-    final controller =
-        this.controller.params[model.name].singleSelectController;
+    final param = controller.params[model.name];
     return ValueListenableBuilder<Slist>(
-      valueListenable: this.controller.slists[model.name],
+      valueListenable: controller.slists[model.name],
       builder: (context, slist, _) {
         switch (model.type) {
           case MgrFormSelectType.select:
+            final controller = param.singleSelectController;
             return MgrFormSelectSingle(
               controller: controller,
               focusNode: controller.focusNode,
@@ -82,7 +86,15 @@ class MgrFormSelect extends StatelessWidget {
               onChanged:
                   isReadOnly ? null : (entry) => controller.value = entry.key,
             );
+          case MgrFormSelectType.multiple:
+            final controller = param.multiSelectController;
+            return MgrFormSelectMulti(
+              controller: controller,
+              itemHeight: 48.0,
+              readOnly: isReadOnly,
+            );
           case MgrFormSelectType.radio:
+            final controller = param.singleSelectController;
             return ValueListenableBuilder<String?>(
               valueListenable: controller,
               builder: (context, value, child) => Column(

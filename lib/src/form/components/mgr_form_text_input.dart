@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mgr5/extensions/datetime_extensions.dart';
 import 'package:flutter_mgr5/extensions/xml_extensions.dart';
-import 'package:flutter_mgr5/listenable_builder.dart';
 import 'package:flutter_mgr5/src/form/mgr_exception_holder.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_model.dart';
@@ -77,7 +76,7 @@ class MgrFormTextInput extends StatelessWidget {
     final textEditingController = controller.textEditingController;
     return ListenableBuilder(
       listenable: textEditingController,
-      builder: (context) => Stack(
+      builder: (context, _) => Stack(
         children: [
           TextField(
             focusNode: controller.focusNode,

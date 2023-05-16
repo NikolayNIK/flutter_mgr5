@@ -13,8 +13,8 @@ dependencies:
     sdk: flutter
 
   http: ^0.13.4
-  xml: ^5.3.1
-  flutter_html: ^2.2.1
+  xml: ^6.3.0
+  flutter_html: ^3.0.0-beta.1
   url_launcher: ^6.0.20
   mask_text_input_formatter: ^2.1.0
   shimmer: ^2.0.0

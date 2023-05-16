@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mgr5/listenable_builder.dart';
 import 'package:flutter_mgr5/src/form/components/mgr_form_error_card.dart';
 import 'package:flutter_mgr5/src/form/mgr_exception_holder.dart';
 import 'package:flutter_mgr5/src/form/mgr_form_controller.dart';
@@ -107,7 +106,7 @@ class MgrFormField extends StatelessWidget {
           final focusNode = controller.params[control.name].focusNode;
           builder = (isActive) => ListenableBuilder(
                 listenable: focusNode,
-                builder: (context) => b(isActive || focusNode.hasFocus),
+                builder: (context, _) => b(isActive || focusNode.hasFocus),
               );
         }
 

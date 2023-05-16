@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_mgr5/listenable_builder.dart';
 import 'package:flutter_mgr5/mgr5.dart';
 import 'package:flutter_mgr5/src/animated_rect_reveal.dart';
 import 'package:flutter_mgr5/src/form/slist.dart';
@@ -52,7 +51,7 @@ class _MgrFormSelectMultiState extends State<MgrFormSelectMulti> {
                             Expanded(
                               child: ListenableBuilder(
                                 listenable: widget.controller,
-                                builder: (context) =>
+                                builder: (context, _) =>
                                     _buildSelectionChips(context, false),
                               ),
                             ),
@@ -94,7 +93,7 @@ class _MgrFormSelectMultiState extends State<MgrFormSelectMulti> {
         alignment: Alignment.centerLeft,
         child: ListenableBuilder(
           listenable: widget.controller,
-          builder: (context) => AnimatedSwitcher(
+          builder: (context, _) => AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: widget.controller.selection.isEmpty
                 ? // TODO localize
@@ -492,7 +491,7 @@ class _DropdownPageState extends State<_DropdownPage> {
                     Flexible(
                       child: ListenableBuilder(
                         listenable: widget.controller,
-                        builder: (context) => Scrollbar(
+                        builder: (context, _) => Scrollbar(
                           controller: scrollController,
                           thumbVisibility: true,
                           child: ListView.builder(

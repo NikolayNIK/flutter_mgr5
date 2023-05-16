@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mgr5/extensions/iterator_extensions.dart';
-import 'package:flutter_mgr5/listenable_builder.dart';
 import 'package:flutter_mgr5/mgr5.dart';
 import 'package:flutter_mgr5/mgr5_form.dart';
 import 'package:flutter_mgr5/src/form/components/mgr_form_field.dart';
@@ -274,7 +273,7 @@ class _MgrListState extends State<MgrList> {
             scrollDirection: Axis.horizontal,
             child: ListenableBuilder(
               listenable: widget.controller.selection,
-              builder: (context) {
+              builder: (context, _) {
                 final selectionList =
                     widget.controller.selection.toList(growable: false);
 
@@ -749,9 +748,9 @@ class _MgrListState extends State<MgrList> {
 
                 return ListenableBuilder(
                   listenable: widget.controller.selection,
-                  builder: (context) => ListenableBuilder(
+                  builder: (context, _) => ListenableBuilder(
                     listenable: widget.controller.items,
-                    builder: (context) => TableView.builder(
+                    builder: (context, _) => TableView.builder(
                       controller: widget.controller.tableViewController,
                       rowCount: widget.controller.items.length,
                       rowHeight: rowHeight,
@@ -1015,7 +1014,7 @@ class _MgrListState extends State<MgrList> {
                             if (column == 0) {
                               return ListenableBuilder(
                                 listenable: widget.controller.selection,
-                                builder: (context) => Tooltip(
+                                builder: (context, _) => Tooltip(
                                   message:
                                       widget.controller.selection.isNotEmpty
                                           ? 'Снять выделение'
@@ -1123,9 +1122,9 @@ class _MgrListState extends State<MgrList> {
                       footerBuilder: (context, contentBuilder) =>
                           ListenableBuilder(
                         listenable: widget.controller.selection,
-                        builder: (context) => ListenableBuilder(
+                        builder: (context, _) => ListenableBuilder(
                           listenable: widget.controller.items,
-                          builder: (context) {
+                          builder: (context, _) {
                             final itemCount = widget.controller.items.length;
                             final loadedItemCount =
                                 widget.controller.items.loadedItemCount;
@@ -1291,7 +1290,7 @@ class _MgrListFilterForm extends StatelessWidget {
         trackVisibility: true,
         child: ListenableBuilder(
           listenable: controller,
-          builder: (context) {
+          builder: (context, _) {
             return ListView(
               shrinkWrap: true,
               padding: const EdgeInsets.only(top: 2.0),

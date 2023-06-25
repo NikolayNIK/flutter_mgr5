@@ -1286,7 +1286,7 @@ class _MgrListFilterForm extends StatelessWidget {
     return FocusTraversalGroup(
       child: Scrollbar(
         controller: controller.scrollController,
-        isAlwaysShown: true,
+        thumbVisibility: true,
         trackVisibility: true,
         child: ListenableBuilder(
           listenable: controller,

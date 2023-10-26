@@ -102,6 +102,7 @@ class _StandaloneMgrListState extends State<StandaloneMgrList> {
   @override
   Widget build(BuildContext context) => _model == null || _controller == null
       ? FutureBuilder(
+          future: _loadingFuture,
           builder: (context, snapshot) => snapshot.hasError
               ? Text(snapshot.error?.toString() ?? 'unknown error')
               : const Center(child: CircularProgressIndicator.adaptive()))

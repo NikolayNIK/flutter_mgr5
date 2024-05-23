@@ -94,7 +94,7 @@ class _MgrFormSelectSingleState extends State<MgrFormSelectSingle> {
       );
 
   Widget _buildItem(BuildContext context, SlistEntry entry, bool selected) {
-    final textStyle = Theme.of(context).textTheme.subtitle1!;
+    final textStyle = Theme.of(context).textTheme.labelLarge!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: DefaultTextStyle(

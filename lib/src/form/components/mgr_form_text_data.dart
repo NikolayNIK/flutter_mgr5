@@ -138,7 +138,7 @@ class MgrFormTextData extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final style = theme.textTheme.bodyText2;
+    final style = theme.textTheme.bodyLarge;
     return Text(
       model.resolveValue(controller.stringParams) ?? '',
       style: model.isWarning

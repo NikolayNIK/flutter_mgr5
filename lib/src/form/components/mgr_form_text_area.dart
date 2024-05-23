@@ -65,7 +65,7 @@ class MgrFormTextArea extends StatelessWidget {
           ),
           style: !forceReadOnly && !model.isReadonly
               ? null
-              : theme.textTheme.subtitle1?.copyWith(
+              : theme.textTheme.titleMedium?.copyWith(
                   color: theme.disabledColor,
                 ),
           minLines: model.rows,

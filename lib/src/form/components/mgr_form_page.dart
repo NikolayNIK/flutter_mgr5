@@ -106,7 +106,7 @@ class MgrFormPage extends StatelessWidget {
                                         page.title!,
                                         style: Theme.of(context)
                                             .textTheme
-                                            .subtitle1,
+                                            .titleMedium,
                                       ),
                                     ),
                                   ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:ffi';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -50,6 +51,18 @@ abstract class MgrFormSlistMap implements Map<String, ValueNotifier<Slist>> {
   void set(MgrFormModel model);
 
   void _notifyChanged();
+}
+
+/// Container holding all the items used in a list control element.
+abstract class MgrFormListMap
+    implements Map<String, ValueNotifier<MgrFormListContent>> {
+  /// Retrieve a holder for the slist with a given name.
+  /// It is guaranteed that returning object never gets switched out
+  /// making it safe to add listeners to track slist changes.
+  @override
+  ValueNotifier<MgrFormListContent> operator [](covariant Object key);
+
+  void set(MgrFormModel model);
 }
 
 typedef MgrFormPagesControllerCallback = void Function(
@@ -308,6 +321,48 @@ class _MgrFormSlistMap extends MapBase<String, ValueNotifier<Slist>>
   }
 }
 
+class _MgrFormListMap extends MapBase<String, ValueNotifier<MgrFormListContent>>
+    implements MgrFormListMap {
+  final MgrFormController controller;
+  final _lists = <String, ValueNotifier<MgrFormListContent>>{};
+
+  _MgrFormListMap(this.controller);
+
+  @override
+  ValueNotifier<MgrFormListContent> operator [](covariant String key) =>
+      _lists.putIfAbsent(
+        key,
+        () => ValueNotifier([]),
+      );
+
+  @override
+  void operator []=(String key, ValueNotifier<MgrFormListContent> value) {
+    this[key].value = value.value;
+  }
+
+  @override
+  void clear() {
+    for (final item in _lists.values) {
+      item.value = [];
+    }
+  }
+
+  @override
+  Iterable<String> get keys => _lists.keys;
+
+  @override
+  ValueNotifier<MgrFormListContent>? remove(covariant String key) {
+    this[key].value = [];
+  }
+
+  @override
+  void set(MgrFormModel model) {
+    for (final list in model.lists.entries) {
+      this[list.key].value = list.value;
+    }
+  }
+}
+
 /// MgrFormPagesController implementation.
 /// Either needs get moved outta here or get merged into the super.
 class _MgrFormPageController extends MgrFormPagesController {
@@ -364,6 +419,8 @@ class MgrFormController with ChangeNotifier implements Listenable {
   /// Holds all the item lists for "select" control elements.
   late final MgrFormSlistMap slists = _MgrFormSlistMap(this);
 
+  late final MgrFormListMap lists = _MgrFormListMap(this);
+
   /// Holds all the state of forms pages.
   final MgrFormPagesController pages = _MgrFormPageController();
 
@@ -391,6 +448,7 @@ class MgrFormController with ChangeNotifier implements Listenable {
 
   void update(MgrFormModel model) {
     slists.set(model);
+    lists.set(model);
     params.set(model);
   }
 

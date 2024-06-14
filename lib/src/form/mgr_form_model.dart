@@ -40,6 +40,7 @@ class MgrFormModel extends MgrModel {
   final List<MgrFormButtonModel> buttons;
   final Map<String, MgrConditionalStateChecker> conditionalStateChecks;
   final Map<String, Slist> slists;
+  final Map<String, MgrFormListContent> lists;
 
   const MgrFormModel({
     required String func,
@@ -50,6 +51,7 @@ class MgrFormModel extends MgrModel {
     required this.buttons,
     required this.conditionalStateChecks,
     required this.slists,
+    required this.lists,
   }) : super(func);
 
   factory MgrFormModel.fromXmlDocument(XmlDocument doc,
@@ -97,26 +99,38 @@ class MgrFormModel extends MgrModel {
           slist.requireAttribute('name'): List.unmodifiable(
             slist.childElements.map(
               (item) => SlistEntry(
-                key: item.attribute('key'),
-                label: item.innerText,
-                depend: item.attribute('depend'),
-                textColor: item.convertAttribute('color', converter: (value) {
-                  switch (value) {
-                    case 'red':
-                      return Colors.red;
-                    case 'green':
-                      return Colors.green;
-                    case 'blue':
-                      return Colors.blue;
-                    case 'yellow':
-                      return Colors.yellow;
-                    case 'cyan':
-                      return Colors.cyan;
-                  }
-                },)
-              ),
+                  key: item.attribute('key'),
+                  label: item.innerText,
+                  depend: item.attribute('depend'),
+                  textColor: item.convertAttribute(
+                    'color',
+                    converter: (value) {
+                      switch (value) {
+                        case 'red':
+                          return Colors.red;
+                        case 'green':
+                          return Colors.green;
+                        case 'blue':
+                          return Colors.blue;
+                        case 'yellow':
+                          return Colors.yellow;
+                        case 'cyan':
+                          return Colors.cyan;
+                      }
+                    },
+                  )),
             ),
           ),
+      },
+      lists: {
+        for (final list in rootElement.findElements('list'))
+          list.requireAttribute('name'):
+              List.unmodifiable(list.childElements.map(
+            (elem) => {
+              for (final value in elem.childElements)
+                value.name.local: value.innerText,
+            },
+          ))
       },
     );
   }
@@ -144,6 +158,7 @@ class MgrFormModel extends MgrModel {
     List<MgrFormButtonModel>? buttons,
     Map<String, MgrConditionalStateChecker>? conditionalStateChecks,
     Map<String, Slist>? slists,
+    Map<String, MgrFormListContent>? lists,
   }) =>
       MgrFormModel(
         func: func ?? this.func,
@@ -155,6 +170,7 @@ class MgrFormModel extends MgrModel {
         conditionalStateChecks:
             conditionalStateChecks ?? this.conditionalStateChecks,
         slists: slists ?? this.slists,
+        lists: lists ?? this.lists,
       );
 
   static List<MgrFormPageModel> _parsePages(
@@ -303,6 +319,10 @@ class MgrFormButtonModel {
     );
   }
 }
+
+typedef MgrFormListElem = Map<String, String>;
+
+typedef MgrFormListContent = List<MgrFormListElem>;
 
 enum MgrFormState { visible, readOnly, gone }
 

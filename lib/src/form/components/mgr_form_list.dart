@@ -30,6 +30,7 @@ class ListFormFieldCol extends TableColumn {
     required this.label,
     required super.width,
     super.freezePriority,
+    super.sticky,
     int flex = 1,
   }) : super(flex: flex);
 
@@ -48,6 +49,7 @@ class ListFormFieldCol extends TableColumn {
           width == null ? defaultWidth : double.tryParse(width) ?? defaultWidth,
       freezePriority:
           freezePriority == null ? 0 : int.tryParse(freezePriority) ?? 0,
+      sticky: element.boolAttribute('cf_sticky'),
     );
   }
 }
@@ -106,7 +108,8 @@ class _MgrFormListState extends State<MgrFormList> {
       ValueListenableBuilder<MgrFormListContent>(
         valueListenable: widget.controller.lists[widget.model.name],
         builder: (context, list, _) {
-          const itemHeight = 36.0;
+          final itemHeight =
+              48.0 + 8 * Theme.of(context).visualDensity.vertical;
           return SizedBox(
             width: double.infinity,
             height: (list.length + 1) * itemHeight + 8,
@@ -115,10 +118,16 @@ class _MgrFormListState extends State<MgrFormList> {
               rowHeight: itemHeight,
               style: const TableViewStyle(
                 dividers: TableViewDividersStyle(
+                  horizontal: TableViewHorizontalDividersStyle.symmetric(
+                    TableViewHorizontalDividerStyle(
+                      thickness: 1,
+                    ),
+                  ),
                   vertical: TableViewVerticalDividersStyle.symmetric(
                     TableViewVerticalDividerStyle(
                       wiggleOffset: 6,
                       wigglesPerRow: 3,
+                      thickness: 1,
                     ),
                   ),
                 ),
